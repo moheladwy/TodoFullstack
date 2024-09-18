@@ -1,0 +1,16 @@
+
+# Compiled source
+bin
+obj
+
+# Database files
+Database
+
+# Visual Studio 2015/2017/2019
+.vs
+
+# Visual Studio Code
+.vscode
+
+# Rider
+.idea
