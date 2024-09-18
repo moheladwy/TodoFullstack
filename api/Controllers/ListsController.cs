@@ -22,8 +22,8 @@ namespace API.Controllers;
 /// </code>
 [Route("api/[controller]")]
 [ApiController]
-[Authorize]
-public class ListsController : ControllerBase
+[Authorize(Roles = Roles.User, Policy = Roles.User)]
+public class ListsController : ControllerBase // BUG: The signed user cannot access the controller at all because of Authorization.
 {
     private readonly IRepository<TaskList> _listRepository;
     private readonly ILogger<ListsController> _logger;

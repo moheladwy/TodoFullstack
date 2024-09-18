@@ -1,4 +1,3 @@
-using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
 using Microsoft.AspNetCore.Identity;
 using System.Security.Claims;
 using API.DTOs.AuthDTOs;
@@ -14,10 +13,7 @@ namespace API.Services;
 public class AuthenticationService : IAuthService
 {
     private readonly UserManager<User> _userManager;
-    private readonly UserStore<User> _userStore;
-    private readonly IUserEmailStore<User> _userEmailStore;
     private readonly SignInManager<User> _signInManager;
-    private readonly RoleManager<IdentityRole> _roleManager;
     private readonly ILogger<AuthenticationService> _logger;
 
     /// <summary>
@@ -29,34 +25,17 @@ public class AuthenticationService : IAuthService
     /// <param name="signInManager">
     ///     The SignInManager instance to use for user sign-in operations, it's registered in the DI container.
     /// </param>
-    /// <param name="roleManager">
-    ///     The RoleManager instance to use for role management operations, it's registered in the DI container.
-    /// </param>
-    /// <param name="userStore">
-    ///    The UserStore instance to use for user store operations, it's registered in the DI container.
-    ///    It's used to set the username, and other information of the user.
-    /// </param>
-    /// <param name="userEmailStore">
-    ///   The IUserEmailStore instance to use for user email store operations, it's registered in the DI container.
-    ///   It's used to set the email of the user.
-    /// </param>
     /// <param name="logger">
     ///    The ILogger instance to use for logging, it's registered in the DI container.
     ///    It's used to log information, warnings, and errors.
     /// </param>
     public AuthenticationService(
         UserManager<User> userManager,
-        UserStore<User> userStore,
-        IUserEmailStore<User> userEmailStore,
         SignInManager<User> signInManager,
-        RoleManager<IdentityRole> roleManager,
         ILogger<AuthenticationService> logger)
     {
         _userManager = userManager;
-        _userStore = userStore;
-        _userEmailStore = userEmailStore;
         _signInManager = signInManager;
-        _roleManager = roleManager;
         _logger = logger;
     }
 
@@ -86,32 +65,24 @@ public class AuthenticationService : IAuthService
             LastName = registerUserDto.LastName
         };
 
-        await _userStore.SetUserNameAsync(user, registerUserDto.Username, CancellationToken.None);
-        await _userEmailStore.SetEmailAsync(user, registerUserDto.Email, CancellationToken.None);
-
         // Create the user with the provided password
         var createdUser = await _userManager.CreateAsync(user, registerUserDto.Password);
         if (!createdUser.Succeeded)
         {
-            var errors = createdUser.Errors.Select(e => e.Description);
-            var errorMessages = $"Failed to create user because of: {string.Join(", ", errors)}";
-            _logger.LogError(errorMessages);
+            var errorMessages = $"Failed to create user because of: {string.Join(", ", createdUser.Errors.Select(e => e.Description))}";
+            _logger.LogError("{error}", errorMessages);
             throw new CreateUserException(errorMessages);
         }
 
         // Add Claim `User` to the user.
         await _userManager.AddClaimAsync(user, new Claim(Roles.User, Roles.User));
 
-        // Add the role `User` to the user
-        var role = await _roleManager.FindByNameAsync(Roles.User) ??
-        throw new AddRoleException($"Role `{Roles.User}` not found");
-
         var roleResult = await _userManager.AddToRoleAsync(user, Roles.User);
         if (!roleResult.Succeeded)
         {
-            var mesasge = $"Failed to add role `{Roles.User}` to the user";
-            _logger.LogError(mesasge);
-            throw new AddRoleException(mesasge);
+            var errorMessages = $"Failed to add role `{Roles.User}` to the user because of: {string.Join(", ", roleResult.Errors.Select(e => e.Description))}";
+            _logger.LogError("{error}", errorMessages);
+            throw new AddRoleException(errorMessages);
         }
 
         return true;
@@ -135,12 +106,17 @@ public class AuthenticationService : IAuthService
     public async Task<User> Login(LoginUserDto loginUserDto)
     {
         // Find the user by email
-        var user = await _userManager.FindByEmailAsync(loginUserDto.Email);
-        if (user == null) throw new InvalidEmailException("Invalid email");
+        var user = await _userManager.FindByEmailAsync(loginUserDto.Email) ??
+                   throw new InvalidEmailException("Invalid email");
 
         // Check if the password is correct
         var result = await _signInManager.CheckPasswordSignInAsync(user, loginUserDto.Password, false);
-        if (!result.Succeeded) throw new InvalidPasswordException("Invalid password");
+        if (!result.Succeeded)
+        {
+            var errorMessages = $"Failed to login user with email: {loginUserDto.Email}";
+            _logger.LogError("{error}", errorMessages);
+            throw new InvalidPasswordException(errorMessages);
+        }
 
         // Sign in the user
         return user;

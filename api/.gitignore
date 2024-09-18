@@ -6,6 +6,9 @@ obj
 # Database files
 Database
 
+# Migration files
+Migrations
+
 # Visual Studio 2015/2017/2019
 .vs
 

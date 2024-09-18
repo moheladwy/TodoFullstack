@@ -4,9 +4,11 @@ using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
 
 namespace API.DatabaseContexts;
 
-public class TodoIdentityContext(DbContextOptions<TodoIdentityContext> options) : IdentityDbContext<User>(options)
+public class TodoIdentityContext : IdentityDbContext<User>
 {
     public DbSet<Models.Task> Tasks { get; init; }
 
     public DbSet<TaskList> Lists { get; init; }
+
+    public TodoIdentityContext(DbContextOptions<TodoIdentityContext> options) : base(options) { }
 }

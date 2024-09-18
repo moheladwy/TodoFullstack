@@ -20,7 +20,7 @@ namespace API.Controllers;
 [Route("api/[controller]")]
 [ApiController]
 [Authorize(Roles.User)]
-public class TasksController : ControllerBase
+public class TasksController : ControllerBase // BUG: The signed user cannot access the controller at all because of Authorization.
 {
     private readonly IRepository<Models_Task> _taskRepository;
 
