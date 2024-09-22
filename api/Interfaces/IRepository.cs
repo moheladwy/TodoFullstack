@@ -2,15 +2,78 @@ using Task = System.Threading.Tasks.Task;
 
 namespace API.Interfaces;
 
-public interface IRepository<T> where T : class
+/// <summary>
+///     Interface for the repository pattern.
+///     This interface is used to define the methods that will be implemented in the repository classes.
+///     The repository pattern is used to separate the logic that retrieves the data from the database from the business logic.
+/// </summary>
+/// <typeparam name="TEntity">
+///     This entity will be the model that will be used to interact with the database.
+/// </typeparam>
+/// <typeparam name="TAddDto">
+///     This DTO will be used to validate the data that will be added to the database.
+/// </typeparam>
+/// <typeparam name="TUpdateDto">
+///     This DTO will be used to validate the data that will be updated in the database.
+/// </typeparam>
+public interface IRepository<TEntity, in TAddDto, in TUpdateDto>
+    where TEntity : class
+    where TAddDto : class
+    where TUpdateDto : class
 {
-    Task<IEnumerable<T>> GetAllAsync(string comparable);
+    /// <summary>
+    ///     This method will return all the entities from the database.
+    /// </summary>
+    /// <param name="id">
+    ///     This parameter will be used to filter the entities by a specific id.
+    /// </param>
+    /// <returns>
+    ///     A Task that will return an IEnumerable of TEntity.
+    /// </returns>
+    Task<IEnumerable<TEntity>> GetAllAsync(string id);
 
-    Task<T?> GetByIdAsync(string id);
+    /// <summary>
+    ///     This method will return a specific entity from the database based on the id.
+    /// </summary>
+    /// <param name="id">
+    ///     This parameter will be used to filter the entity by a specific id.
+    /// </param>
+    /// <returns>
+    ///     A Task that will return a TEntity.
+    /// </returns>
+    Task<TEntity> GetByIdAsync(Guid id);
 
-    Task<T> AddAsync(T entity);
+    /// <summary>
+    ///     This method will add a new entity to the database.
+    /// </summary>
+    /// <param name="entity">
+    ///     This parameter will be used to add a new entity to the database.
+    /// </param>
+    /// <returns>
+    ///     A Task that will return the added TEntity.
+    /// </returns>
+    Task<TEntity> AddAsync(TAddDto entity);
 
-    Task<T> UpdateAsync(T entity);
+    /// <summary>
+    ///     This method will update an entity in the database.
+    /// </summary>
+    /// <param name="entity">
+    ///     This parameter will be used to update an entity in the database.
+    /// </param>
+    /// <returns>
+    ///     A Task that will return the updated TEntity.
+    /// </returns>
+    Task<TEntity> UpdateAsync(TUpdateDto entity);
 
-    Task DeleteAsync(string id);
+    /// <summary>
+    ///     This method will delete an entity from the database.
+    ///     The entity will be deleted based on the id.
+    /// </summary>
+    /// <param name="id">
+    ///     This parameter will be used to delete an entity from the database.
+    /// </param>
+    /// <returns>
+    ///     A Task that will return nothing.
+    /// </returns>
+    Task DeleteAsync(Guid id);
 }

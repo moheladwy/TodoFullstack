@@ -1,12 +1,14 @@
-using API.DatabaseContexts;
-using API.Interfaces;
-using API.Models;
-using API.Repository;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
 using Microsoft.OpenApi.Models;
+using API.DatabaseContexts;
+using api.DTOs.ListDTOs;
+using API.DTOs.TasksDTOs;
+using API.Interfaces;
+using API.Models;
+using API.Repository;
 using Models_Task = API.Models.Task;
 
 namespace API.Services;
@@ -31,6 +33,8 @@ public static class BuilderService
 
         builder.AddAuthenticationService();
         builder.AddAuthorizationService();
+        builder.AddLoggingService();
+
         builder.AddIdentityService();
         builder.AddRepositoryService();
 
@@ -38,7 +42,10 @@ public static class BuilderService
         builder.Services.AddScoped<IAuthService, AuthenticationService>();
         builder.Services.AddScoped<IAccountService, AccountService>();
         builder.Services.AddHttpClient();
-        builder.Services.AddControllers();
+        builder.Services.AddControllers().AddJsonOptions(options =>
+        {
+            options.JsonSerializerOptions.ReferenceHandler = System.Text.Json.Serialization.ReferenceHandler.Preserve;
+        });
     }
 
     /// <summary>
@@ -51,14 +58,14 @@ public static class BuilderService
     {
         builder.Services.AddSwaggerGen(c =>
         {
-            c.SwaggerDoc("v1", new OpenApiInfo { Title = "AuthCore API", Version = "v1" });
+            c.SwaggerDoc("v1", new OpenApiInfo { Title = "Todo API", Version = "v1" });
             var securityScheme = new OpenApiSecurityScheme
             {
-                Name = "Authentication",
-                Description = "Enter your token in this field",
+                Name = "Authorization",
+                Description = "Enter your JWT token in this field: {your token}",
                 In = ParameterLocation.Header,
                 Type = SecuritySchemeType.Http,
-                Scheme = "bearer",
+                Scheme = "Bearer",
                 BearerFormat = "JWT"
             };
 
@@ -96,12 +103,12 @@ public static class BuilderService
     {
         builder.Services.AddAuthentication(options =>
         {
-            options.DefaultAuthenticateScheme =
-                options.DefaultChallengeScheme =
-                    options.DefaultForbidScheme =
-                        options.DefaultScheme =
-                            options.DefaultSignInScheme =
-                                options.DefaultSignOutScheme = JwtBearerDefaults.AuthenticationScheme;
+            options.DefaultAuthenticateScheme = JwtBearerDefaults.AuthenticationScheme;
+            options.DefaultChallengeScheme = JwtBearerDefaults.AuthenticationScheme;
+            options.DefaultForbidScheme = JwtBearerDefaults.AuthenticationScheme;
+            options.DefaultScheme = JwtBearerDefaults.AuthenticationScheme;
+            options.DefaultSignInScheme = JwtBearerDefaults.AuthenticationScheme;
+            options.DefaultSignOutScheme = JwtBearerDefaults.AuthenticationScheme;
         }).AddJwtBearer(options =>
         {
             options.TokenValidationParameters = new TokenValidationParameters
@@ -113,7 +120,9 @@ public static class BuilderService
                 ValidateIssuerSigningKey = true,
                 IssuerSigningKey = new SymmetricSecurityKey(
                     System.Text.Encoding.UTF8.GetBytes(builder.Configuration["JWT:SecretKey"] ?? throw new InvalidOperationException("JWT Secret Key not found."))
-                )
+                ),
+                ValidateLifetime = true,
+                ClockSkew = TimeSpan.Zero
             };
         });
     }
@@ -162,7 +171,8 @@ public static class BuilderService
             options.User.AllowedUserNameCharacters =
                 "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789-._@";
             options.User.RequireUniqueEmail = true;
-        }).AddEntityFrameworkStores<TodoIdentityContext>().AddRoles<IdentityRole>();
+        }).AddEntityFrameworkStores<TodoIdentityContext>();
+            // .AddRoles<IdentityRole>();
     }
 
     /// <summary>
@@ -173,9 +183,9 @@ public static class BuilderService
     /// </param>
     private static void AddAuthorizationService(this WebApplicationBuilder builder)
     {
-        builder.Services.AddAuthorizationBuilder()
-            .AddPolicy(Roles.Admin, policy => policy.RequireRole(Roles.Admin))
-            .AddPolicy(Roles.User, policy => policy.RequireRole(Roles.User));
+        builder.Services.AddAuthorizationBuilder();
+            // .AddPolicy(Roles.Admin, policy => policy.RequireRole(Roles.Admin))
+            // .AddPolicy(Roles.User, policy => policy.RequireRole(Roles.User));
     }
 
     /// <summary>
@@ -187,7 +197,24 @@ public static class BuilderService
     /// </param>
     private static void AddRepositoryService(this WebApplicationBuilder builder)
     {
-        builder.Services.AddScoped<IRepository<Models_Task>, TasksRepository>();
-        builder.Services.AddScoped<IRepository<TaskList>, ListRepository>();
+        builder.Services.AddScoped<IRepository<TaskList, AddListDto, UpdateListDto>, ListRepository>();
+        builder.Services.AddScoped<IRepository<Models_Task, AddTaskDto, UpdateTaskDto>, TasksRepository>();
+    }
+
+    /// <summary>
+    ///     Adds the logging service to the application builder.
+    /// </summary>
+    /// <param name="builder">
+    ///     The WebApplicationBuilder to add the logging service to.
+    /// </param>
+    private static void AddLoggingService(this WebApplicationBuilder builder)
+    {
+        builder.Services.AddLogging(loggingBuilder =>
+        {
+            loggingBuilder.AddConsole()
+                .AddFilter("Microsoft.AspNetCore.Authentication", LogLevel.Debug)
+                .AddFilter("Microsoft.AspNetCore.Authorization", LogLevel.Debug);
+        });
+
     }
 }

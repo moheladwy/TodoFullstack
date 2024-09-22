@@ -15,9 +15,10 @@ public class ChangePasswordDto
     [MinLength(12)]
     [MaxLength(100)]
     [DataType(DataType.Password)]
-    [
-        RegularExpression("([a-z][A-Z][0-9][!@#$%^&*()_+\\-=\\[\\]{};':\"\\\\|,.<>\\/?]){12,100}",
-        ErrorMessage = "Password must be at least 12 characters long and contain letters, numbers, and special characters.")
-    ]
+    [RegularExpression(
+        @"^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[!@#$%^&*()_+\-=[\]{};':""\\|,.<>\/?]).{12,100}$",
+        ErrorMessage = "Password must be at least 12 characters long, contain at least one uppercase letter, " +
+                       "one lowercase letter, one number, and one special character."
+    )]
     public string NewPassword { get; set; }
 }

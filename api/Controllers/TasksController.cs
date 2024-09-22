@@ -1,9 +1,9 @@
+using API.DTOs.TasksDTOs;
 using API.Interfaces;
-using API.Models;
+using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Models_Task = API.Models.Task;
-using Task = API.Models.Task;
 
 namespace API.Controllers;
 
@@ -19,10 +19,11 @@ namespace API.Controllers;
 /// </code>
 [Route("api/[controller]")]
 [ApiController]
-[Authorize(Roles.User)]
-public class TasksController : ControllerBase // BUG: The signed user cannot access the controller at all because of Authorization.
+[Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme)]
+public class TasksController : ControllerBase
 {
-    private readonly IRepository<Models_Task> _taskRepository;
+    private readonly IRepository<Models_Task, AddTaskDto, UpdateTaskDto> _taskRepository;
+    private readonly ILogger<TasksController> _logger;
 
     /// <summary>
     ///     Constructor for the TasksController.
@@ -30,7 +31,14 @@ public class TasksController : ControllerBase // BUG: The signed user cannot acc
     /// <param name="taskRepository">
     ///     The repository for tasks.
     /// </param>
-    public TasksController(IRepository<Models_Task> taskRepository) => _taskRepository = taskRepository;
+    /// <param name="logger">
+    ///     The logger for the TasksController.
+    /// </param>
+    public TasksController(IRepository<Models_Task, AddTaskDto, UpdateTaskDto> taskRepository, ILogger<TasksController> logger)
+    {
+        _taskRepository = taskRepository;
+        _logger = logger;
+    }
 
     /// <summary>
     ///     Get all tasks for a specific list by listId.
@@ -44,15 +52,17 @@ public class TasksController : ControllerBase // BUG: The signed user cannot acc
     ///     If an error occurs, a bad request is returned with the error message.
     /// </returns>
     [HttpGet("all-tasks/{listId}")]
-    public async Task<ActionResult<List<Models_Task>>> GetAllItems([FromRoute] string listId)
+    public async Task<ActionResult<List<Models_Task>>> GetAllTasksByListId([FromRoute] string listId)
     {
         try
         {
             var tasks = await _taskRepository.GetAllAsync(listId);
+            _logger.LogInformation("Tasks found for list with id: {listId}", listId);
             return Ok(tasks);
         }
         catch (Exception e)
         {
+            _logger.LogInformation("No tasks found for list with id: {listId}", listId);
             return BadRequest("Error: " + e.Message);
         }
     }
@@ -69,15 +79,17 @@ public class TasksController : ControllerBase // BUG: The signed user cannot acc
     ///     If an error occurs, a bad request is returned with the error message.
     /// </returns>
     [HttpGet("get-task/{id}")]
-    public async Task<ActionResult<Models_Task>> GetItem(string id)
+    public async Task<ActionResult<Models_Task>> GetTaskById(Guid id)
     {
         try
         {
             var task = await _taskRepository.GetByIdAsync(id);
-            return task == null ? NotFound() : Ok(task);
+            _logger.LogInformation("Task with ID: {taskId} retrieved successfully.", id);
+            return Ok(task);
         }
         catch (Exception e)
         {
+            _logger.LogError("Error retrieving task with id: {id}, because {error}.", id, e.Message);
             return BadRequest("Error: " + e.Message);
         }
     }
@@ -85,7 +97,7 @@ public class TasksController : ControllerBase // BUG: The signed user cannot acc
     /// <summary>
     ///     Add a new task to the database with the specified listId.
     /// </summary>
-    /// <param name="task">
+    /// <param name="addTaskDto">
     ///     The task to add to the database.
     /// </param>
     /// <returns>
@@ -93,15 +105,17 @@ public class TasksController : ControllerBase // BUG: The signed user cannot acc
     ///     If an error occurs, a bad request is returned with the error message.
     /// </returns>
     [HttpPost("add-task")]
-    public async Task<ActionResult<Models_Task>> AddItem([FromBody] Models_Task task)
+    public async Task<ActionResult<Models_Task>> AddTask([FromBody] AddTaskDto addTaskDto)
     {
         try
         {
-            task = await _taskRepository.AddAsync(task);
+            var task = await _taskRepository.AddAsync(addTaskDto);
+            _logger.LogInformation("Task with ID: {taskId} added successfully.", task.Id);
             return Ok(task);
         }
         catch (Exception e)
         {
+            _logger.LogError("Error adding the task to the list with ID: {entity.ListId}, because {error}.", addTaskDto.ListId, e.Message);
             return BadRequest("Error: " + e.Message);
         }
     }
@@ -109,22 +123,24 @@ public class TasksController : ControllerBase // BUG: The signed user cannot acc
     /// <summary>
     ///     Update a task in the database.
     /// </summary>
-    /// <param name="task">
+    /// <param name="updateTaskDto">
     ///     The task to be updated in the database.
     /// </param>
     /// <returns>
     ///     The updated task.
     /// </returns>
     [HttpPut("update-task")]
-    public async Task<ActionResult<Models_Task>> UpdateItem(Models_Task task)
+    public async Task<ActionResult<Models_Task>> UpdateTask([FromBody] UpdateTaskDto updateTaskDto)
     {
         try
         {
-            task = await _taskRepository.UpdateAsync(task);
+            var task = await _taskRepository.UpdateAsync(updateTaskDto);
+            _logger.LogInformation("Task with ID: {taskId} updated successfully.", task.Id);
             return Ok(task);
         }
         catch (Exception e)
         {
+            _logger.LogError("Error updating task with ID: {taskId}, because {error}.", updateTaskDto.Id, e.Message);
             return BadRequest("Error: " + e.Message);
         }
     }
@@ -141,15 +157,17 @@ public class TasksController : ControllerBase // BUG: The signed user cannot acc
     ///     If an error occurs, a bad request is returned with the error message.
     /// </returns>
     [HttpDelete("delete-task/{id}")]
-    public async Task<ActionResult> DeleteItem(string id)
+    public async Task<ActionResult> DeleteTask([FromRoute] Guid id)
     {
         try
         {
             await _taskRepository.DeleteAsync(id);
+            _logger.LogInformation("Task with ID: {taskId} deleted successfully.", id);
             return Ok();
         }
         catch (Exception e)
         {
+            _logger.LogError("Error deleting task with ID: {taskId}, because {error}.", id, e.Message);
             return BadRequest("Error: " + e.Message);
         }
     }

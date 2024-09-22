@@ -19,7 +19,7 @@ public static class ApplicationService
     public static void Initialize(this WebApplication app)
     {
         app.UseAutoMigrationAtStartup();
-        app.AddInitialRoles();
+        // app.AddInitialRoles();
 
         if (app.Environment.IsDevelopment())
             app.DevelopmentMode();

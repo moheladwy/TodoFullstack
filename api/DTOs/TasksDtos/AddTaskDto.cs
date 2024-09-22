@@ -1,8 +1,8 @@
 using System.ComponentModel.DataAnnotations;
 
-namespace API.DTOs.ListsDTOs;
+namespace API.DTOs.TasksDTOs;
 
-public class AddListDto
+public class AddTaskDto
 {
     [Required]
     [MinLength(3)]
@@ -12,6 +12,6 @@ public class AddListDto
     [MaxLength(500)]
     public string? Description { get; init; }
 
-    // [Required]
-    // public string UserId { get; set; }
+    [Required]
+    public Guid ListId { get; init; }
 }

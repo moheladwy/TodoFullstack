@@ -1,0 +1,18 @@
+﻿version: '3.8'
+
+services:
+  todo-api:
+    image: todo-api:V1.0
+    build:
+      context: .
+      dockerfile: Dockerfile
+    ports:
+      - "8000:8080"
+    volumes:
+      - /var/database:/TodoAPI/Database
+    environment:
+      - ASPNETCORE_ENVIRONMENT=Production
+
+networks:
+  default:
+    driver: bridge

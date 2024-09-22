@@ -1,3 +1,4 @@
+using System.Security.Claims;
 using API.DTOs.AccountDTOs;
 using API.Exceptions;
 using API.Interfaces;
@@ -11,8 +12,19 @@ namespace API.Services;
 /// </summary>
 public class AccountService : IAccountService
 {
+    /// <summary>
+    ///     UserManager instance to manage user operations.
+    /// </summary>
     private readonly UserManager<User> _userManager;
+
+    /// <summary>
+    ///     SignInManager instance to manage sign in operations.
+    /// </summary>
     private readonly SignInManager<User> _signInManager;
+
+    /// <summary>
+    ///     ILogger instance to log information, warnings, and errors.
+    /// </summary>
     private readonly ILogger<AccountService> _logger;
 
     /// <summary>
@@ -55,6 +67,37 @@ public class AccountService : IAccountService
     }
 
     /// <summary>
+    ///     GetUserByClaims method is used to get user by claims.
+    /// </summary>
+    /// <param name="claims">
+    ///     ClaimsPrincipal instance that contains user's claims.
+    /// </param>
+    /// <returns>
+    ///     Returns user if user found by given claims.
+    /// </returns>
+    /// <exception cref="UserNotFoundException">
+    ///     Throws when user not found by given claims.
+    /// </exception>
+    /// <exception cref="UnauthorizedAccessException">
+    ///     This sample shows how to call the GetUserByClaims method.
+    /// </exception>
+    public async Task<User> GetUserByClaims(ClaimsPrincipal claims)
+    {
+        var userEmail = claims.FindFirst(ClaimTypes.Email)?.Value;
+        if (userEmail == null)
+        {
+            _logger.LogError("User not found.");
+            throw new UnauthorizedAccessException("User not authenticated.");
+        }
+
+        var user = await _userManager.FindByEmailAsync(userEmail);
+        if (user != null) return user;
+
+        _logger.LogError("User with this email: {userEmail} not found", userEmail);
+        throw new UserNotFoundException($"User with this email: {userEmail} not found");
+    }
+
+    /// <summary>
     ///     ChangePassword method is used to change user's password.
     /// </summary>
     /// <param name="changePasswordDto">
@@ -77,11 +120,11 @@ public class AccountService : IAccountService
         if (!result.Succeeded)
         {
             var message = $"Failed to change password because of: {string.Join(", ", result.Errors.Select(e => e.Description))}";
-            _logger.LogError(message);
+            _logger.LogError("{message}", message);
             throw new PasswordDidNotChangeException(message);
         }
 
-        _logger.LogInformation($"User with id: {changePasswordDto.Id} changed password successfully");
+        _logger.LogInformation("User with id: {changePasswordDto.Id} changed password successfully", changePasswordDto.Id);
         return true;
     }
 
@@ -132,11 +175,11 @@ public class AccountService : IAccountService
         if (!result.Succeeded)
         {
             var message = $"Failed to update user information because of: {string.Join(", ", result.Errors.Select(e => e.Description))}";
-            _logger.LogError(message);
+            _logger.LogError("{message}", message);
             throw new UserInformationDidNotUpdateException(message);
         }
 
-        _logger.LogInformation($"User with id: {updateUserInfoDto.Id} updated his information successfully");
+        _logger.LogInformation("User with id: {updateUserInfoDto.Id} updated his information successfully", updateUserInfoDto.Id);
         return true;
     }
 
@@ -156,7 +199,6 @@ public class AccountService : IAccountService
     public async Task<bool> DeleteAccount(string id)
     {
         var user = await GetUserById(id);
-
         var result = await _userManager.DeleteAsync(user);
         await _signInManager.SignOutAsync();
         return result.Succeeded;

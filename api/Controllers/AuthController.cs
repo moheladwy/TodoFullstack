@@ -1,6 +1,5 @@
 using API.DTOs.AuthDTOs;
 using API.Interfaces;
-using API.Models;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
@@ -17,6 +16,7 @@ public class AuthController : ControllerBase
 
     private readonly IAuthService _authenticationService;
     private readonly ITokenService _tokenService;
+    private readonly ILogger<AuthController> _logger;
 
     /// <summary>
     ///     Constructor for the AuthController.
@@ -27,10 +27,14 @@ public class AuthController : ControllerBase
     /// <param name="tokenService">
     ///     The service to use for token operations.
     /// </param>
-    public AuthController(IAuthService authenticationService, ITokenService tokenService)
+    /// <param name="logger">
+    ///     The logger to use for logging.
+    /// </param>
+    public AuthController(IAuthService authenticationService, ITokenService tokenService, ILogger<AuthController> logger)
     {
         _authenticationService = authenticationService;
         _tokenService = tokenService;
+        _logger = logger;
     }
 
     /// <summary>
@@ -49,18 +53,25 @@ public class AuthController : ControllerBase
     {
         try
         {
-            if (!ModelState.IsValid) return BadRequest(ModelState);
+            if (!ModelState.IsValid)
+            {
+                _logger.LogCritical("Invalid model state");
+                return BadRequest(ModelState);
+            }
+
             var user = await _authenticationService.Login(loginDto);
+            _logger.LogInformation("User logged in successfully with email: {email}", user.Email);
+
             return Ok(new AuthResponse
             {
                 Id = user.Id,
-                Username = user.UserName,
                 Token = _tokenService.GenerateToken(user),
                 ExpiresInDays = _tokenService.GetTokenExpirationDays()
             });
         }
         catch (Exception e)
         {
+            _logger.LogError(e, "Failed to log in with email: {email}", loginDto.Email);
             return BadRequest(e.Message);
         }
     }
@@ -83,36 +94,23 @@ public class AuthController : ControllerBase
     {
         try
         {
-            if (!ModelState.IsValid) return BadRequest(ModelState);
-            await _authenticationService.Register(registerDto);
+            if (!ModelState.IsValid)
+            {
+                _logger.LogCritical("Invalid model state");
+                return BadRequest(ModelState);
+            }
+            var result = await _authenticationService.Register(registerDto);
+            if (!result)
+            {
+                _logger.LogWarning("Failed to register user with email: {email}", registerDto.Email);
+                return BadRequest("Failed to register user.");
+            }
+            _logger.LogInformation("User registered successfully with email: {email}", registerDto.Email);
             return Ok();
         }
         catch (Exception e)
         {
-            return BadRequest(e.Message);
-        }
-    }
-
-    /// <summary>
-    ///     Logout endpoint for users to log out of the system.
-    /// </summary>
-    /// <returns>
-    ///     An IActionResult representing the result of the logout.
-    ///     returns Ok if the user was successfully logged out,
-    ///     otherwise returns BadRequest.
-    /// </returns>
-    [HttpPost("logout")]
-    [Authorize(Roles = Roles.User)]
-    public async Task<ActionResult> Logout()
-    {
-        try
-        {
-            // BUG: The user is not logged out, the token is still valid and returns 404 Not Found.
-            await _authenticationService.Logout();
-            return Ok();
-        }
-        catch (Exception e)
-        {
+            _logger.LogError(e, "Failed to register user with email: {email}", registerDto.Email);
             return BadRequest(e.Message);
         }
     }

@@ -1,10 +1,9 @@
-using System.Security.Claims;
+using api.DTOs.ListDTOs;
 using Microsoft.AspNetCore.Mvc;
-using API.DTOs.ListsDTOs;
 using API.Interfaces;
 using API.Models;
+using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Authorization;
-using Microsoft.AspNetCore.Identity;
 
 namespace API.Controllers;
 
@@ -14,7 +13,7 @@ namespace API.Controllers;
 ///     It has the following endpoints:
 /// </summary>
 /// <code>
-///     - GET /api/lists/all-lists/{userId}
+///     - GET /api/lists/all-lists
 ///     - GET /api/lists/get-list/{id}
 ///     - POST /api/lists/add-list
 ///     - PUT /api/lists/update-list
@@ -22,12 +21,13 @@ namespace API.Controllers;
 /// </code>
 [Route("api/[controller]")]
 [ApiController]
-[Authorize(Roles = Roles.User, Policy = Roles.User)]
-public class ListsController : ControllerBase // BUG: The signed user cannot access the controller at all because of Authorization.
+[Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme)]
+public class ListsController : ControllerBase
 {
-    private readonly IRepository<TaskList> _listRepository;
+    private readonly IRepository<TaskList, AddListDto, UpdateListDto> _listRepository;
     private readonly ILogger<ListsController> _logger;
-    private readonly User _user;
+    private readonly IAccountService _accountService;
+    private User? _authenticatedUser;
 
     /// <summary>
     ///     Constructor for ListsController class.
@@ -38,30 +38,17 @@ public class ListsController : ControllerBase // BUG: The signed user cannot acc
     /// <param name="logger">
     ///     The logger for the ListsController class.
     /// </param>
-    /// <param name="principal">
-    ///     The current user principal that is making the request.
+    /// <param name="accountService">
+    ///     The account service for managing user operations.
     /// </param>
-    /// <param name="signInManager">
-    ///     The sign-in manager for the user.
-    /// </param>
-    /// <exception cref="UnauthorizedAccessException">
-    ///     Thrown when the user is not authenticated or not found.
-    /// </exception>
     public ListsController(
-        IRepository<TaskList> listRepository,
+        IRepository<TaskList, AddListDto, UpdateListDto> listRepository,
         ILogger<ListsController> logger,
-        ClaimsPrincipal principal,
-        SignInManager<User> signInManager)
+        IAccountService accountService)
     {
         _listRepository = listRepository;
+        _accountService = accountService;
         _logger = logger;
-        if (signInManager.IsSignedIn(principal))
-        {
-            _logger.LogError("User is not authenticated.");
-            throw new UnauthorizedAccessException("User is not authenticated to in the system.");
-        }
-
-        _user  = signInManager.UserManager.GetUserAsync(principal).Result ?? throw new UnauthorizedAccessException("Unauthorized access for the user.");
     }
 
     /// <summary>
@@ -77,14 +64,14 @@ public class ListsController : ControllerBase // BUG: The signed user cannot acc
     {
         try
         {
-            var lists = await _listRepository.GetAllAsync(_user.Id);
-            var listsCount = lists.ToList().Count;
-            _logger.LogInformation(listsCount == 0 ? "No lists found for user with ID: {userId}." : "Lists for user with ID: {userId} retrieved successfully.", _user.Id);
+            _authenticatedUser = await _accountService.GetUserByClaims(User);
+            var lists = await _listRepository.GetAllAsync(_authenticatedUser.Id);
+            _logger.LogInformation("Lists for user with ID: {userId} retrieved successfully.", _authenticatedUser.Id);
             return Ok(lists);
         }
         catch (Exception e)
         {
-            _logger.LogError(e, "Error retrieving lists for user with ID: {Id}, because {error}.", _user.Id, e.Message);
+            _logger.LogError(e, "Error retrieving lists for user with ID: {Id}, because {error}.", _authenticatedUser.Id, e.Message);
             return BadRequest(e.Message);
         }
     }
@@ -96,18 +83,17 @@ public class ListsController : ControllerBase // BUG: The signed user cannot acc
     ///     The ID of the list to get.
     /// </param>
     /// <returns>
-    ///     The ItemsList object with the specified ID for the current user which includes the items in the list in case they exist.
-    ///     If the list is not found, a NotFound response is returned.
+    ///     The TaskList object with the specified ID for the current user which includes the items in the list in case they exist.
     ///     If an exception occurs, a BadRequest response is returned with the exception message.
     /// </returns>
     [HttpGet("get-list/{listId}")]
-    public async Task<ActionResult<TaskList>> GetList([FromRoute] string listId)
+    public async Task<ActionResult<TaskList>> GetListById([FromRoute] Guid listId)
     {
         try
         {
             var list = await _listRepository.GetByIdAsync(listId);
-            _logger.LogInformation(list != null ? "List with ID: {listId} retrieved successfully." : "List with ID: {listId} not found.", listId);
-            return list == null ? NotFound($"List with the specified ID: {listId} not found.") : Ok(list);
+            _logger.LogInformation("List with ID: {listId} retrieved successfully." , listId);
+            return Ok(list);
         }
         catch (Exception e)
         {
@@ -139,15 +125,17 @@ public class ListsController : ControllerBase // BUG: The signed user cannot acc
                 return BadRequest(ModelState);
             }
 
-            var newList = await _listRepository.AddAsync(new TaskList()
+            _authenticatedUser = await _accountService.GetUserByClaims(User);
+            if (_authenticatedUser.Id != addListDto.UserId)
             {
-                Name = addListDto.Name,
-                Description = addListDto.Description ?? string.Empty,
-                User = _user
-            });
+                _logger.LogError("User with ID: {userId} is not authorized to add a list for user with ID: {addListDto.UserId}.", _authenticatedUser.Id, addListDto.UserId);
+                return BadRequest("You are not authorized to add a list for another user.");
+            }
 
-            _logger.LogInformation("New list with ID: {id} added successfully.", newList.Id);
-            return Ok(newList);
+            var list = await _listRepository.AddAsync(addListDto);
+
+            _logger.LogInformation("New list with ID: {id} added successfully to the user with ID: {userId}.", list.Id, _authenticatedUser.Id);
+            return Ok(list);
         }
         catch (Exception e)
         {
@@ -168,7 +156,7 @@ public class ListsController : ControllerBase // BUG: The signed user cannot acc
     ///     If an exception occurs, a BadRequest response is returned with the exception message.
     /// </returns>
     [HttpPut("update-list")]
-    public async Task<ActionResult<TaskList>> UpdateList([FromBody] TaskList list)
+    public async Task<ActionResult<TaskList>> UpdateList([FromBody] UpdateListDto list)
     {
         try
         {
@@ -179,14 +167,13 @@ public class ListsController : ControllerBase // BUG: The signed user cannot acc
             }
 
             var updatedTask = await _listRepository.UpdateAsync(list);
-            _logger.LogInformation("List with ID: {id} updated successfully.", updatedTask.Id);
-
+            _logger.LogInformation("List with ID: {entity.Id} updated successfully.", list.Id);
             return Ok(updatedTask);
         }
         catch (Exception e)
         {
             _logger.LogError(e, "Error updating list with ID: {id}, because {error}.", list.Id, e.Message);
-            return BadRequest(e.Message);
+            return BadRequest($"Error updating list with ID: {list.Id}, because {e.Message}.");
         }
     }
 
@@ -201,12 +188,12 @@ public class ListsController : ControllerBase // BUG: The signed user cannot acc
     ///     If an exception occurs, a BadRequest response is returned with the exception message.
     /// </returns>
     [HttpDelete("delete-list/{id}")]
-    public async Task<ActionResult> DeleteList([FromRoute] string id)
+    public async Task<ActionResult> DeleteList([FromRoute] Guid id)
     {
         try
         {
             await _listRepository.DeleteAsync(id);
-            _logger.LogInformation("List with ID: {id} deleted successfully.", id);
+            _logger.LogInformation("List with ID: {id} and all its tasks deleted successfully.", id);
             return Ok();
         }
         catch (Exception e)

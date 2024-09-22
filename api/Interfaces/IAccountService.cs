@@ -1,3 +1,4 @@
+using System.Security.Claims;
 using API.DTOs.AccountDTOs;
 using API.Models;
 
@@ -19,6 +20,17 @@ public interface IAccountService
     ///     Returns the user with the provided id.
     /// </returns>
     Task<User> GetUserById(string userId);
+
+    /// <summary>
+    ///     GetUserByClaims method is used to get user by claims.
+    /// </summary>
+    /// <param name="claims">
+    ///     ClaimsPrincipal instance that contains user's claims.
+    /// </param>
+    /// <returns>
+    ///     Returns the user with the provided claims.
+    /// </returns>
+    Task<User> GetUserByClaims(ClaimsPrincipal claims);
 
     /// <summary>
     ///     ChangePassword method is used to change user's password.

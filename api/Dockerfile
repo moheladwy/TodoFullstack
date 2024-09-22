@@ -1,23 +1,28 @@
-FROM mcr.microsoft.com/dotnet/aspnet:8.0 AS base
+﻿FROM mcr.microsoft.com/dotnet/aspnet:8.0 AS base
 USER $APP_UID
-WORKDIR /app
+WORKDIR /TodoAPI
 EXPOSE 8080
 EXPOSE 8081
 
 FROM mcr.microsoft.com/dotnet/sdk:8.0 AS build
 ARG BUILD_CONFIGURATION=Release
-WORKDIR /src
-COPY ["API/API.csproj", "API/"]
-RUN dotnet restore "API/API.csproj"
+WORKDIR /TodoAPI/src
+COPY ["api.csproj", "./"]
+RUN dotnet restore "api.csproj"
 COPY . .
-WORKDIR "/src/API"
-RUN dotnet build "API.csproj" -c $BUILD_CONFIGURATION -o /app/build
+WORKDIR "/TodoAPI/src/"
+RUN dotnet build "api.csproj" -c $BUILD_CONFIGURATION -o /TodoAPI/build
 
 FROM build AS publish
 ARG BUILD_CONFIGURATION=Release
-RUN dotnet publish "API.csproj" -c $BUILD_CONFIGURATION -o /app/publish /p:UseAppHost=false
+RUN dotnet publish "api.csproj" -c $BUILD_CONFIGURATION -o /TodoAPI/publish /p:UseAppHost=false
 
 FROM base AS final
-WORKDIR /app
-COPY --from=publish /app/publish .
-ENTRYPOINT ["dotnet", "API.dll"]
+WORKDIR /TodoAPI
+COPY --from=publish /TodoAPI/publish .
+
+RUN dotnet tool install --global dotnet-ef
+ENV PATH="${PATH}:/root/.dotnet/tools"
+RUN dotnet ef database update
+
+ENTRYPOINT ["dotnet", "api.dll"]

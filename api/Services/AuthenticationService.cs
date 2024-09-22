@@ -1,5 +1,4 @@
 using Microsoft.AspNetCore.Identity;
-using System.Security.Claims;
 using API.DTOs.AuthDTOs;
 using API.Exceptions;
 using API.Interfaces;
@@ -12,8 +11,19 @@ namespace API.Services;
 /// </summary>
 public class AuthenticationService : IAuthService
 {
+    /// <summary>
+    ///     The UserManager instance to use for user management operations.
+    /// </summary>
     private readonly UserManager<User> _userManager;
+
+    /// <summary>
+    ///     The SignInManager instance to use for user sign-in operations.
+    /// </summary>
     private readonly SignInManager<User> _signInManager;
+
+    /// <summary>
+    ///     The ILogger instance to use for logging.
+    /// </summary>
     private readonly ILogger<AuthenticationService> _logger;
 
     /// <summary>
@@ -67,25 +77,11 @@ public class AuthenticationService : IAuthService
 
         // Create the user with the provided password
         var createdUser = await _userManager.CreateAsync(user, registerUserDto.Password);
-        if (!createdUser.Succeeded)
-        {
-            var errorMessages = $"Failed to create user because of: {string.Join(", ", createdUser.Errors.Select(e => e.Description))}";
-            _logger.LogError("{error}", errorMessages);
-            throw new CreateUserException(errorMessages);
-        }
+        if (createdUser.Succeeded) return true;
 
-        // Add Claim `User` to the user.
-        await _userManager.AddClaimAsync(user, new Claim(Roles.User, Roles.User));
-
-        var roleResult = await _userManager.AddToRoleAsync(user, Roles.User);
-        if (!roleResult.Succeeded)
-        {
-            var errorMessages = $"Failed to add role `{Roles.User}` to the user because of: {string.Join(", ", roleResult.Errors.Select(e => e.Description))}";
-            _logger.LogError("{error}", errorMessages);
-            throw new AddRoleException(errorMessages);
-        }
-
-        return true;
+        var errorMessages = $"Failed to create user because of: {string.Join(", ", createdUser.Errors.Select(e => e.Description))}";
+        _logger.LogError("{error}", errorMessages);
+        throw new CreateUserException(errorMessages);
     }
 
     /// <summary>
@@ -105,35 +101,14 @@ public class AuthenticationService : IAuthService
     /// </exception>
     public async Task<User> Login(LoginUserDto loginUserDto)
     {
-        // Find the user by email
         var user = await _userManager.FindByEmailAsync(loginUserDto.Email) ??
                    throw new InvalidEmailException("Invalid email");
 
-        // Check if the password is correct
         var result = await _signInManager.CheckPasswordSignInAsync(user, loginUserDto.Password, false);
-        if (!result.Succeeded)
-        {
-            var errorMessages = $"Failed to login user with email: {loginUserDto.Email}";
-            _logger.LogError("{error}", errorMessages);
-            throw new InvalidPasswordException(errorMessages);
-        }
+        if (result.Succeeded) return user;
 
-        // Sign in the user
-        return user;
-    }
-
-    /// <summary>
-    ///     Logout the current user from the system.
-    /// </summary>
-    /// <returns>
-    ///     A boolean indicating if the user was successfully logged out of the system.
-    /// </returns>
-    /// <exception cref="NullReferenceException">
-    ///     Thrown when the HttpContext is null.
-    /// </exception>
-    public async Task<bool> Logout()
-    {
-        await _signInManager.SignOutAsync();
-        return true;
+        var errorMessages = $"Failed to login user with email: {loginUserDto.Email}";
+        _logger.LogError("{error}", errorMessages);
+        throw new InvalidPasswordException(errorMessages);
     }
 }
