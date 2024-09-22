@@ -21,8 +21,5 @@ FROM base AS final
 WORKDIR /TodoAPI
 COPY --from=publish /TodoAPI/publish .
 
-RUN dotnet tool install --global dotnet-ef
-ENV PATH="${PATH}:/root/.dotnet/tools"
-RUN dotnet ef database update
-
-ENTRYPOINT ["dotnet", "api.dll"]
+RUN mkdir -p /TodoAPI/Database
+ENTRYPOINT ["dotnet", "api.dll", "ef", "database", "update", "&&", "dotnet", "api.dll"]
