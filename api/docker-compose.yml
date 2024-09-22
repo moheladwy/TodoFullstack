@@ -1,7 +1,7 @@
 ﻿version: "3.8"
 
 services:
-    todoapi:
+    todo:
         image: todo-api:V1.0
         build:
             context: .
@@ -9,12 +9,12 @@ services:
         ports:
             - "8070:8080"
         volumes:
-            - todo_api:/TodoAPI/Database
+            - todo_volume:/TodoAPI/Database
         environment:
             - ASPNETCORE_ENVIRONMENT=Production
 
 volumes:
-    todo_api:
+    todo_volume:
 
 networks:
     default:
