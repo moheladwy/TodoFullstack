@@ -44,7 +44,8 @@ public static class BuilderService
         builder.Services.AddHttpClient();
         builder.Services.AddControllers().AddJsonOptions(options =>
         {
-            options.JsonSerializerOptions.ReferenceHandler = System.Text.Json.Serialization.ReferenceHandler.Preserve;
+            options.JsonSerializerOptions.ReferenceHandler =
+                System.Text.Json.Serialization.ReferenceHandler.Preserve;
         });
     }
 
@@ -119,7 +120,8 @@ public static class BuilderService
                 ValidAudience = builder.Configuration["JWT:Audience"],
                 ValidateIssuerSigningKey = true,
                 IssuerSigningKey = new SymmetricSecurityKey(
-                    System.Text.Encoding.UTF8.GetBytes(builder.Configuration["JWT:SecretKey"] ?? throw new InvalidOperationException("JWT Secret Key not found."))
+                    System.Text.Encoding.UTF8.GetBytes(builder.Configuration["JWT:SecretKey"] ??
+                                                       throw new InvalidOperationException("JWT Secret Key not found."))
                 ),
                 ValidateLifetime = true,
                 ClockSkew = TimeSpan.Zero
@@ -140,7 +142,8 @@ public static class BuilderService
     {
         const string connectionStringName = "SqliteConnection";
         var connectionString = builder.Configuration.GetConnectionString(connectionStringName)
-                               ?? throw new InvalidOperationException($"Connection string '{connectionStringName}' not found.");
+                               ?? throw new InvalidOperationException(
+                                   $"Connection string '{connectionStringName}' not found.");
         builder.Services.AddDbContext<TodoIdentityContext>(options => options.UseSqlite(connectionString));
     }
 
@@ -172,7 +175,7 @@ public static class BuilderService
                 "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789-._@";
             options.User.RequireUniqueEmail = true;
         }).AddEntityFrameworkStores<TodoIdentityContext>();
-            // .AddRoles<IdentityRole>();
+        // .AddRoles<IdentityRole>();
     }
 
     /// <summary>
@@ -184,8 +187,8 @@ public static class BuilderService
     private static void AddAuthorizationService(this WebApplicationBuilder builder)
     {
         builder.Services.AddAuthorizationBuilder();
-            // .AddPolicy(Roles.Admin, policy => policy.RequireRole(Roles.Admin))
-            // .AddPolicy(Roles.User, policy => policy.RequireRole(Roles.User));
+        // .AddPolicy(Roles.Admin, policy => policy.RequireRole(Roles.Admin))
+        // .AddPolicy(Roles.User, policy => policy.RequireRole(Roles.User));
     }
 
     /// <summary>
@@ -215,6 +218,5 @@ public static class BuilderService
                 .AddFilter("Microsoft.AspNetCore.Authentication", LogLevel.Debug)
                 .AddFilter("Microsoft.AspNetCore.Authorization", LogLevel.Debug);
         });
-
     }
 }

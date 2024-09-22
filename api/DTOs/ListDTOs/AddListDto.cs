@@ -9,9 +9,7 @@ public class AddListDto
     [MaxLength(100)]
     public required string Name { get; init; }
 
-    [MaxLength(500)]
-    public string? Description { get; init; }
+    [MaxLength(500)] public string? Description { get; init; }
 
-    [Required]
-    public string UserId { get; init; }
+    [Required] public string UserId { get; init; }
 }

@@ -4,8 +4,7 @@ namespace API.DTOs.TasksDTOs;
 
 public class UpdateTaskDto
 {
-    [Required]
-    public required Guid Id { get; set; }
+    [Required] public required Guid Id { get; set; }
 
     [StringLength(100, MinimumLength = 1, ErrorMessage = "The field Name must be between 1 and 100 characters.")]
     public string? Name { get; set; }

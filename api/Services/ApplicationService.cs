@@ -19,7 +19,6 @@ public static class ApplicationService
     public static void Initialize(this WebApplication app)
     {
         app.UseAutoMigrationAtStartup();
-        // app.AddInitialRoles();
 
         if (app.Environment.IsDevelopment())
             app.DevelopmentMode();
@@ -28,6 +27,8 @@ public static class ApplicationService
 
         app.UseHttpsRedirection();
         app.UseRouting();
+        app.UseSwagger();
+        app.UseSwaggerUI();
         app.UseAuthentication();
         app.UseAuthorization();
         app.MapControllers();
@@ -79,8 +80,6 @@ public static class ApplicationService
     /// </param>
     private static void DevelopmentMode(this WebApplication app)
     {
-        app.UseSwagger();
-        app.UseSwaggerUI();
         app.UseDeveloperExceptionPage();
     }
 

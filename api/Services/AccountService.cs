@@ -40,7 +40,8 @@ public class AccountService : IAccountService
     ///    ILogger instance to log information, warnings, and errors, it's injected by dependency injection container.
     ///    It's used to log information, warnings, and errors.
     /// </param>
-    public AccountService(UserManager<User> userManager, SignInManager<User> signInManager, ILogger<AccountService> logger)
+    public AccountService(UserManager<User> userManager, SignInManager<User> signInManager,
+        ILogger<AccountService> logger)
     {
         _userManager = userManager;
         _signInManager = signInManager;
@@ -62,7 +63,7 @@ public class AccountService : IAccountService
     public async Task<User> GetUserById(string userId)
     {
         var user = await _userManager.FindByIdAsync(userId) ??
-        throw new UserNotFoundException($"User with this id: {userId} not found");
+                   throw new UserNotFoundException($"User with this id: {userId} not found");
         return user;
     }
 
@@ -116,15 +117,14 @@ public class AccountService : IAccountService
     {
         var user = await GetUserById(changePasswordDto.Id);
 
-        var result = await _userManager.ChangePasswordAsync(user, changePasswordDto.CurrentPassword, changePasswordDto.NewPassword);
+        var result = await _userManager.ChangePasswordAsync(user, changePasswordDto.CurrentPassword,
+                changePasswordDto.NewPassword);
         if (!result.Succeeded)
-        {
-            var message = $"Failed to change password because of: {string.Join(", ", result.Errors.Select(e => e.Description))}";
-            _logger.LogError("{message}", message);
-            throw new PasswordDidNotChangeException(message);
-        }
+            throw new PasswordDidNotChangeException($"Failed to change password because of: {string.Join(", ",
+                result.Errors.Select(e => e.Description))}");
 
-        _logger.LogInformation("User with id: {changePasswordDto.Id} changed password successfully", changePasswordDto.Id);
+        _logger.LogInformation("User with id: {changePasswordDto.Id} changed password successfully",
+            changePasswordDto.Id);
         return true;
     }
 
@@ -173,13 +173,10 @@ public class AccountService : IAccountService
 
         var result = await _userManager.UpdateAsync(user);
         if (!result.Succeeded)
-        {
-            var message = $"Failed to update user information because of: {string.Join(", ", result.Errors.Select(e => e.Description))}";
-            _logger.LogError("{message}", message);
-            throw new UserInformationDidNotUpdateException(message);
-        }
+            throw new UserInformationDidNotUpdateException($"Failed to update user information because of: {string.Join(", ", result.Errors.Select(e => e.Description))}");
 
-        _logger.LogInformation("User with id: {updateUserInfoDto.Id} updated his information successfully", updateUserInfoDto.Id);
+        _logger.LogInformation("User with id: {updateUserInfoDto.Id} updated his information successfully",
+            updateUserInfoDto.Id);
         return true;
     }
 

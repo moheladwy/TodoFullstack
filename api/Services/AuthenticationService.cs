@@ -79,7 +79,8 @@ public class AuthenticationService : IAuthService
         var createdUser = await _userManager.CreateAsync(user, registerUserDto.Password);
         if (createdUser.Succeeded) return true;
 
-        var errorMessages = $"Failed to create user because of: {string.Join(", ", createdUser.Errors.Select(e => e.Description))}";
+        var errorMessages =
+            $"Failed to create user because of: {string.Join(", ", createdUser.Errors.Select(e => e.Description))}";
         _logger.LogError("{error}", errorMessages);
         throw new CreateUserException(errorMessages);
     }

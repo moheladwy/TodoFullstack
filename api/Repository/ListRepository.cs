@@ -41,7 +41,7 @@ public class ListRepository : IRepository<TaskList, AddListDto, UpdateListDto>
         return await _identityContext.Lists
             .AsNoTracking() // No need to track the entities since we are not going to modify them in this request (we are only reading them).
             .Where(l => l.UserId == id) // Filter the lists by the current user.
-            .Include(l => l.Tasks)  // Include the items in the list.
+            .Include(l => l.Tasks) // Include the items in the list.
             .ToListAsync(); // Execute the query and return the results as a list.
     }
 
@@ -100,9 +100,9 @@ public class ListRepository : IRepository<TaskList, AddListDto, UpdateListDto>
     public async Task<TaskList> UpdateAsync(UpdateListDto entity)
     {
         var list = await _identityContext.Lists
-            .Where(l => l.Id == entity.Id) // Filter the lists by the specified ID.
-            .FirstAsync() ?? // Fetch the entity to be updated.
-            throw new ListNotFoundException($"List with the specified ID: {entity.Id} not found.");
+                       .Where(l => l.Id == entity.Id) // Filter the lists by the specified ID.
+                       .FirstAsync() ?? // Fetch the entity to be updated.
+                   throw new ListNotFoundException($"List with the specified ID: {entity.Id} not found.");
 
         // Update the list's name if the new value is not empty.
         list.Name = entity.Name.Length > 0 ? entity.Name : list.Name;
@@ -128,14 +128,14 @@ public class ListRepository : IRepository<TaskList, AddListDto, UpdateListDto>
     public async Task DeleteAsync(Guid id)
     {
         var list = await _identityContext.Lists
-            .Where(l => l.Id == id)                 // Filter by the specified ID.
-            .Include(taskList => taskList.Tasks)    // Include related items.
-            .FirstAsync() ??                        // Fetch the entities to be removed.
-            throw new ListNotFoundException($"List with the specified ID: {id} not found.");
+                       .Where(l => l.Id == id) // Filter by the specified ID.
+                       .Include(taskList => taskList.Tasks) // Include related items.
+                       .FirstAsync() ?? // Fetch the entities to be removed.
+                   throw new ListNotFoundException($"List with the specified ID: {id} not found.");
 
         _identityContext.Tasks.RemoveRange(list.Tasks); // Remove the tasks from the database context.
-        _identityContext.Lists.Remove(list);            // Remove the lists from the database context.
+        _identityContext.Lists.Remove(list); // Remove the lists from the database context.
 
-        await _identityContext.SaveChangesAsync();      // Save the changes to the database.
+        await _identityContext.SaveChangesAsync(); // Save the changes to the database.
     }
 }

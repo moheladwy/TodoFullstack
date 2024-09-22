@@ -4,8 +4,7 @@ namespace api.DTOs.ListDTOs;
 
 public class UpdateListDto
 {
-    [Required]
-    public required Guid Id { get; set; }
+    [Required] public required Guid Id { get; set; }
 
     [Required]
     [StringLength(100, MinimumLength = 1, ErrorMessage = "The field Name must be between 1 and 100 characters.")]

@@ -71,7 +71,8 @@ public class ListsController : ControllerBase
         }
         catch (Exception e)
         {
-            _logger.LogError(e, "Error retrieving lists for user with ID: {Id}, because {error}.", _authenticatedUser.Id, e.Message);
+            _logger.LogError(e, "Error retrieving lists for user with ID: {Id}, because {error}.",
+                _authenticatedUser.Id, e.Message);
             return BadRequest(e.Message);
         }
     }
@@ -92,7 +93,7 @@ public class ListsController : ControllerBase
         try
         {
             var list = await _listRepository.GetByIdAsync(listId);
-            _logger.LogInformation("List with ID: {listId} retrieved successfully." , listId);
+            _logger.LogInformation("List with ID: {listId} retrieved successfully.", listId);
             return Ok(list);
         }
         catch (Exception e)
@@ -128,18 +129,22 @@ public class ListsController : ControllerBase
             _authenticatedUser = await _accountService.GetUserByClaims(User);
             if (_authenticatedUser.Id != addListDto.UserId)
             {
-                _logger.LogError("User with ID: {userId} is not authorized to add a list for user with ID: {addListDto.UserId}.", _authenticatedUser.Id, addListDto.UserId);
+                _logger.LogError(
+                    "User with ID: {userId} is not authorized to add a list for user with ID: {addListDto.UserId}.",
+                    _authenticatedUser.Id, addListDto.UserId);
                 return BadRequest("You are not authorized to add a list for another user.");
             }
 
             var list = await _listRepository.AddAsync(addListDto);
 
-            _logger.LogInformation("New list with ID: {id} added successfully to the user with ID: {userId}.", list.Id, _authenticatedUser.Id);
+            _logger.LogInformation("New list with ID: {id} added successfully to the user with ID: {userId}.", list.Id,
+                _authenticatedUser.Id);
             return Ok(list);
         }
         catch (Exception e)
         {
-            _logger.LogError(e, "Error adding new list with name: {name}, because {error}.", addListDto.Name, e.Message);
+            _logger.LogError(e, "Error adding new list with name: {name}, because {error}.", addListDto.Name,
+                e.Message);
             return BadRequest(e.Message);
         }
     }
@@ -203,4 +208,3 @@ public class ListsController : ControllerBase
         }
     }
 }
-

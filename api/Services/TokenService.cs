@@ -52,7 +52,8 @@ public class TokenService : ITokenService
         _configuration = configuration;
         _logger = logger;
         _key = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(_configuration["Jwt:SecretKey"] ??
-                                                               throw new InvalidOperationException("JWT Secret Key not found.")));
+                                                               throw new InvalidOperationException(
+                                                                   "JWT Secret Key not found.")));
     }
 
     /// <summary>
@@ -74,7 +75,8 @@ public class TokenService : ITokenService
         {
             new(JwtRegisteredClaimNames.Jti, user.Id.ToString()),
             new(JwtRegisteredClaimNames.Email, user.Email ?? throw new NullReferenceException("User email is null")),
-            new(JwtRegisteredClaimNames.GivenName, user.UserName ?? throw new NullReferenceException("User username is null")),
+            new(JwtRegisteredClaimNames.GivenName,
+                user.UserName ?? throw new NullReferenceException("User username is null")),
             new(ClaimTypes.Role, Roles.User)
         };
 

@@ -118,8 +118,11 @@ public class AccountController : ControllerBase
                 _logger.LogError("Failed to update user information because: {error}", ModelState.ValidationState);
                 return BadRequest(ModelState);
             }
+
             var result = await _accountService.UpdateUserInfo(updateUserInfoDto);
-            return result ? Ok("User information updated successfully.") : BadRequest("Failed to update user information.");
+            return result
+                ? Ok("User information updated successfully.")
+                : BadRequest("Failed to update user information.");
         }
         catch (Exception e)
         {

@@ -70,7 +70,7 @@ public class TaskNotFoundException(string message) : Exception(message);
 /// <param name="message">
 ///     The message to display when the exception is thrown.
 /// </param>
-public class UserInformationDidNotUpdateException (string message) : Exception(message);
+public class UserInformationDidNotUpdateException(string message) : Exception(message);
 
 /// <summary>
 ///     Exception thrown when the user is not found in the database.

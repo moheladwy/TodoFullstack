@@ -4,8 +4,7 @@ namespace API.DTOs.AccountDTOs;
 
 public class ChangePasswordDto
 {
-    [Required]
-    public string Id { get; set; }
+    [Required] public string Id { get; set; }
 
     [Required]
     [DataType(DataType.Password)]

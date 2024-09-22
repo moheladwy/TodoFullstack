@@ -13,7 +13,6 @@ namespace API.Controllers;
 [AllowAnonymous]
 public class AuthController : ControllerBase
 {
-
     private readonly IAuthService _authenticationService;
     private readonly ITokenService _tokenService;
     private readonly ILogger<AuthController> _logger;
@@ -30,7 +29,8 @@ public class AuthController : ControllerBase
     /// <param name="logger">
     ///     The logger to use for logging.
     /// </param>
-    public AuthController(IAuthService authenticationService, ITokenService tokenService, ILogger<AuthController> logger)
+    public AuthController(IAuthService authenticationService, ITokenService tokenService,
+        ILogger<AuthController> logger)
     {
         _authenticationService = authenticationService;
         _tokenService = tokenService;
@@ -99,12 +99,14 @@ public class AuthController : ControllerBase
                 _logger.LogCritical("Invalid model state");
                 return BadRequest(ModelState);
             }
+
             var result = await _authenticationService.Register(registerDto);
             if (!result)
             {
                 _logger.LogWarning("Failed to register user with email: {email}", registerDto.Email);
                 return BadRequest("Failed to register user.");
             }
+
             _logger.LogInformation("User registered successfully with email: {email}", registerDto.Email);
             return Ok();
         }

@@ -34,7 +34,8 @@ public class TasksController : ControllerBase
     /// <param name="logger">
     ///     The logger for the TasksController.
     /// </param>
-    public TasksController(IRepository<Models_Task, AddTaskDto, UpdateTaskDto> taskRepository, ILogger<TasksController> logger)
+    public TasksController(IRepository<Models_Task, AddTaskDto, UpdateTaskDto> taskRepository,
+        ILogger<TasksController> logger)
     {
         _taskRepository = taskRepository;
         _logger = logger;
@@ -115,7 +116,8 @@ public class TasksController : ControllerBase
         }
         catch (Exception e)
         {
-            _logger.LogError("Error adding the task to the list with ID: {entity.ListId}, because {error}.", addTaskDto.ListId, e.Message);
+            _logger.LogError("Error adding the task to the list with ID: {entity.ListId}, because {error}.",
+                addTaskDto.ListId, e.Message);
             return BadRequest("Error: " + e.Message);
         }
     }

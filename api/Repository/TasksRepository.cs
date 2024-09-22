@@ -110,9 +110,9 @@ public class TasksRepository : IRepository<Models.Task, AddTaskDto, UpdateTaskDt
     public async Task<Models.Task> UpdateAsync(UpdateTaskDto entity)
     {
         var task = await _identityContext.Tasks
-            .Where(l => l.Id == entity.Id)
-            .FirstAsync() ??
-            throw new TaskNotFoundException($"Task with the specified ID: {entity.Id} not found.");
+                       .Where(l => l.Id == entity.Id)
+                       .FirstAsync() ??
+                   throw new TaskNotFoundException($"Task with the specified ID: {entity.Id} not found.");
 
         if (!string.IsNullOrEmpty(entity.Name))
             task.Name = entity.Name;
@@ -120,8 +120,8 @@ public class TasksRepository : IRepository<Models.Task, AddTaskDto, UpdateTaskDt
             task.Description = entity.Description;
         task.IsCompleted = entity.IsCompleted ?? task.IsCompleted;
 
-        _identityContext.Tasks.Update(task);        // Update the list in the database context.
-        await _identityContext.SaveChangesAsync();  // Save the changes to the database.
+        _identityContext.Tasks.Update(task); // Update the list in the database context.
+        await _identityContext.SaveChangesAsync(); // Save the changes to the database.
         return task;
     }
 
@@ -137,10 +137,10 @@ public class TasksRepository : IRepository<Models.Task, AddTaskDto, UpdateTaskDt
     public async Task DeleteAsync(Guid id)
     {
         var task = await _identityContext.Tasks
-            .Where(l => l.Id == id)
-            .FirstAsync() ??
-            throw new TaskNotFoundException($"Task with the specified ID: {id} not found.");
-        
+                       .Where(l => l.Id == id)
+                       .FirstAsync() ??
+                   throw new TaskNotFoundException($"Task with the specified ID: {id} not found.");
+
         _identityContext.Tasks.Remove(task);
         await _identityContext.SaveChangesAsync();
     }
