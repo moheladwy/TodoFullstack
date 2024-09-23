@@ -2,7 +2,7 @@
 
 services:
   todo:
-    image: todo-api:V1.0
+    image: todo-api:V1.1
     build:
       context: .
       dockerfile: Dockerfile
@@ -17,5 +17,5 @@ volumes:
   todo_volume:
 
 networks:
-  default:
+  todo_default:
     driver: bridge

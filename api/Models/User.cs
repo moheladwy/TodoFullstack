@@ -15,7 +15,7 @@ public class User : IdentityUser
     ///     Required, must be between 3 and 25 characters.
     /// </summary>
     [Required]
-    [Range(3, 25)]
+    [StringLength(25, MinimumLength = 3)]
     public string FirstName { get; set; } = string.Empty;
 
     /// <summary>
@@ -23,7 +23,7 @@ public class User : IdentityUser
     ///     Required, must be between 3 and 25 characters.
     /// </summary>
     [Required]
-    [Range(3, 25)]
+    [StringLength(25, MinimumLength = 3)]
     public string LastName { get; set; } = string.Empty;
 
     /// <summary>

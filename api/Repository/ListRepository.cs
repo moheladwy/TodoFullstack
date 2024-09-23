@@ -105,7 +105,7 @@ public class ListRepository : IRepository<TaskList, AddListDto, UpdateListDto>
                    throw new ListNotFoundException($"List with the specified ID: {entity.Id} not found.");
 
         // Update the list's name if the new value is not empty.
-        list.Name = entity.Name.Length > 0 ? entity.Name : list.Name;
+        list.Name = entity.Name?.Length > 0 ? entity.Name : list.Name;
 
         // Update the list's description if the new value is not null.
         list.Description = entity.Description ?? list.Description;

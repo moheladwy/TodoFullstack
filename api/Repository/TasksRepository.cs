@@ -86,7 +86,7 @@ public class TasksRepository : IRepository<Models.Task, AddTaskDto, UpdateTaskDt
         var task = new Models.Task()
         {
             Name = dto.Name,
-            Description = dto.Description,
+            Description = dto.Description ?? string.Empty,
             ListId = dto.ListId
         };
 
@@ -114,10 +114,15 @@ public class TasksRepository : IRepository<Models.Task, AddTaskDto, UpdateTaskDt
                        .FirstAsync() ??
                    throw new TaskNotFoundException($"Task with the specified ID: {entity.Id} not found.");
 
+        // Update the task's name if the new value is not null or empty.
         if (!string.IsNullOrEmpty(entity.Name))
             task.Name = entity.Name;
+
+        // Update the task's description if the new value is not null or empty.
         if (!string.IsNullOrEmpty(entity.Description))
             task.Description = entity.Description;
+
+        // Update the task's is completed status if the new value is not null.
         task.IsCompleted = entity.IsCompleted ?? task.IsCompleted;
 
         _identityContext.Tasks.Update(task); // Update the list in the database context.

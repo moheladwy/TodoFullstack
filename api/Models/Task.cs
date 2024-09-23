@@ -21,14 +21,14 @@ public class Task
     ///     The minimum length is 1 character.
     /// </summary>
     [Required]
-    [Range(1, 100)]
-    public string Name { get; set; }
+    [StringLength(100, MinimumLength = 1, ErrorMessage = "The field Name must be between 1 and 100 characters.")]
+    public required string Name { get; set; }
 
     /// <summary>
-    ///     The description of the task, a string with a maximum length of 200 characters.
+    ///     The description of the task, a string with a maximum length of 500 characters.
     ///     The description is optional and can be null.
     /// </summary>
-    [Range(0, 200)]
+    [StringLength(500, ErrorMessage = "The field Description must not exceed 500 characters.")]
     public string? Description { get; set; } = string.Empty;
 
     /// <summary>

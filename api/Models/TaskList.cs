@@ -21,14 +21,14 @@ public class TaskList
     ///     The name must be between 1 and 100 characters.
     /// </summary>
     [Required]
-    [Range(1, 100)]
+    [StringLength(100, MinimumLength = 1)]
     public required string Name { get; set; }
 
     /// <summary>
     ///     The description of the list of tasks, not required, and can be null.
     ///     The description must not exceed 200 characters.
     /// </summary>
-    [Range(0, 200)]
+    [StringLength(200)]
     public string Description { get; set; }
 
     /// <summary>
