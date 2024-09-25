@@ -3,7 +3,6 @@ using api.DTOs.ListDTOs;
 using API.Exceptions;
 using API.Interfaces;
 using API.Models;
-using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using Task = System.Threading.Tasks.Task;
 
@@ -104,16 +103,31 @@ public class ListRepository : IRepository<TaskList, AddListDto, UpdateListDto>
                        .FirstAsync() ?? // Fetch the entity to be updated.
                    throw new ListNotFoundException($"List with the specified ID: {entity.Id} not found.");
 
-        // Update the list's name if the new value is not empty.
-        list.Name = entity.Name?.Length > 0 ? entity.Name : list.Name;
-
-        // Update the list's description if the new value is not null.
-        list.Description = entity.Description ?? list.Description;
+        list = UpdateEntity(list, entity); // Update the list entity with the new data.
 
         _identityContext.Lists.Update(list); // Update the list in the database context.
         await _identityContext.SaveChangesAsync(); // Save the changes to the database.
 
         return list;
+    }
+
+    /// <summary>
+    ///     Updates the task list entity with the new data.
+    /// </summary>
+    /// <param name="entity">
+    ///     The task list entity to update.
+    /// </param>
+    /// <param name="dto">
+    ///     The DTO that contains the new data for the task list.
+    /// </param>
+    /// <returns>
+    ///     The updated task list entity.
+    /// </returns>
+    public TaskList UpdateEntity(TaskList entity, UpdateListDto dto)
+    {
+        entity.Name = dto.Name?.Length > 0 ? dto.Name : entity.Name;
+        entity.Description = dto.Description ?? entity.Description;
+        return entity;
     }
 
     /// <summary>

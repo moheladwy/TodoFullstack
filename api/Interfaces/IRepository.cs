@@ -66,6 +66,20 @@ public interface IRepository<TEntity, in TAddDto, in TUpdateDto>
     Task<TEntity> UpdateAsync(TUpdateDto entity);
 
     /// <summary>
+    ///     This method will update an entity with the data from the DTO.
+    /// </summary>
+    /// <param name="entity">
+    ///     This parameter will be used to update an entity in the database.
+    /// </param>
+    /// <param name="dto">
+    ///     This parameter will be used to update the entity with the data from the DTO.
+    /// </param>
+    /// <returns>
+    ///     The updated TEntity.
+    /// </returns>
+    TEntity UpdateEntity(TEntity entity, TUpdateDto dto);
+
+    /// <summary>
     ///     This method will delete an entity from the database.
     ///     The entity will be deleted based on the id.
     /// </summary>

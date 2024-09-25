@@ -1,4 +1,5 @@
 using System.ComponentModel.DataAnnotations;
+using api.Enums;
 
 namespace API.DTOs.TasksDTOs;
 
@@ -12,6 +13,12 @@ public class UpdateTaskDto
 
     [StringLength(500, ErrorMessage = "The field Description must not exceed 500 characters.")]
     public string? Description { get; set; }
+
+    [DataType(DataType.Date)]
+    public DateTime? DueDate { get; set; }
+
+    [DataType(DataType.Custom)]
+    public TaskPriority? Priority { get; init; } = TaskPriority.Low;
 
     public bool? IsCompleted { get; set; }
 }

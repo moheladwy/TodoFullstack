@@ -1,6 +1,7 @@
 using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
 using System.Text.Json.Serialization;
+using api.Enums;
 
 namespace API.Models;
 
@@ -37,6 +38,19 @@ public class Task
     /// </summary>
     [Required]
     public bool IsCompleted { get; set; }
+
+
+    /// <summary>
+    ///    The due date of the task, optional, and can be null.
+    /// </summary>
+    [DataType(DataType.Date)]
+    public DateTime? DueDate { get; set; }
+
+    /// <summary>
+    ///     The priority of the task, optional, and can be null.
+    /// </summary>
+    [DataType(DataType.Custom)]
+    public TaskPriority? Priority { get; set; } = TaskPriority.Low;
 
     /// <summary>
     ///     The unique identifier of the task list that the task belongs to.

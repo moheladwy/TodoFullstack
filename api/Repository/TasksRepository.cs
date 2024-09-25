@@ -87,6 +87,8 @@ public class TasksRepository : IRepository<Models.Task, AddTaskDto, UpdateTaskDt
         {
             Name = dto.Name,
             Description = dto.Description ?? string.Empty,
+            DueDate = dto.DueDate,
+            Priority = dto.Priority,
             ListId = dto.ListId
         };
 
@@ -114,20 +116,41 @@ public class TasksRepository : IRepository<Models.Task, AddTaskDto, UpdateTaskDt
                        .FirstAsync() ??
                    throw new TaskNotFoundException($"Task with the specified ID: {entity.Id} not found.");
 
-        // Update the task's name if the new value is not null or empty.
-        if (!string.IsNullOrEmpty(entity.Name))
-            task.Name = entity.Name;
-
-        // Update the task's description if the new value is not null or empty.
-        if (!string.IsNullOrEmpty(entity.Description))
-            task.Description = entity.Description;
-
-        // Update the task's is completed status if the new value is not null.
-        task.IsCompleted = entity.IsCompleted ?? task.IsCompleted;
+        task = UpdateEntity(task, entity); // Update the Task entity with the new data.
 
         _identityContext.Tasks.Update(task); // Update the list in the database context.
         await _identityContext.SaveChangesAsync(); // Save the changes to the database.
         return task;
+    }
+
+    /// <summary>
+    ///     Updates the Task entity with the new data from the DTO.
+    /// </summary>
+    /// <param name="entity">
+    ///     The Task entity to update.
+    /// </param>
+    /// <param name="dto">
+    ///     The DTO that contains the new data for the Task entity.
+    /// </param>
+    /// <returns>
+    ///     The updated Task entity.
+    /// </returns>
+    public Models.Task UpdateEntity(Models.Task entity, UpdateTaskDto dto)
+    {
+        // Update the task's name if the new value is not null or empty.
+        if (!string.IsNullOrEmpty(dto.Name))
+            entity.Name = dto.Name;
+        // Update the task's description if the new value is not null or empty.
+        if (!string.IsNullOrEmpty(dto.Description))
+            entity.Description = dto.Description;
+        // Update the task's is completed status if the new value is not null.
+        entity.IsCompleted = dto.IsCompleted ?? entity.IsCompleted;
+        // Update the task's due date.
+        entity.DueDate = dto.DueDate;
+        // Update the task's priority.
+        entity.Priority = dto.Priority;
+
+        return entity;
     }
 
     /// <summary>

@@ -110,6 +110,11 @@ public class TasksController : ControllerBase
     {
         try
         {
+            if (!ModelState.IsValid)
+            {
+                _logger.LogError("Invalid model state for adding a task with the error {ModelState.Values}", ModelState.Values);
+                return BadRequest(ModelState);
+            }
             var task = await _taskRepository.AddAsync(addTaskDto);
             _logger.LogInformation("Task with ID: {taskId} added successfully.", task.Id);
             return Ok(task);
@@ -136,6 +141,11 @@ public class TasksController : ControllerBase
     {
         try
         {
+            if (!ModelState.IsValid)
+            {
+                _logger.LogError("Invalid model state for updating a task with the error {ModelState.Values}", ModelState.Values);
+                return BadRequest(ModelState);
+            }
             var task = await _taskRepository.UpdateAsync(updateTaskDto);
             _logger.LogInformation("Task with ID: {taskId} updated successfully.", task.Id);
             return Ok(task);
