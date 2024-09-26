@@ -7,7 +7,7 @@ pipeline {
         DOCKER_IMAGE = 'only1adwy/todo-api'                           // Your Docker Hub repo.
         BRANCH = 'main'                                               // Branch to build.
         REPO_URL = 'https://github.com/moheladwy/TodoFullstack.git'   // GitHub repo URL.
-        BUILD_TAG = "V1.${env.BUILD_NUMBER}"                       // Build tag.
+        BUILD_TAG = "V1.8.${env.BUILD_NUMBER}"                        // Build tag.
     }
 
     stages {
