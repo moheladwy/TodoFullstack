@@ -22,4 +22,4 @@ WORKDIR /TodoAPI
 COPY --from=publish /TodoAPI/publish .
 
 RUN mkdir -p /TodoAPI/Database
-ENTRYPOINT ["dotnet", "api.dll", "ef", "database", "update", "&&", "dotnet", "api.dll"]
+ENTRYPOINT ["dotnet", "api.dll", "ef", "migrations", "add", "InitialMigration", "&&", "dotnet", "api.dll", "ef", "database", "update", "&&", "dotnet", "api.dll"]
