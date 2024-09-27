@@ -2,7 +2,7 @@
 
 ## Introduction
 
-This is a fullstack project that is built with React, Node.js, Express, and MongoDB. The project is a simple todo list application that allows users to add, delete, and update tasks. The project is built with a RESTful API and uses JWT for authentication.
+This is a full-stack project that is built with ASP.NET Core 8.0 for the backend, Sqlite3 for the Database, and ReactJS for the front end. The project is a simple to-do list application that allows users to add, delete, and update tasks. The project is built with a RESTful API and uses JWT for authentication.
 
 ## Installation
 
