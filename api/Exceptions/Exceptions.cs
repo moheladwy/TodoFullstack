@@ -27,10 +27,10 @@ public class InvalidEmailException(string message) : Exception(message);
 /// <summary>
 ///     Exception thrown when the id guid is not valid.
 /// </summary>
-/// <param name="invalidGuidFormat">
+/// <param name="message">
 ///     The message to display when the exception is thrown.
 /// </param>
-public class InvalidGuidException(string invalidGuidFormat) : Exception(invalidGuidFormat);
+public class InvalidGuidException(string message) : Exception(message);
 
 /// <summary>
 ///     Exception thrown when the password is not valid.
