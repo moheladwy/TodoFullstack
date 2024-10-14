@@ -59,7 +59,7 @@ public static class BuilderService
     {
         builder.Services.AddSwaggerGen(c =>
         {
-            c.SwaggerDoc("v1", new OpenApiInfo { Title = "Todo API | V1", Version = "v1" });
+            c.SwaggerDoc("v1", new OpenApiInfo { Title = "Todo API | V1.1", Version = "v1" });
             var securityScheme = new OpenApiSecurityScheme
             {
                 Name = "Authorization",
