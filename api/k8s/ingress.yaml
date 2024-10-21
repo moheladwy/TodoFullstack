@@ -16,4 +16,4 @@ spec:
               service:
                 name: todo-api-ingress
                 port:
-                  number: 8080
+                  number: 8070
