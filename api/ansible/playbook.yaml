@@ -1,0 +1,48 @@
+- name: Apply Kubernetes manifests
+  hosts: localhost
+  become: true
+  
+  environment:
+    KUBECONFIG: /etc/kubernetes/config
+    
+  vars:
+    k8s_directory: /etc/kubernetes/k8s
+  
+  tasks:
+    - name: Ensure kubectl is installed
+      command: kubectl version --client
+      register: kubectl_installed
+      ignore_errors: true
+      
+    - name: Fail if kubectl is not installed
+      fail:
+        msg: "kubectl is not installed on this machine."
+      when: kubectl_installed.rc != 0
+
+    - name: Apply Namespace
+      command: kubectl apply -f {{ k8s_directory }}/namespace.yaml --validate=false
+      register: apply_namespace_output
+      environment:
+        KUBECONFIG: "{{ lookup('env', 'KUBECONFIG') }}"
+
+    - name: Show Namespace apply output
+      debug:
+        msg: "{{ apply_namespace_output.stdout }}"
+
+    - name: Apply Deployments
+      command: kubectl apply -f "{{ k8s_directory }}/deployment.yaml" --validate=false
+      register: apply_deployment_output
+      environment:
+        KUBECONFIG: "{{ lookup('env', 'KUBECONFIG') }}"
+
+    - name: Apply Services
+      command: kubectl apply -f "{{ k8s_directory }}/service.yaml" --validate=false
+      register: apply_services_output
+      environment:
+        KUBECONFIG: "{{ lookup('env', 'KUBECONFIG') }}"
+
+    - name: Apply Ingress
+      command: kubectl apply -f "{{ k8s_directory }}/ingress.yaml" --validate=false
+      register: apply_ingress_output
+      environment:
+        KUBECONFIG: "{{ lookup('env', 'KUBECONFIG') }}"

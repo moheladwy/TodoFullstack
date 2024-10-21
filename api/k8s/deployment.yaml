@@ -1,0 +1,30 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: todo-api
+  namespace: todo-namespace
+  labels:
+    app: todo-api
+spec:
+    replicas: 1
+    selector:
+        matchLabels:
+          app: todo-api
+    template:
+        metadata:
+          labels:
+            app: todo-api
+        spec:
+          containers:
+          - name: todo-api
+            image: only1adwy/todo-api:latest
+            ports:
+              - containerPort: 3000
+            env:
+            - name: MONGO_URI
+              value: mongodb://todo-mongo:27017/todo
+            - name: PORT
+              value: "8070"
+            - name: NODE_ENV
+              value: production
+  
