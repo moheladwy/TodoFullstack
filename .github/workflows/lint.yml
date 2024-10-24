@@ -27,4 +27,4 @@ jobs:
               run: dotnet restore api/api.csproj
 
             - name: Run StyleCop linting
-              run: dotnet build --project api /warnaserror /p:TreatWarningsAsErrors=true
+              run: dotnet build api /warnaserror /p:TreatWarningsAsErrors=true
