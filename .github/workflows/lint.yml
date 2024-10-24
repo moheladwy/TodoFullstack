@@ -24,7 +24,7 @@ jobs:
                   dotnet-version: "8.x"
 
             - name: Install dependencies
-              run: dotnet restore
+              run: dotnet restore api/api.csproj
 
             - name: Run StyleCop linting
-              run: dotnet build /warnaserror /p:TreatWarningsAsErrors=true
+              run: dotnet build --project api /warnaserror /p:TreatWarningsAsErrors=true
