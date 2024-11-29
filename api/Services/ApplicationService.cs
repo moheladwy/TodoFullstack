@@ -26,6 +26,7 @@ public static class ApplicationService
             app.ProductionMode();
 
         app.UseHttpsRedirection();
+        app.UseHttpLogging();
         app.UseRouting();
         app.UseSwagger();
         app.UseSwaggerUI();
