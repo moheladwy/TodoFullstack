@@ -1,5 +1,5 @@
-using API.DTOs.AccountDTOs;
 using API.Interfaces;
+using api.Models.DTOs.AccountDTOs;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
@@ -60,7 +60,7 @@ public class AccountController : ControllerBase
         }
         catch (Exception e)
         {
-            _logger.LogError(e, "Failed to retrieve user information for user with id: {id}", id);
+            _logger.LogError(e, "Failed to retrieve user information for user with id: {id}, Because: {error}", id, e.Message);
             return BadRequest(e.Message);
         }
     }
@@ -92,7 +92,7 @@ public class AccountController : ControllerBase
         }
         catch (Exception e)
         {
-            _logger.LogError(e, "Failed to change password for user with id: {id}", changePasswordDto.Id);
+            _logger.LogError(e, "Failed to change password for user with id: {id}, Because: {error}", changePasswordDto.Id, e.Message);
             return BadRequest(e.Message);
         }
     }
@@ -126,7 +126,7 @@ public class AccountController : ControllerBase
         }
         catch (Exception e)
         {
-            _logger.LogError(e, "Failed to update user information for user with id: {id}", updateUserInfoDto.Id);
+            _logger.LogError(e, "Failed to update user information for user with id: {id}, Because: {error}", updateUserInfoDto.Id, e.Message);
             return BadRequest(e.Message);
         }
     }
@@ -154,7 +154,7 @@ public class AccountController : ControllerBase
         }
         catch (Exception e)
         {
-            _logger.LogError(e, "Failed to delete account for user with id: {id}", id);
+            _logger.LogError(e, "Failed to delete account for user with id: {id}, Because: {error}", id, e.Message);
             return BadRequest(e.Message);
         }
     }

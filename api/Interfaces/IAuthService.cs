@@ -1,5 +1,5 @@
-using API.DTOs.AuthDTOs;
-using API.Models;
+using api.Models.DTOs.AuthDTOs;
+using api.Models.Entities;
 
 namespace API.Interfaces;
 

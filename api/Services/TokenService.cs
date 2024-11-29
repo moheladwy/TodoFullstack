@@ -1,8 +1,9 @@
 using System.IdentityModel.Tokens.Jwt;
 using System.Security.Claims;
 using System.Text;
+using API.Configurations;
 using API.Interfaces;
-using API.Models;
+using api.Models.Entities;
 using Microsoft.IdentityModel.Tokens;
 using JwtRegisteredClaimNames = Microsoft.IdentityModel.JsonWebTokens.JwtRegisteredClaimNames;
 
@@ -13,11 +14,6 @@ namespace API.Services;
 /// </summary>
 public class TokenService : ITokenService
 {
-    /// <summary>
-    ///     The number of days the token is valid for.
-    /// </summary>
-    private const int TokenExpirationDays = 30;
-
     /// <summary>
     ///     The secret key used for generating JWT tokens.
     ///     This key is used to sign the JWT token.
@@ -84,7 +80,7 @@ public class TokenService : ITokenService
         var tokenDescriptor = new SecurityTokenDescriptor
         {
             Subject = new ClaimsIdentity(claims),
-            Expires = DateTime.UtcNow.AddDays(TokenExpirationDays),
+            Expires = DateTime.UtcNow.AddDays(Constants.TokenExpirationDays),
             SigningCredentials = credentials,
             Issuer = _configuration["Jwt:Issuer"],
             Audience = _configuration["Jwt:Audience"]
@@ -110,5 +106,5 @@ public class TokenService : ITokenService
     /// <returns>
     ///     The expiration days for the JWT token.
     /// </returns>
-    public int GetTokenExpirationDays() => TokenExpirationDays;
+    public int GetTokenExpirationDays() => Constants.TokenExpirationDays;
 }

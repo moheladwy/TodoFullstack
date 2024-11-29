@@ -1,8 +1,8 @@
-using API.DatabaseContexts;
-using api.DTOs.ListDTOs;
+using api.Data.DatabaseContexts;
 using API.Exceptions;
 using API.Interfaces;
-using API.Models;
+using api.Models.DTOs.ListDTOs;
+using api.Models.Entities;
 using Microsoft.EntityFrameworkCore;
 using Task = System.Threading.Tasks.Task;
 

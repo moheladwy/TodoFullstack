@@ -1,6 +1,6 @@
 using System.Security.Claims;
-using API.DTOs.AccountDTOs;
-using API.Models;
+using api.Models.DTOs.AccountDTOs;
+using api.Models.Entities;
 
 namespace API.Interfaces;
 

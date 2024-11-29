@@ -1,8 +1,8 @@
 using System.Security.Claims;
-using API.DTOs.AccountDTOs;
 using API.Exceptions;
 using API.Interfaces;
-using API.Models;
+using api.Models.DTOs.AccountDTOs;
+using api.Models.Entities;
 using Microsoft.AspNetCore.Identity;
 
 namespace API.Services;
@@ -150,7 +150,20 @@ public class AccountService : IAccountService
     public async Task<bool> UpdateUserInfo(UpdateUserInfoDto updateUserInfoDto)
     {
         var user = await GetUserById(updateUserInfoDto.Id);
+        
+        UpdateUserInformation(user, updateUserInfoDto);
+        
+        var result = await _userManager.UpdateAsync(user);
+        if (!result.Succeeded)
+            throw new UserInformationDidNotUpdateException($"Failed to update user information because of: {string.Join(", ", result.Errors.Select(e => e.Description))}");
 
+        _logger.LogInformation("User with id: {updateUserInfoDto.Id} updated his information successfully",
+            updateUserInfoDto.Id);
+        return true;
+    }
+    
+    private static void UpdateUserInformation(User user, UpdateUserInfoDto updateUserInfoDto)
+    {
         // Update the user's first name if it's provided
         if (!string.IsNullOrEmpty(updateUserInfoDto.NewFirstName))
             user.FirstName = updateUserInfoDto.NewFirstName;
@@ -170,14 +183,6 @@ public class AccountService : IAccountService
         // Update the user's phone number if it's provided
         if (!string.IsNullOrEmpty(updateUserInfoDto.NewPhoneNumber))
             user.PhoneNumber = updateUserInfoDto.NewPhoneNumber;
-
-        var result = await _userManager.UpdateAsync(user);
-        if (!result.Succeeded)
-            throw new UserInformationDidNotUpdateException($"Failed to update user information because of: {string.Join(", ", result.Errors.Select(e => e.Description))}");
-
-        _logger.LogInformation("User with id: {updateUserInfoDto.Id} updated his information successfully",
-            updateUserInfoDto.Id);
-        return true;
     }
 
     /// <summary>

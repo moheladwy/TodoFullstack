@@ -1,5 +1,5 @@
-using API.DTOs.AuthDTOs;
 using API.Interfaces;
+using api.Models.DTOs.AuthDTOs;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
@@ -71,7 +71,7 @@ public class AuthController : ControllerBase
         }
         catch (Exception e)
         {
-            _logger.LogError(e, "Failed to log in with email: {email}", loginDto.Email);
+            _logger.LogError(e, "Failed to log in with email: {email}, Because: {message}", loginDto.Email, e.Message);
             return BadRequest(e.Message);
         }
     }
@@ -103,7 +103,7 @@ public class AuthController : ControllerBase
             var result = await _authenticationService.Register(registerDto);
             if (!result)
             {
-                _logger.LogWarning("Failed to register user with email: {email}", registerDto.Email);
+                _logger.LogError("Failed to register user with email: {email}", registerDto.Email);
                 return BadRequest("Failed to register user.");
             }
 
@@ -112,7 +112,7 @@ public class AuthController : ControllerBase
         }
         catch (Exception e)
         {
-            _logger.LogError(e, "Failed to register user with email: {email}", registerDto.Email);
+            _logger.LogError(e, "Failed to register user with email: {email}, Because: {message}", registerDto.Email, e.Message);
             return BadRequest(e.Message);
         }
     }

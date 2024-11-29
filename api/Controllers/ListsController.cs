@@ -1,7 +1,7 @@
-using api.DTOs.ListDTOs;
 using Microsoft.AspNetCore.Mvc;
 using API.Interfaces;
-using API.Models;
+using api.Models.DTOs.ListDTOs;
+using api.Models.Entities;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Authorization;
 

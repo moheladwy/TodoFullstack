@@ -1,6 +1,6 @@
-using API.Services;
-
 namespace API;
+
+using Configurations;
 
 /// <summary>
 ///     The main class that will be called when the application starts.
@@ -19,13 +19,13 @@ public static class Program
         var builder = WebApplication.CreateBuilder(args);
 
         // Initialize all the services.
-        builder.Initialize();
+        builder.InitializeBuilder();
 
         // Build the app.
         var app = builder.Build();
 
         // Initialize all the middleware and services for the app.
-        app.Initialize();
+        app.InitializeApplication();
 
         // Run the app.
         app.Run();

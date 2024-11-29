@@ -1,7 +1,7 @@
-using API.DatabaseContexts;
-using API.DTOs.TasksDTOs;
+using api.Data.DatabaseContexts;
 using API.Exceptions;
 using API.Interfaces;
+using api.Models.DTOs.TasksDtos;
 using Microsoft.EntityFrameworkCore;
 
 namespace API.Repository;
@@ -9,7 +9,7 @@ namespace API.Repository;
 /// <summary>
 ///     A class that implements the IRepository interface for the Task entity.
 /// </summary>
-public class TasksRepository : IRepository<Models.Task, AddTaskDto, UpdateTaskDto>
+public class TasksRepository : IRepository<api.Models.Entities.Task, AddTaskDto, UpdateTaskDto>
 {
     /// <summary>
     ///     The database context for the Identity database.
@@ -36,7 +36,7 @@ public class TasksRepository : IRepository<Models.Task, AddTaskDto, UpdateTaskDt
     /// <exception cref="ArgumentException">
     ///     Thrown when the specified ID is not a valid GUID.
     /// </exception>
-    public async Task<IEnumerable<Models.Task>> GetAllAsync(string id)
+    public async Task<IEnumerable<api.Models.Entities.Task>> GetAllAsync(string id)
     {
         if (!Guid.TryParse(id, out var guidId))
             throw new ArgumentException("The specified ID is not a valid GUID.");
@@ -56,7 +56,7 @@ public class TasksRepository : IRepository<Models.Task, AddTaskDto, UpdateTaskDt
     /// <returns>
     ///     A Task that represents the asynchronous operation. The Task contains a Model Task.
     /// </returns>
-    public Task<Models.Task> GetByIdAsync(Guid id)
+    public Task<api.Models.Entities.Task> GetByIdAsync(Guid id)
     {
         return _identityContext.Tasks
             .AsNoTracking()
@@ -76,14 +76,14 @@ public class TasksRepository : IRepository<Models.Task, AddTaskDto, UpdateTaskDt
     /// <exception cref="ListNotFoundException">
     ///     Thrown when the List with the specified ID is not found.
     /// </exception>
-    public async Task<Models.Task> AddAsync(AddTaskDto dto)
+    public async Task<api.Models.Entities.Task> AddAsync(AddTaskDto dto)
     {
         _ = await _identityContext.Lists
                 .Where(l => l.Id == dto.ListId)
                 .FirstAsync() ??
             throw new ListNotFoundException($"List with the specified ID: {dto.ListId} not found.");
 
-        var task = new Models.Task()
+        var task = new api.Models.Entities.Task()
         {
             Name = dto.Name,
             Description = dto.Description ?? string.Empty,
@@ -109,7 +109,7 @@ public class TasksRepository : IRepository<Models.Task, AddTaskDto, UpdateTaskDt
     /// <exception cref="TaskNotFoundException">
     ///     Thrown when the Task with the specified ID is not found.
     /// </exception>
-    public async Task<Models.Task> UpdateAsync(UpdateTaskDto entity)
+    public async Task<api.Models.Entities.Task> UpdateAsync(UpdateTaskDto entity)
     {
         var task = await _identityContext.Tasks
                        .Where(l => l.Id == entity.Id)
@@ -135,7 +135,7 @@ public class TasksRepository : IRepository<Models.Task, AddTaskDto, UpdateTaskDt
     /// <returns>
     ///     The updated Task entity.
     /// </returns>
-    public Models.Task UpdateEntity(Models.Task entity, UpdateTaskDto dto)
+    public api.Models.Entities.Task UpdateEntity(api.Models.Entities.Task entity, UpdateTaskDto dto)
     {
         // Update the task's name if the new value is not null or empty.
         if (!string.IsNullOrEmpty(dto.Name))

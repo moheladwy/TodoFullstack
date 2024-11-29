@@ -1,9 +1,9 @@
-using API.DTOs.TasksDTOs;
 using API.Interfaces;
+using api.Models.DTOs.TasksDtos;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
-using Models_Task = API.Models.Task;
+using Models_Task = api.Models.Entities.Task;
 
 namespace API.Controllers;
 

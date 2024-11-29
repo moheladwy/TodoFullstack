@@ -1,8 +1,8 @@
 using Microsoft.AspNetCore.Identity;
-using API.DTOs.AuthDTOs;
 using API.Exceptions;
 using API.Interfaces;
-using API.Models;
+using api.Models.DTOs.AuthDTOs;
+using api.Models.Entities;
 
 namespace API.Services;
 
