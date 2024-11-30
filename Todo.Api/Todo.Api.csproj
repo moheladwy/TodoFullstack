@@ -35,6 +35,7 @@
     <ItemGroup>
         <Folder Include="Database\" />
         <Folder Include="Data\" />
+        <Folder Include="obj\" />
     </ItemGroup>
 
 </Project>

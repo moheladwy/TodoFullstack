@@ -1,7 +1,11 @@
+using System;
+using System.Linq;
 using System.Security.Claims;
+using System.Threading.Tasks;
 using Todo.Api.Models.DTOs.AccountDTOs;
 using Todo.Api.Models.Entities;
 using Microsoft.AspNetCore.Identity;
+using Microsoft.Extensions.Logging;
 using Todo.Api.Exceptions;
 using Todo.Api.Interfaces;
 using Task = System.Threading.Tasks.Task;

@@ -1,8 +1,10 @@
+using System.Linq;
 using Microsoft.AspNetCore.Identity;
 using Todo.Api.Models.DTOs.AuthDTOs;
 using Todo.Api.Models.Entities;
 using Todo.Api.Exceptions;
 using Todo.Api.Interfaces;
+using System.Threading.Tasks;
 
 namespace Todo.Api.Services;
 
