@@ -1,0 +1,13 @@
+services:
+  api:
+    build: Todo.Api
+    image: todo-api:latest
+    container_name: todo-api
+    ports:
+      - "8070:8080"
+    volumes:
+      - todo-db:/TodoApi/Database
+    
+volumes:
+  todo-db:
+    name: todo-db
