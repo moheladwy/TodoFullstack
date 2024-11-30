@@ -1,3 +1,4 @@
+using API.Exceptions;
 using API.Interfaces;
 using api.Models.DTOs.AuthDTOs;
 using Microsoft.AspNetCore.Authorization;
@@ -51,29 +52,18 @@ public class AuthController : ControllerBase
     [HttpPost("login")]
     public async Task<IActionResult> Login([FromBody] LoginUserDto loginDto)
     {
-        try
-        {
-            if (!ModelState.IsValid)
-            {
-                _logger.LogCritical("Invalid model state");
-                return BadRequest(ModelState);
-            }
+        if (!ModelState.IsValid)
+            throw new InvalidModelStateException($"Invalid model state because: {ModelState.ValidationState}");
 
-            var user = await _authenticationService.Login(loginDto);
-            _logger.LogInformation("User logged in successfully with email: {email}", user.Email);
+        var user = await _authenticationService.Login(loginDto);
+        _logger.LogInformation("User logged in successfully with email: {email}", user.Email);
 
-            return Ok(new AuthResponse
-            {
-                Id = user.Id,
-                Token = _tokenService.GenerateToken(user),
-                ExpiresInDays = _tokenService.GetTokenExpirationDays()
-            });
-        }
-        catch (Exception e)
+        return Ok(new AuthResponse
         {
-            _logger.LogError(e, "Failed to log in with email: {email}, Because: {message}", loginDto.Email, e.Message);
-            return BadRequest(e.Message);
-        }
+            Id = user.Id,
+            Token = _tokenService.GenerateToken(user),
+            ExpiresInDays = _tokenService.GetTokenExpirationDays()
+        });
     }
 
     /// <summary>
@@ -92,28 +82,17 @@ public class AuthController : ControllerBase
     [HttpPost("register")]
     public async Task<IActionResult> Register([FromBody] RegisterUserDto registerDto)
     {
-        try
-        {
-            if (!ModelState.IsValid)
-            {
-                _logger.LogCritical("Invalid model state");
-                return BadRequest(ModelState);
-            }
+        if (!ModelState.IsValid)
+            throw new InvalidModelStateException($"Invalid model state because: {ModelState.ValidationState}");
 
-            var result = await _authenticationService.Register(registerDto);
-            if (!result)
-            {
-                _logger.LogError("Failed to register user with email: {email}", registerDto.Email);
-                return BadRequest("Failed to register user.");
-            }
-
-            _logger.LogInformation("User registered successfully with email: {email}", registerDto.Email);
-            return Ok();
-        }
-        catch (Exception e)
+        var user = await _authenticationService.Register(registerDto);
+        _logger.LogInformation("User registered successfully with email: {email}", registerDto.Email);
+        
+        return Ok(new AuthResponse()
         {
-            _logger.LogError(e, "Failed to register user with email: {email}, Because: {message}", registerDto.Email, e.Message);
-            return BadRequest(e.Message);
-        }
+            Id = user.Id,
+            Token = _tokenService.GenerateToken(user),
+            ExpiresInDays = _tokenService.GetTokenExpirationDays()
+        });
     }
 }

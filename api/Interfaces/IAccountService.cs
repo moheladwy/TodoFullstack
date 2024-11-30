@@ -1,6 +1,7 @@
 using System.Security.Claims;
 using api.Models.DTOs.AccountDTOs;
 using api.Models.Entities;
+using Task = System.Threading.Tasks.Task;
 
 namespace API.Interfaces;
 
@@ -41,7 +42,7 @@ public interface IAccountService
     /// <returns>
     ///     Returns true if password changed successfully.
     /// </returns>
-    Task<bool> ChangePassword(ChangePasswordDto changePasswordDto);
+    Task ChangePassword(ChangePasswordDto changePasswordDto);
 
     /// <summary>
     ///     UpdateUserInfo method is used to update user's information like first name, last name, email, username, and phone number.
@@ -56,7 +57,7 @@ public interface IAccountService
     /// <returns>
     ///     Returns true if user information updated successfully.
     /// </returns>
-    Task<bool> UpdateUserInfo(UpdateUserInfoDto updateUserInfoDto);
+    Task UpdateUserInfo(UpdateUserInfoDto updateUserInfoDto);
 
     /// <summary>
     ///     DeleteAccount method is used to delete the user account by id.
@@ -67,5 +68,5 @@ public interface IAccountService
     /// <returns>
     ///     Returns true if the account deleted successfully.
     /// </returns>
-    Task<bool> DeleteAccount(string id);
+    Task DeleteAccount(string id);
 }

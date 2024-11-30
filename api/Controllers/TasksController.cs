@@ -1,3 +1,4 @@
+using API.Exceptions;
 using API.Interfaces;
 using api.Models.DTOs.TasksDtos;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
@@ -55,17 +56,10 @@ public class TasksController : ControllerBase
     [HttpGet("all-tasks/{listId}")]
     public async Task<ActionResult<List<Models_Task>>> GetAllTasksByListId([FromRoute] string listId)
     {
-        try
-        {
-            var tasks = await _taskRepository.GetAllAsync(listId);
-            _logger.LogInformation("Tasks found for list with id: {listId}", listId);
-            return Ok(tasks);
-        }
-        catch (Exception e)
-        {
-            _logger.LogInformation("No tasks found for list with id: {listId}", listId);
-            return BadRequest("Error: " + e.Message);
-        }
+        var tasks = await _taskRepository.GetAllAsync(listId);
+        
+        _logger.LogInformation("Tasks found for list with id: {listId}", listId);
+        return Ok(tasks);
     }
 
     /// <summary>
@@ -82,17 +76,10 @@ public class TasksController : ControllerBase
     [HttpGet("get-task/{id}")]
     public async Task<ActionResult<Models_Task>> GetTaskById(Guid id)
     {
-        try
-        {
-            var task = await _taskRepository.GetByIdAsync(id);
-            _logger.LogInformation("Task with ID: {taskId} retrieved successfully.", id);
-            return Ok(task);
-        }
-        catch (Exception e)
-        {
-            _logger.LogError("Error retrieving task with id: {id}, because {error}.", id, e.Message);
-            return BadRequest("Error: " + e.Message);
-        }
+        var task = await _taskRepository.GetByIdAsync(id);
+        
+        _logger.LogInformation("Task with ID: {taskId} retrieved successfully.", id);
+        return Ok(task);
     }
 
     /// <summary>
@@ -108,23 +95,13 @@ public class TasksController : ControllerBase
     [HttpPost("add-task")]
     public async Task<ActionResult<Models_Task>> AddTask([FromBody] AddTaskDto addTaskDto)
     {
-        try
-        {
-            if (!ModelState.IsValid)
-            {
-                _logger.LogError("Invalid model state for adding a task with the error {ModelState.Values}", ModelState.Values);
-                return BadRequest(ModelState);
-            }
-            var task = await _taskRepository.AddAsync(addTaskDto);
-            _logger.LogInformation("Task with ID: {taskId} added successfully.", task.Id);
-            return Ok(task);
-        }
-        catch (Exception e)
-        {
-            _logger.LogError("Error adding the task to the list with ID: {entity.ListId}, because {error}.",
-                addTaskDto.ListId, e.Message);
-            return BadRequest("Error: " + e.Message);
-        }
+        if (!ModelState.IsValid)
+            throw new InvalidModelStateException($"Invalid model state for adding a task with the error {ModelState.ValidationState}");
+        
+        var task = await _taskRepository.AddAsync(addTaskDto);
+        
+        _logger.LogInformation("Task with ID: {taskId} added successfully.", task.Id);
+        return Ok(task);
     }
 
     /// <summary>
@@ -139,22 +116,13 @@ public class TasksController : ControllerBase
     [HttpPut("update-task")]
     public async Task<ActionResult<Models_Task>> UpdateTask([FromBody] UpdateTaskDto updateTaskDto)
     {
-        try
-        {
-            if (!ModelState.IsValid)
-            {
-                _logger.LogError("Invalid model state for updating a task with the error {ModelState.Values}", ModelState.Values);
-                return BadRequest(ModelState);
-            }
-            var task = await _taskRepository.UpdateAsync(updateTaskDto);
-            _logger.LogInformation("Task with ID: {taskId} updated successfully.", task.Id);
-            return Ok(task);
-        }
-        catch (Exception e)
-        {
-            _logger.LogError("Error updating task with ID: {taskId}, because {error}.", updateTaskDto.Id, e.Message);
-            return BadRequest("Error: " + e.Message);
-        }
+        if (!ModelState.IsValid)
+            throw new InvalidModelStateException($"Invalid model state for updating a task with the error {ModelState.ValidationState}");
+        
+        var task = await _taskRepository.UpdateAsync(updateTaskDto);
+        
+        _logger.LogInformation("Task with ID: {taskId} updated successfully.", task.Id);
+        return Ok(task);
     }
 
     /// <summary>
@@ -171,16 +139,9 @@ public class TasksController : ControllerBase
     [HttpDelete("delete-task/{id}")]
     public async Task<ActionResult> DeleteTask([FromRoute] Guid id)
     {
-        try
-        {
-            await _taskRepository.DeleteAsync(id);
-            _logger.LogInformation("Task with ID: {taskId} deleted successfully.", id);
-            return Ok();
-        }
-        catch (Exception e)
-        {
-            _logger.LogError("Error deleting task with ID: {taskId}, because {error}.", id, e.Message);
-            return BadRequest("Error: " + e.Message);
-        }
+        await _taskRepository.DeleteAsync(id);
+        
+        _logger.LogInformation("Task with ID: {taskId} deleted successfully.", id);
+        return Ok();
     }
 }

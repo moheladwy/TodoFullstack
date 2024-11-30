@@ -15,9 +15,9 @@ public interface IAuthService
     ///     The RegisterUserDto containing the user's information.
     /// </param>
     /// <returns>
-    ///     A boolean indicating whether the registration was successful.
+    ///     The User object of the registered user.
     /// </returns>
-    Task<bool> Register(RegisterUserDto registerUserDto);
+    Task<User> Register(RegisterUserDto registerUserDto);
 
     /// <summary>
     ///     Log in a user with the provided LoginUserDto.

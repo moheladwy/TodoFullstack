@@ -1,3 +1,4 @@
+using API.Exceptions;
 using API.Interfaces;
 using api.Models.DTOs.AccountDTOs;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
@@ -52,17 +53,9 @@ public class AccountController : ControllerBase
     [HttpGet("get-user/{id}")]
     public async Task<IActionResult> GetUserById([FromRoute] string id)
     {
-        try
-        {
-            var userInfo = await _accountService.GetUserById(id);
-            _logger.LogInformation("User information retrieved successfully for user with id: {id}", userInfo.Id);
-            return Ok(userInfo);
-        }
-        catch (Exception e)
-        {
-            _logger.LogError(e, "Failed to retrieve user information for user with id: {id}, Because: {error}", id, e.Message);
-            return BadRequest(e.Message);
-        }
+        var userInfo = await _accountService.GetUserById(id);
+        _logger.LogInformation("User information retrieved successfully for user with id: {id}", userInfo.Id);
+        return Ok(userInfo);
     }
 
     /// <summary>
@@ -79,22 +72,13 @@ public class AccountController : ControllerBase
     [HttpPut("change-password")]
     public async Task<IActionResult> ChangePassword([FromBody] ChangePasswordDto changePasswordDto)
     {
-        try
-        {
-            if (!ModelState.IsValid)
-            {
-                _logger.LogError("Failed to change password because: {error}", ModelState.ValidationState);
-                return BadRequest(ModelState);
-            }
+        if (!ModelState.IsValid)
+            throw new InvalidModelStateException($"Failed to change password because: {ModelState.ValidationState}");
 
-            var result = await _accountService.ChangePassword(changePasswordDto);
-            return result ? Ok("Password changed successfully.") : BadRequest("Failed to change password.");
-        }
-        catch (Exception e)
-        {
-            _logger.LogError(e, "Failed to change password for user with id: {id}, Because: {error}", changePasswordDto.Id, e.Message);
-            return BadRequest(e.Message);
-        }
+        await _accountService.ChangePassword(changePasswordDto);
+        
+        _logger.LogInformation("Password changed successfully for user with id: {id}", changePasswordDto.Id);
+        return Ok("Password changed successfully.");
     }
 
     /// <summary>
@@ -111,24 +95,13 @@ public class AccountController : ControllerBase
     [HttpPut("update-user-info")]
     public async Task<IActionResult> UpdateUserInfo([FromBody] UpdateUserInfoDto updateUserInfoDto)
     {
-        try
-        {
-            if (!ModelState.IsValid)
-            {
-                _logger.LogError("Failed to update user information because: {error}", ModelState.ValidationState);
-                return BadRequest(ModelState);
-            }
+        if (!ModelState.IsValid)
+            throw new InvalidModelStateException($"Failed to update user information because: {ModelState.ValidationState}");
 
-            var result = await _accountService.UpdateUserInfo(updateUserInfoDto);
-            return result
-                ? Ok("User information updated successfully.")
-                : BadRequest("Failed to update user information.");
-        }
-        catch (Exception e)
-        {
-            _logger.LogError(e, "Failed to update user information for user with id: {id}, Because: {error}", updateUserInfoDto.Id, e.Message);
-            return BadRequest(e.Message);
-        }
+        await _accountService.UpdateUserInfo(updateUserInfoDto);
+        
+        _logger.LogInformation("User information updated successfully for user with id: {id}", updateUserInfoDto.Id);
+        return Ok("User information updated successfully.");
     }
 
 
@@ -147,15 +120,9 @@ public class AccountController : ControllerBase
     [HttpDelete("delete-account/{id}")]
     public async Task<IActionResult> DeleteAccount([FromRoute] string id)
     {
-        try
-        {
-            var result = await _accountService.DeleteAccount(id);
-            return result ? Ok("Account deleted successfully.") : BadRequest("Failed to delete account.");
-        }
-        catch (Exception e)
-        {
-            _logger.LogError(e, "Failed to delete account for user with id: {id}, Because: {error}", id, e.Message);
-            return BadRequest(e.Message);
-        }
+        await _accountService.DeleteAccount(id);
+        
+        _logger.LogInformation("Account deleted successfully for user with id: {id}", id);
+        return Ok("Account deleted successfully.");
     }
 }

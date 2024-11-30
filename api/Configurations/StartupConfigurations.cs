@@ -232,12 +232,14 @@ public static class StartupConfigurations
             app.ProductionMode();
 
         app.UseHttpsRedirection();
-        app.UseHttpLogging();
+        // app.UseHttpLogging();
+        app.UseMiddleware<GlobalExceptionMiddleware>();
         app.UseRouting();
         app.UseSwagger();
         app.UseSwaggerUI();
         app.UseAuthentication();
         app.UseAuthorization();
+        app.UseStatusCodePages();
         app.MapControllers();
     }
 
