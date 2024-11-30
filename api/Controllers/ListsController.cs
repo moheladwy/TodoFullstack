@@ -1,3 +1,4 @@
+using API.Exceptions;
 using Microsoft.AspNetCore.Mvc;
 using API.Interfaces;
 using api.Models.DTOs.ListDTOs;
@@ -62,19 +63,11 @@ public class ListsController : ControllerBase
     [HttpGet("all-lists")]
     public async Task<ActionResult<List<TaskList>>> GetAllLists()
     {
-        try
-        {
-            _authenticatedUser = await _accountService.GetUserByClaims(User);
-            var lists = await _listRepository.GetAllAsync(_authenticatedUser.Id);
-            _logger.LogInformation("Lists for user with ID: {userId} retrieved successfully.", _authenticatedUser.Id);
-            return Ok(lists);
-        }
-        catch (Exception e)
-        {
-            _logger.LogError(e, "Error retrieving lists for user with ID: {Id}, because {error}.",
-                _authenticatedUser.Id, e.Message);
-            return BadRequest(e.Message);
-        }
+        _authenticatedUser = await _accountService.GetUserByClaims(User);
+        var lists = await _listRepository.GetAllAsync(_authenticatedUser.Id);
+        
+        _logger.LogInformation("Lists for user with ID: {userId} retrieved successfully.", _authenticatedUser.Id);
+        return Ok(lists);
     }
 
     /// <summary>
@@ -90,17 +83,10 @@ public class ListsController : ControllerBase
     [HttpGet("get-list/{listId}")]
     public async Task<ActionResult<TaskList>> GetListById([FromRoute] Guid listId)
     {
-        try
-        {
-            var list = await _listRepository.GetByIdAsync(listId);
-            _logger.LogInformation("List with ID: {listId} retrieved successfully.", listId);
-            return Ok(list);
-        }
-        catch (Exception e)
-        {
-            _logger.LogError(e, "Error retrieving list with ID: {listId}, because {error}.", listId, e.Message);
-            return BadRequest(e.Message);
-        }
+        var list = await _listRepository.GetByIdAsync(listId);
+        
+        _logger.LogInformation("List with ID: {listId} retrieved successfully.", listId);
+        return Ok(list);
     }
 
     /// <summary>
@@ -118,35 +104,18 @@ public class ListsController : ControllerBase
     [HttpPost("add-list")]
     public async Task<ActionResult<TaskList>> AddList([FromBody] AddListDto addListDto)
     {
-        try
-        {
-            if (!ModelState.IsValid)
-            {
-                _logger.LogError("Invalid model state for adding new list.");
-                return BadRequest(ModelState);
-            }
+        if (!ModelState.IsValid)
+            throw new InvalidModelStateException($"Invalid model state because of the following errors: {ModelState.ValidationState}");
 
-            _authenticatedUser = await _accountService.GetUserByClaims(User);
-            if (_authenticatedUser.Id != addListDto.UserId)
-            {
-                _logger.LogError(
-                    "User with ID: {userId} is not authorized to add a list for user with ID: {addListDto.UserId}.",
-                    _authenticatedUser.Id, addListDto.UserId);
-                return BadRequest("You are not authorized to add a list for another user.");
-            }
+        _authenticatedUser = await _accountService.GetUserByClaims(User);
+        if (_authenticatedUser.Id != addListDto.UserId)
+            throw new UnauthorizedAccessException($"User with Id: {_authenticatedUser.Id} is not authorized to add a list for another user.");
 
-            var list = await _listRepository.AddAsync(addListDto);
+        var list = await _listRepository.AddAsync(addListDto);
 
-            _logger.LogInformation("New list with ID: {id} added successfully to the user with ID: {userId}.", list.Id,
-                _authenticatedUser.Id);
-            return Ok(list);
-        }
-        catch (Exception e)
-        {
-            _logger.LogError(e, "Error adding new list with name: {name}, because {error}.", addListDto.Name,
-                e.Message);
-            return BadRequest(e.Message);
-        }
+        _logger.LogInformation("New list with ID: {id} added successfully to the user with ID: {userId}.", list.Id,
+            _authenticatedUser.Id);
+        return Ok(list);
     }
 
     /// <summary>
@@ -163,23 +132,13 @@ public class ListsController : ControllerBase
     [HttpPut("update-list")]
     public async Task<ActionResult<TaskList>> UpdateList([FromBody] UpdateListDto list)
     {
-        try
-        {
-            if (!ModelState.IsValid)
-            {
-                _logger.LogError("Invalid model state for updating list.");
-                return BadRequest(ModelState);
-            }
+        if (!ModelState.IsValid)
+            throw new InvalidModelStateException($"Invalid model state because of the following errors: {ModelState.ValidationState}");
 
-            var updatedTask = await _listRepository.UpdateAsync(list);
-            _logger.LogInformation("List with ID: {entity.Id} updated successfully.", list.Id);
-            return Ok(updatedTask);
-        }
-        catch (Exception e)
-        {
-            _logger.LogError(e, "Error updating list with ID: {id}, because {error}.", list.Id, e.Message);
-            return BadRequest($"Error updating list with ID: {list.Id}, because {e.Message}.");
-        }
+        var updatedTask = await _listRepository.UpdateAsync(list);
+        
+        _logger.LogInformation("List with ID: {entity.Id} updated successfully.", list.Id);
+        return Ok(updatedTask);
     }
 
     /// <summary>
@@ -195,16 +154,9 @@ public class ListsController : ControllerBase
     [HttpDelete("delete-list/{id}")]
     public async Task<ActionResult> DeleteList([FromRoute] Guid id)
     {
-        try
-        {
-            await _listRepository.DeleteAsync(id);
-            _logger.LogInformation("List with ID: {id} and all its tasks deleted successfully.", id);
-            return Ok();
-        }
-        catch (Exception e)
-        {
-            _logger.LogError(e, "Error deleting list with ID: {id}, because {error}.", id, e.Message);
-            return BadRequest(e.Message);
-        }
+        await _listRepository.DeleteAsync(id);
+        
+        _logger.LogInformation("List with ID: {id} and all its tasks deleted successfully.", id);
+        return Ok();
     }
 }

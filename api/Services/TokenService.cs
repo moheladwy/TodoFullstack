@@ -69,7 +69,7 @@ public class TokenService : ITokenService
         ArgumentNullException.ThrowIfNull(user, nameof(user));
         var claims = new List<Claim>
         {
-            new(JwtRegisteredClaimNames.Jti, user.Id.ToString()),
+            new(JwtRegisteredClaimNames.Jti, user.Id),
             new(JwtRegisteredClaimNames.Email, user.Email ?? throw new NullReferenceException("User email is null")),
             new(JwtRegisteredClaimNames.GivenName,
                 user.UserName ?? throw new NullReferenceException("User username is null")),
@@ -88,7 +88,8 @@ public class TokenService : ITokenService
 
         var tokenHandler = new JwtSecurityTokenHandler();
         var token = tokenHandler.CreateToken(tokenDescriptor);
-        _logger.LogInformation("Token generated for user: {user.Email}", user.Email);
+        
+        _logger.LogInformation("JWT token generated for user: {user.Email}", user.Email);
         return tokenHandler.WriteToken(token);
     }
 

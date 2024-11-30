@@ -9,6 +9,14 @@ namespace API.Exceptions;
 public class AddRoleException(string message) : Exception(message);
 
 /// <summary>
+///     Exception thrown when the Model State is invalid.
+/// </summary>
+/// <param name="message">
+///     The message to display when the exception is thrown.
+/// </param>
+public class InvalidModelStateException(string message) : Exception(message);
+
+/// <summary>
 ///     Exception thrown when a user is not added to the database.
 /// </summary>
 /// <param name="message">

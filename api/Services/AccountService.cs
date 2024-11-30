@@ -4,6 +4,7 @@ using API.Interfaces;
 using api.Models.DTOs.AccountDTOs;
 using api.Models.Entities;
 using Microsoft.AspNetCore.Identity;
+using Task = System.Threading.Tasks.Task;
 
 namespace API.Services;
 
@@ -84,18 +85,13 @@ public class AccountService : IAccountService
     /// </exception>
     public async Task<User> GetUserByClaims(ClaimsPrincipal claims)
     {
-        var userEmail = claims.FindFirst(ClaimTypes.Email)?.Value;
-        if (userEmail == null)
-        {
-            _logger.LogError("User not found.");
-            throw new UnauthorizedAccessException("User not authenticated.");
-        }
+        var userEmail = claims.FindFirst(ClaimTypes.Email)?.Value ?? 
+                        throw new UnauthorizedAccessException("User not authenticated.");
 
-        var user = await _userManager.FindByEmailAsync(userEmail);
-        if (user != null) return user;
-
-        _logger.LogError("User with this email: {userEmail} not found", userEmail);
-        throw new UserNotFoundException($"User with this email: {userEmail} not found");
+        var user = await _userManager.FindByEmailAsync(userEmail) ??
+            throw new UserNotFoundException($"User with this email: {userEmail} not found");
+        
+        return user;
     }
 
     /// <summary>
@@ -113,7 +109,7 @@ public class AccountService : IAccountService
     /// <exception cref="PasswordDidNotChangeException">
     ///     Throws when password did not change successfully.
     /// </exception>
-    public async Task<bool> ChangePassword(ChangePasswordDto changePasswordDto)
+    public async Task ChangePassword(ChangePasswordDto changePasswordDto)
     {
         var user = await GetUserById(changePasswordDto.Id);
 
@@ -122,10 +118,6 @@ public class AccountService : IAccountService
         if (!result.Succeeded)
             throw new PasswordDidNotChangeException($"Failed to change password because of: {string.Join(", ",
                 result.Errors.Select(e => e.Description))}");
-
-        _logger.LogInformation("User with id: {changePasswordDto.Id} changed password successfully",
-            changePasswordDto.Id);
-        return true;
     }
 
     /// <summary>
@@ -147,7 +139,7 @@ public class AccountService : IAccountService
     /// <exception cref="UserInformationDidNotUpdateException">
     ///     Throws when user information did not update successfully.
     /// </exception>
-    public async Task<bool> UpdateUserInfo(UpdateUserInfoDto updateUserInfoDto)
+    public async Task UpdateUserInfo(UpdateUserInfoDto updateUserInfoDto)
     {
         var user = await GetUserById(updateUserInfoDto.Id);
         
@@ -155,11 +147,8 @@ public class AccountService : IAccountService
         
         var result = await _userManager.UpdateAsync(user);
         if (!result.Succeeded)
-            throw new UserInformationDidNotUpdateException($"Failed to update user information because of: {string.Join(", ", result.Errors.Select(e => e.Description))}");
-
-        _logger.LogInformation("User with id: {updateUserInfoDto.Id} updated his information successfully",
-            updateUserInfoDto.Id);
-        return true;
+            throw new UserInformationDidNotUpdateException($"Failed to update user information because of: {
+                string.Join(", ", result.Errors.Select(e => e.Description))}");
     }
     
     private static void UpdateUserInformation(User user, UpdateUserInfoDto updateUserInfoDto)
@@ -198,11 +187,10 @@ public class AccountService : IAccountService
     /// <exception cref="UserNotFoundException">
     ///     Throws when user not found by given id.
     /// </exception>
-    public async Task<bool> DeleteAccount(string id)
+    public async Task DeleteAccount(string id)
     {
         var user = await GetUserById(id);
-        var result = await _userManager.DeleteAsync(user);
+        await _userManager.DeleteAsync(user);
         await _signInManager.SignOutAsync();
-        return result.Succeeded;
     }
 }

@@ -22,11 +22,6 @@ public class AuthenticationService : IAuthService
     private readonly SignInManager<User> _signInManager;
 
     /// <summary>
-    ///     The ILogger instance to use for logging.
-    /// </summary>
-    private readonly ILogger<AuthenticationService> _logger;
-
-    /// <summary>
     ///     Constructor for the AuthenticationService class.
     /// </summary>
     /// <param name="userManager">
@@ -35,18 +30,12 @@ public class AuthenticationService : IAuthService
     /// <param name="signInManager">
     ///     The SignInManager instance to use for user sign-in operations, it's registered in the DI container.
     /// </param>
-    /// <param name="logger">
-    ///    The ILogger instance to use for logging, it's registered in the DI container.
-    ///    It's used to log information, warnings, and errors.
-    /// </param>
     public AuthenticationService(
         UserManager<User> userManager,
-        SignInManager<User> signInManager,
-        ILogger<AuthenticationService> logger)
+        SignInManager<User> signInManager)
     {
         _userManager = userManager;
         _signInManager = signInManager;
-        _logger = logger;
     }
 
     /// <summary>
@@ -61,10 +50,7 @@ public class AuthenticationService : IAuthService
     /// <exception cref="CreateUserException">
     ///     Thrown when the user creation in the system fails.
     /// </exception>
-    /// <exception cref="AddRoleException">
-    ///     Thrown when the role `User` cannot be added to the user.
-    /// </exception>
-    public async Task<bool> Register(RegisterUserDto registerUserDto)
+    public async Task<User> Register(RegisterUserDto registerUserDto)
     {
         // Create a new user instance with the provided credentials.
         var user = new User
@@ -76,13 +62,11 @@ public class AuthenticationService : IAuthService
         };
 
         // Create the user with the provided password
-        var createdUser = await _userManager.CreateAsync(user, registerUserDto.Password);
-        if (createdUser.Succeeded) return true;
+        var result = await _userManager.CreateAsync(user, registerUserDto.Password);
+        if (!result.Succeeded) 
+            throw new CreateUserException($"Failed to create user because of: {string.Join(", ", result.Errors.Select(e => e.Description))}");
 
-        var errorMessages =
-            $"Failed to create user because of: {string.Join(", ", createdUser.Errors.Select(e => e.Description))}";
-        _logger.LogError("{error}", errorMessages);
-        throw new CreateUserException(errorMessages);
+        return user;
     }
 
     /// <summary>
@@ -106,10 +90,9 @@ public class AuthenticationService : IAuthService
                    throw new InvalidEmailException("Invalid email");
 
         var result = await _signInManager.CheckPasswordSignInAsync(user, loginUserDto.Password, false);
-        if (result.Succeeded) return user;
-
-        var errorMessages = $"Failed to login user with email: {loginUserDto.Email}";
-        _logger.LogError("{error}", errorMessages);
-        throw new InvalidPasswordException(errorMessages);
+        if (!result.Succeeded) 
+            throw new InvalidPasswordException($"Invalid password for the email {loginUserDto.Email} provided");
+        
+        return user;
     }
 }
