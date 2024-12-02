@@ -58,13 +58,17 @@ public class AuthController : ControllerBase
             throw new InvalidModelStateException($"Invalid model state because: {ModelState.ValidationState}");
 
         var user = await _authenticationService.Login(loginDto);
+        var token = _tokenService.GenerateToken(user);
+        var refreshToken = _tokenService.GenerateRefreshToken();
+        
         _logger.LogInformation("User logged in successfully with email: {email}", user.Email);
-
         return Ok(new AuthResponse
         {
             Id = user.Id,
-            Token = _tokenService.GenerateToken(user),
-            ExpiresInDays = _tokenService.GetTokenExpirationDays()
+            AccessToken = token.Token,
+            AccessTokenExpirationDate = token.ExpirationDate,
+            RefreshToken = refreshToken.RefreshToken,
+            RefreshTokenExpirationDate = refreshToken.ExpirationDate
         });
     }
 
@@ -88,13 +92,17 @@ public class AuthController : ControllerBase
             throw new InvalidModelStateException($"Invalid model state because: {ModelState.ValidationState}");
 
         var user = await _authenticationService.Register(registerDto);
+        var accessToken = _tokenService.GenerateToken(user);
+        var refreshToken = _tokenService.GenerateRefreshToken();
+
         _logger.LogInformation("User registered successfully with email: {email}", registerDto.Email);
-        
         return Ok(new AuthResponse()
         {
             Id = user.Id,
-            Token = _tokenService.GenerateToken(user),
-            ExpiresInDays = _tokenService.GetTokenExpirationDays()
+            AccessToken = accessToken.Token,
+            AccessTokenExpirationDate = accessToken.ExpirationDate,
+            RefreshToken = refreshToken.RefreshToken,
+            RefreshTokenExpirationDate = refreshToken.ExpirationDate
         });
     }
 }

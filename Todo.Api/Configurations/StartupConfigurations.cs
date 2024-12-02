@@ -35,6 +35,7 @@ public static class StartupConfigurations
         builder.AddDatabaseConnectionString();
         builder.AddSwaggerService();
 
+        builder.InitializeJwtConfigurations();
         builder.AddAuthenticationService();
         builder.AddAuthorizationService();
         builder.AddLoggingService();
@@ -93,6 +94,12 @@ public static class StartupConfigurations
 
             c.AddSecurityRequirement(securityRequirement);
         });
+    }
+    
+    private static void InitializeJwtConfigurations(this WebApplicationBuilder builder)
+    {
+        builder.Services.Configure<JwtConfigurations>(
+            builder.Configuration.GetSection(Constants.JwtConfigurationsSectionKey));
     }
 
     /// <summary>

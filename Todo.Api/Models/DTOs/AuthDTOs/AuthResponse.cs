@@ -3,6 +3,8 @@ namespace Todo.Api.Models.DTOs.AuthDTOs;
 public class AuthResponse
 {
     public string Id { get; set; } = string.Empty;
-    public string Token { get; set; } = string.Empty;
-    public int ExpiresInDays { get; set; }
+    public string AccessToken { get; set; } = string.Empty;
+    public DateTime AccessTokenExpirationDate { get; set; }
+    public string RefreshToken { get; set; } = string.Empty;
+    public DateTime RefreshTokenExpirationDate { get; set; }
 }
