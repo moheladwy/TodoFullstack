@@ -1,0 +1,21 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<package xmlns="http://schemas.microsoft.com/packaging/2012/06/nuspec.xsd">
+  <metadata>
+    <id>Todo.Core</id>
+    <version>1.0.0</version>
+    <title>Todo Fullstack Core</title>
+    <authors>Todo.Core</authors>
+    <projectUrl>https://todo.aladawy.duckdns.org/</projectUrl>
+    <description>This is the Todo Fullstack Core Class Library that contains the models and entities in the project.</description>
+    <repository type="git" url="https://github.com/moheladwy/TodoFullstack" commit="8e25db510318d6210610c13f81bb29a2257777f1" />
+    <dependencies>
+      <group targetFramework="net8.0">
+        <dependency id="Microsoft.AspNetCore.Identity.EntityFrameworkCore" version="8.0.11" exclude="Build,Analyzers" />
+      </group>
+    </dependencies>
+  </metadata>
+  <files>
+    <file src="/home/eladwy/github/TodoFullstack/Todo.Core/bin/Debug/net8.0/Todo.Core.dll" target="lib/net8.0/Todo.Core.dll" />
+    <file src="/home/eladwy/github/TodoFullstack/Todo.Core/bin/Debug/net8.0/Todo.Core.xml" target="lib/net8.0/Todo.Core.xml" />
+  </files>
+</package>

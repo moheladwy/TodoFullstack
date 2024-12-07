@@ -1,14 +1,10 @@
-using System;
-using System.Collections.Generic;
-using System.Threading.Tasks;
-using Todo.Api.Models.DTOs.TasksDtos;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.Extensions.Logging;
-using Todo.Api.Exceptions;
-using Todo.Api.Interfaces;
-using Models_Task = Todo.Api.Models.Entities.Task;
+using Todo.Core.DTOs.TasksDtos;
+using Todo.Core.Exceptions;
+using Todo.Core.Interfaces;
+using Entity_Task = Todo.Core.Entities.Task;
 
 namespace Todo.Api.Controllers;
 
@@ -27,7 +23,7 @@ namespace Todo.Api.Controllers;
 [Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme)]
 public class TasksController : ControllerBase
 {
-    private readonly IRepository<Models_Task, AddTaskDto, UpdateTaskDto> _taskRepository;
+    private readonly IRepository<Entity_Task, AddTaskDto, UpdateTaskDto> _taskRepository;
     private readonly ILogger<TasksController> _logger;
 
     /// <summary>
@@ -39,7 +35,7 @@ public class TasksController : ControllerBase
     /// <param name="logger">
     ///     The logger for the TasksController.
     /// </param>
-    public TasksController(IRepository<Models_Task, AddTaskDto, UpdateTaskDto> taskRepository,
+    public TasksController(IRepository<Entity_Task, AddTaskDto, UpdateTaskDto> taskRepository,
         ILogger<TasksController> logger)
     {
         _taskRepository = taskRepository;
@@ -58,10 +54,10 @@ public class TasksController : ControllerBase
     ///     If an error occurs, a bad request is returned with the error message.
     /// </returns>
     [HttpGet("all-tasks/{listId}")]
-    public async Task<ActionResult<List<Models_Task>>> GetAllTasksByListId([FromRoute] string listId)
+    public async Task<ActionResult<List<Entity_Task>>> GetAllTasksByListId([FromRoute] string listId)
     {
         var tasks = await _taskRepository.GetAllAsync(listId);
-        
+
         _logger.LogInformation("Tasks found for list with id: {listId}", listId);
         return Ok(tasks);
     }
@@ -78,10 +74,10 @@ public class TasksController : ControllerBase
     ///     If an error occurs, a bad request is returned with the error message.
     /// </returns>
     [HttpGet("get-task/{id}")]
-    public async Task<ActionResult<Models_Task>> GetTaskById(Guid id)
+    public async Task<ActionResult<Entity_Task>> GetTaskById(Guid id)
     {
         var task = await _taskRepository.GetByIdAsync(id);
-        
+
         _logger.LogInformation("Task with ID: {taskId} retrieved successfully.", id);
         return Ok(task);
     }
@@ -97,13 +93,13 @@ public class TasksController : ControllerBase
     ///     If an error occurs, a bad request is returned with the error message.
     /// </returns>
     [HttpPost("add-task")]
-    public async Task<ActionResult<Models_Task>> AddTask([FromBody] AddTaskDto addTaskDto)
+    public async Task<ActionResult<Entity_Task>> AddTask([FromBody] AddTaskDto addTaskDto)
     {
         if (!ModelState.IsValid)
             throw new InvalidModelStateException($"Invalid model state for adding a task with the error {ModelState.ValidationState}");
-        
+
         var task = await _taskRepository.AddAsync(addTaskDto);
-        
+
         _logger.LogInformation("Task with ID: {taskId} added successfully.", task.Id);
         return Ok(task);
     }
@@ -118,7 +114,7 @@ public class TasksController : ControllerBase
     ///     The updated task.
     /// </returns>
     [HttpPut("update-task")]
-    public async Task<ActionResult<Models_Task>> UpdateTask([FromBody] UpdateTaskDto updateTaskDto)
+    public async Task<ActionResult<Entity_Task>> UpdateTask([FromBody] UpdateTaskDto updateTaskDto)
     {
         if (!ModelState.IsValid)
             throw new InvalidModelStateException($"Invalid model state for updating a task with the error {ModelState.ValidationState}");

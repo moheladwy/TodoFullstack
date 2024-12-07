@@ -1,0 +1,14 @@
+/home/eladwy/github/TodoFullstack/Todo.Core/bin/Debug/net8.0/Todo.Core.xml
+/home/eladwy/github/TodoFullstack/Todo.Core/bin/Debug/net8.0/Todo.Core.deps.json
+/home/eladwy/github/TodoFullstack/Todo.Core/bin/Debug/net8.0/Todo.Core.dll
+/home/eladwy/github/TodoFullstack/Todo.Core/bin/Debug/net8.0/Todo.Core.pdb
+/home/eladwy/github/TodoFullstack/Todo.Core/obj/Debug/net8.0/Todo.Core.csproj.AssemblyReference.cache
+/home/eladwy/github/TodoFullstack/Todo.Core/obj/Debug/net8.0/Todo.Core.GeneratedMSBuildEditorConfig.editorconfig
+/home/eladwy/github/TodoFullstack/Todo.Core/obj/Debug/net8.0/Todo.Core.AssemblyInfoInputs.cache
+/home/eladwy/github/TodoFullstack/Todo.Core/obj/Debug/net8.0/Todo.Core.AssemblyInfo.cs
+/home/eladwy/github/TodoFullstack/Todo.Core/obj/Debug/net8.0/Todo.Core.csproj.CoreCompileInputs.cache
+/home/eladwy/github/TodoFullstack/Todo.Core/obj/Debug/net8.0/Todo.Core.sourcelink.json
+/home/eladwy/github/TodoFullstack/Todo.Core/obj/Debug/net8.0/Todo.Core.dll
+/home/eladwy/github/TodoFullstack/Todo.Core/obj/Debug/net8.0/refint/Todo.Core.dll
+/home/eladwy/github/TodoFullstack/Todo.Core/obj/Debug/net8.0/Todo.Core.pdb
+/home/eladwy/github/TodoFullstack/Todo.Core/obj/Debug/net8.0/ref/Todo.Core.dll

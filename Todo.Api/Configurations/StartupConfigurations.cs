@@ -1,22 +1,18 @@
-using System;
-using Todo.Api.Data.DatabaseContexts;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
-using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
-using Microsoft.Extensions.Configuration;
-using Microsoft.Extensions.DependencyInjection;
-using Microsoft.Extensions.Hosting;
-using Microsoft.Extensions.Logging;
 using Microsoft.IdentityModel.Tokens;
 using Microsoft.OpenApi.Models;
-using Todo.Api.Models.DTOs.ListDTOs;
-using Todo.Api.Models.DTOs.TasksDtos;
-using Todo.Api.Models.Entities;
-using Todo.Api.Interfaces;
-using Todo.Api.Repository;
-using Todo.Api.Services;
-using Models_Task = Todo.Api.Models.Entities.Task;
+using Todo.Core.DTOs.ListDTOs;
+using Todo.Core.DTOs.TasksDtos;
+using Todo.Core.Entities;
+using Todo.Core.Interfaces;
+using Todo.Infrastructure;
+using Todo.Infrastructure.Configurations;
+using Todo.Infrastructure.DatabaseContexts;
+using Todo.Infrastructure.Repositories;
+using Todo.Infrastructure.Services;
+using Models_Task = Todo.Core.Entities.Task;
 
 namespace Todo.Api.Configurations;
 
@@ -28,11 +24,10 @@ public static class StartupConfigurations
     /// <param name="builder">
     ///    The WebApplicationBuilder to initialize.
     /// </param>
-    public static void InitializeBuilder(this WebApplicationBuilder builder)
+    public static void InitializeBuilderConfigurations(this WebApplicationBuilder builder)
     {
         builder.Services.AddEndpointsApiExplorer();
-
-        builder.AddDatabaseConnectionString();
+        builder.Services.AddDatabaseConnectionString(builder.Configuration);
         builder.AddSwaggerService();
 
         builder.AddAuthenticationService();
@@ -40,11 +35,8 @@ public static class StartupConfigurations
         builder.AddLoggingService();
 
         builder.AddIdentityService();
-        builder.AddRepositoryService();
-
-        builder.Services.AddScoped<ITokenService, TokenService>();
-        builder.Services.AddScoped<IAuthService, AuthenticationService>();
-        builder.Services.AddScoped<IAccountService, AccountService>();
+        builder.Services.RegisterRepositories();
+        builder.Services.RegisterServices();
         builder.Services.AddHttpClient();
         builder.Services.AddControllers().AddJsonOptions(options =>
         {
@@ -228,7 +220,7 @@ public static class StartupConfigurations
     /// <param name="app">
     ///     The WebApplication instance to initialize.
     /// </param>
-    public static void InitializeApplication(this WebApplication app)
+    public static void InitializeApplicationConfigurations(this WebApplication app)
     {
         app.UseAutoMigrationAtStartup();
 
