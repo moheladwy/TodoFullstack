@@ -25,12 +25,6 @@
         <PackageReference Include="Microsoft.Extensions.DependencyInjection" Version="8.0.1"/>
         <PackageReference Include="Swashbuckle.AspNetCore" Version="6.8.0" />
     </ItemGroup>
-
-    <ItemGroup>
-        <Content Include="..\.dockerignore">
-            <Link>.dockerignore</Link>
-        </Content>
-    </ItemGroup>
     
     <ItemGroup>
         <Folder Include="Database\" />

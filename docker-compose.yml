@@ -1,6 +1,6 @@
 services:
   api:
-    build: Todo.Api
+    build: .
     image: todo-api:latest
     container_name: todo-api
     ports:
