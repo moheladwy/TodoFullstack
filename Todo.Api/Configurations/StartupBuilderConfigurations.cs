@@ -1,12 +1,10 @@
 using Microsoft.AspNetCore.HttpLogging;
-using Microsoft.EntityFrameworkCore;
 using Microsoft.OpenApi.Models;
 using Todo.Infrastructure;
-using Todo.Infrastructure.DatabaseContexts;
 
 namespace Todo.Api.Configurations;
 
-public static class StartupConfigurations
+public static class StartupBuilderConfigurations
 {
     /// <summary>
     ///     Initializes the application builder with the required services.
@@ -14,7 +12,7 @@ public static class StartupConfigurations
     /// <param name="builder">
     ///    The WebApplicationBuilder to initialize.
     /// </param>
-    public static void InitializeBuilderConfigurations(this WebApplicationBuilder builder)
+    public static void InitializeConfigurations(this WebApplicationBuilder builder)
     {
         builder.Services.AddEndpointsApiExplorer();
         builder.AddSwaggerService();
@@ -100,76 +98,5 @@ public static class StartupConfigurations
             options.RequestHeaders.Add("Authorization");
             options.ResponseHeaders.Add("Authorization");
         });
-    }
-    
-    /// <summary>
-    ///    Initializes the application with the necessary services and middleware.
-    /// </summary>
-    /// <param name="app">
-    ///     The WebApplication instance to initialize.
-    /// </param>
-    public static void InitializeApplicationConfigurations(this WebApplication app)
-    {
-        app.UseAutoMigrationAtStartup();
-
-        if (app.Environment.IsDevelopment())
-            app.DevelopmentMode();
-        else
-            app.ProductionMode();
-
-        app.UseHttpsRedirection();
-        // app.UseHttpLogging();
-        app.UseMiddleware<GlobalExceptionMiddleware>();
-        app.UseRouting();
-        app.UseSwagger();
-        app.UseSwaggerUI();
-        app.UseAuthentication();
-        app.UseAuthorization();
-        app.UseStatusCodePages();
-        app.MapControllers();
-    }
-
-    /// <summary>
-    ///     Automatically migrates the database at startup.
-    /// </summary>
-    /// <param name="app">
-    ///     The WebApplication instance to use for the migration.
-    /// </param>
-    private static async void UseAutoMigrationAtStartup(this WebApplication app)
-    {
-        try
-        {
-            using var scope = app.Services.CreateScope();
-            var services = scope.ServiceProvider;
-            var dbContext = services.GetRequiredService<TodoIdentityContext>();
-            await dbContext.Database.MigrateAsync();
-        }
-        catch (Exception e)
-        {
-            var logger = app.Services.GetRequiredService<LoggerFactory>().CreateLogger("Database Migration");
-            logger.LogError(e, "This error occurred while migrating the database {Error}", e.Message);
-        }
-    }
-
-    /// <summary>
-    ///     Configures the application for development mode.
-    /// </summary>
-    /// <param name="app">
-    ///     The WebApplication instance to configure.
-    /// </param>
-    private static void DevelopmentMode(this WebApplication app)
-    {
-        app.UseDeveloperExceptionPage();
-    }
-
-    /// <summary>
-    ///     Configures the application for production mode.
-    /// </summary>
-    /// <param name="app">
-    ///     The WebApplication instance to configure.
-    /// </param>
-    private static void ProductionMode(this WebApplication app)
-    {
-        app.UseExceptionHandler("/error");
     }
 }

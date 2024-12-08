@@ -126,6 +126,7 @@ public class AuthenticationService : IAuthService
         };
     }
 
+    // BUG: The method throws an exception when trying to fetch the user with the provided refresh token.
     /// <summary>
     ///     Login a user with the provided refresh token.
     /// </summary>

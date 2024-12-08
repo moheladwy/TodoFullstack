@@ -2,11 +2,30 @@ using System.Diagnostics;
 
 namespace Todo.Api.Configurations;
 
+/// <summary>
+///     Middleware to handle global exceptions in the application.
+/// </summary>
 public class GlobalExceptionMiddleware
 {
+    /// <summary>
+    ///     The RequestDelegate instance to use for the next middleware in the pipeline.
+    /// </summary>
     private readonly RequestDelegate _next;
+
+    /// <summary>
+    ///     The ILogger instance to use for logging exceptions.
+    /// </summary>
     private readonly ILogger<GlobalExceptionMiddleware> _logger;
 
+    /// <summary>
+    ///     Constructor for the GlobalExceptionMiddleware class.
+    /// </summary>
+    /// <param name="logger">
+    ///     The ILogger instance to use for logging exceptions.
+    /// </param>
+    /// <param name="next">
+    ///     The RequestDelegate instance to use for the next middleware in the pipeline.
+    /// </param>
     public GlobalExceptionMiddleware(
         ILogger<GlobalExceptionMiddleware> logger,
         RequestDelegate next)
@@ -15,6 +34,12 @@ public class GlobalExceptionMiddleware
         _next = next;
     }
 
+    /// <summary>
+    ///     Invokes the middleware to handle global exceptions in the application.
+    /// </summary>
+    /// <param name="httpContext">
+    ///     The HttpContext instance to use for the request.
+    /// </param>
     public async Task InvokeAsync(HttpContext httpContext)
     {
         try

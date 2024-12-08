@@ -5,7 +5,7 @@ namespace Todo.Api;
 /// <summary>
 ///     The main class that will be called when the application starts.
 /// </summary>
-public static class Program
+public class Program
 {
     /// <summary>
     ///     The main method that will be called when the application starts.
@@ -19,13 +19,13 @@ public static class Program
         var builder = WebApplication.CreateBuilder(args);
 
         // Initialize all the services.
-        builder.InitializeBuilderConfigurations();
+        builder.InitializeConfigurations();
 
         // Build the app.
         var app = builder.Build();
 
         // Initialize all the middleware and services for the app.
-        app.InitializeApplicationConfigurations();
+        app.InitializeConfigurations();
 
         // Run the app.
         app.Run();
