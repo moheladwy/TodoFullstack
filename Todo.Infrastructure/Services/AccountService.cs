@@ -30,9 +30,6 @@ public class AccountService : IAccountService
     /// <param name="userManager">
     ///     UserManager instance to manage user operations, it's injected by dependency injection container.
     /// </param>
-    /// <param name="signInManager">
-    ///     SignInManager instance to manage sign in operations, it's injected by dependency injection container.
-    /// </param>
     /// <param name="logger">
     ///    ILogger instance to log information, warnings, and errors, it's injected by dependency injection container.
     ///    It's used to log information, warnings, and errors.
@@ -59,6 +56,8 @@ public class AccountService : IAccountService
     {
         var user = await _userManager.FindByIdAsync(userId) ??
                    throw new UserNotFoundException($"User with this id: {userId} not found");
+
+        _logger.LogInformation("User with id: {userId} found successfully.", userId);
         return user;
     }
 
@@ -84,7 +83,8 @@ public class AccountService : IAccountService
 
         var user = await _userManager.FindByEmailAsync(userEmail) ??
             throw new UserNotFoundException($"User with this email: {userEmail} not found");
-        
+
+        _logger.LogInformation("User with email: {userEmail} found successfully.", userEmail);
         return user;
     }
 
@@ -112,6 +112,8 @@ public class AccountService : IAccountService
         if (!result.Succeeded)
             throw new PasswordDidNotChangeException($"Failed to change password because of: {string.Join(", ",
                 result.Errors.Select(e => e.Description))}");
+
+        _logger.LogInformation("Password changed successfully for user with id: {changePasswordDto.Id}", changePasswordDto.Id);
     }
 
     /// <summary>
@@ -143,6 +145,8 @@ public class AccountService : IAccountService
         if (!result.Succeeded)
             throw new UserInformationDidNotUpdateException($"Failed to update user information because of: {
                 string.Join(", ", result.Errors.Select(e => e.Description))}");
+
+        _logger.LogInformation("User information updated successfully for user with id: {updateUserInfoDto.Id}", updateUserInfoDto.Id);
     }
     
     private static void UpdateUserInformation(User user, UpdateUserInfoDto updateUserInfoDto)
@@ -185,5 +189,6 @@ public class AccountService : IAccountService
     {
         var user = await GetUserById(id);
         await _userManager.DeleteAsync(user);
+        _logger.LogInformation("User account deleted successfully for user with id: {id}", id);
     }
 }

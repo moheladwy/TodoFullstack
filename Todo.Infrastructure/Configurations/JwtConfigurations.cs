@@ -1,4 +1,4 @@
-namespace Todo.Api.Configurations;
+namespace Todo.Infrastructure.Configurations;
 
 public class JwtConfigurations
 {

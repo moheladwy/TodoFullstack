@@ -1,10 +1,11 @@
 using System.IdentityModel.Tokens.Jwt;
 using System.Security.Claims;
 using System.Security.Cryptography;
-using SystemNewFile1.txt.Text;
-using Microsoft.Extensions.Configuration;
+using System.Text;
 using Microsoft.Extensions.Logging;
+using Microsoft.Extensions.Options;
 using Microsoft.IdentityModel.Tokens;
+using Todo.Core.DTOs.AuthDTOs;
 using Todo.Core.Entities;
 using Todo.Core.Interfaces;
 using Todo.Infrastructure.Configurations;
@@ -76,15 +77,22 @@ public class TokenService : ITokenService
 
         var accessToken = new AccessTokenDto()
         {
-            Token = tokenHandler.WriteToken(token),
-            ExpirationDate = DateTime.UtcNow.AddDays(_jwtConfigurations.AccessTokenExpirationDays)
+            UserId = user.Id,
+            AccessToken = tokenHandler.WriteToken(token),
+            AccessTokenExpirationDate = DateTime.UtcNow.AddDays(_jwtConfigurations.AccessTokenExpirationDays)
         };
 
         _logger.LogInformation("JWT token generated for user: {user.Email}", user.Email);
         return accessToken;
     }
 
-    private static List<Claim> InitializeClaimsList(User user)
+    /// <summary>
+    ///     This is a helper function that initializes the claims list for the specified user.
+    /// </summary>
+    /// <param name="user"> The user to initialize the claims list for. </param>
+    /// <returns> A list of claims for the specified user. </returns>
+    /// <exception cref="NullReferenceException"> Thrown when the user email or username is null. </exception>
+    private List<Claim> InitializeClaimsList(User user)
     {
         return
         [
@@ -95,14 +103,20 @@ public class TokenService : ITokenService
                 user.UserName ?? throw new NullReferenceException("User username is null")),
             new Claim(JwtRegisteredClaimNames.Nbf, new DateTimeOffset(DateTime.Now).ToUnixTimeSeconds().ToString()),
             new Claim(JwtRegisteredClaimNames.Exp,
-                new DateTimeOffset(DateTime.Now.AddDays(Constants.TokenExpirationDays)).ToUnixTimeSeconds().ToString()),
+                new DateTimeOffset(DateTime.Now.AddDays(_jwtConfigurations.AccessTokenExpirationDays)).ToUnixTimeSeconds().ToString()),
             new Claim(ClaimTypes.Role, Roles.User)
         ];
     }
 
+    /// <summary>
+    ///     Generates a refresh token.
+    /// </summary>
+    /// <returns>
+    ///     A refresh token with a random value and expiration date.
+    /// </returns>
     public RefreshTokenDto GenerateRefreshToken()
     {
-        var randomNumber = new byte[32];
+        var randomNumber = new byte[64];
 
         using var rng = RandomNumberGenerator.Create();
         rng.GetBytes(randomNumber);
@@ -110,13 +124,22 @@ public class TokenService : ITokenService
         var refreshToken = new RefreshTokenDto
         {
             RefreshToken = Convert.ToBase64String(randomNumber),
-            ExpirationDate = DateTime.UtcNow.AddDays(_jwtConfigurations.RefreshTokenExpirationDays)
+            RefreshTokenExpirationDate = DateTime.UtcNow.AddDays(_jwtConfigurations.RefreshTokenExpirationDays)
         };
 
         _logger.LogInformation("Refresh token generated.");
         return refreshToken;
     }
 
+    /// <summary>
+    ///     Validates the JWT token.
+    /// </summary>
+    /// <param name="token">
+    ///     The JWT token to validate.
+    /// </param>
+    /// <returns>
+    ///     A ClaimsPrincipal object representing the principal of the token.
+    /// </returns>
     public ClaimsPrincipal GetPrincipalFromExpiredToken(string token)
     {
         var secretKey = Encoding.UTF8.GetBytes(_jwtConfigurations.SecretKey);

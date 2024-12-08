@@ -43,11 +43,5 @@ public class User : IdentityUser
     ///     The refresh token of the user.
     ///     Used for refreshing the access token.
     /// </summary>
-    public string? RefreshToken { get; set; } = string.Empty;
-
-    /// <summary>
-    ///     The expiration date of the refresh token.
-    ///     Used for checking if the refresh token is expired.
-    /// </summary>
-    public DateTime? RefreshTokenExpirationDate { get; set; }
+    public RefreshToken? RefreshToken { get; set; }
 }

@@ -1,36 +1,41 @@
+using System.Security.Claims;
+using Todo.Core.DTOs.AuthDTOs;
 using Todo.Core.Entities;
 
 namespace Todo.Core.Interfaces;
 
 /// <summary>
-///     Interface for TokenService class.
+///     Interface for TokenService
 /// </summary>
 public interface ITokenService
 {
     /// <summary>
-    ///     Generates a token for a user based on the user's information.
+    ///     Generate Token
     /// </summary>
     /// <param name="user">
-    ///     The user to generate a token for.
+    ///     User object to generate token for.
     /// </param>
     /// <returns>
-    ///     The generated token.
+    ///     AccessTokenDto object containing token and expiry date.
     /// </returns>
-    string GenerateToken(User user);
+    AccessTokenDto GenerateToken(User user);
 
     /// <summary>
-    ///     Gets the secret key for the token.
+    ///     Generate Refresh Token.
     /// </summary>
     /// <returns>
-    ///     The secret key for the token.
+    ///     RefreshTokenDto object containing refresh token and expiry date.
     /// </returns>
-    string GetSecretKey();
+    RefreshTokenDto GenerateRefreshToken();
 
     /// <summary>
-    ///     Gets the number of days until the token expires.
+    ///     Get Principal from expired token.
     /// </summary>
+    /// <param name="token">
+    ///     Token to get principal from.
+    /// </param>
     /// <returns>
-    ///     The number of days until the token expires.
+    ///     ClaimsPrincipal object.
     /// </returns>
-    int GetTokenExpirationDays();
+    ClaimsPrincipal GetPrincipalFromExpiredToken(string token);
 }

@@ -39,7 +39,6 @@ public class Task
     [Required]
     public bool IsCompleted { get; set; }
 
-
     /// <summary>
     ///    The due date of the task, optional, and can be null.
     /// </summary>
