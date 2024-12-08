@@ -1,14 +1,10 @@
-using System;
-using System.Collections.Generic;
-using Microsoft.AspNetCore.Mvc;
-using Todo.Api.Models.DTOs.ListDTOs;
-using Todo.Api.Models.Entities;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Authorization;
-using Microsoft.Extensions.Logging;
-using Todo.Api.Exceptions;
-using Todo.Api.Interfaces;
-using System.Threading.Tasks;
+using Microsoft.AspNetCore.Mvc;
+using Todo.Core.DTOs.ListDTOs;
+using Todo.Core.Entities;
+using Todo.Core.Exceptions;
+using Todo.Core.Interfaces;
 
 namespace Todo.Api.Controllers;
 

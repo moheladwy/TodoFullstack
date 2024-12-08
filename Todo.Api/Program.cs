@@ -1,4 +1,3 @@
-using Microsoft.AspNetCore.Builder;
 using Todo.Api.Configurations;
 
 namespace Todo.Api;
@@ -20,13 +19,13 @@ public static class Program
         var builder = WebApplication.CreateBuilder(args);
 
         // Initialize all the services.
-        builder.InitializeBuilder();
+        builder.InitializeBuilderConfigurations();
 
         // Build the app.
         var app = builder.Build();
 
         // Initialize all the middleware and services for the app.
-        app.InitializeApplication();
+        app.InitializeApplicationConfigurations();
 
         // Run the app.
         app.Run();
