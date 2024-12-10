@@ -1,4 +1,5 @@
 using System.ComponentModel.DataAnnotations;
+using System.ComponentModel.DataAnnotations.Schema;
 using Microsoft.AspNetCore.Identity;
 
 namespace Todo.Core.Entities;
@@ -40,8 +41,17 @@ public class User : IdentityUser
     public List<TaskList> Lists { get; set; } = [];
 
     /// <summary>
-    ///     The refresh token of the user.
+    ///     The Id of the refresh token of the user.
     ///     Used for refreshing the access token.
     /// </summary>
-    public RefreshToken? RefreshToken { get; set; }
+    public Guid? RefreshTokenId { get; set; }
+
+    /// <summary>
+    ///     The refresh token of the user.
+    ///     Used for refreshing the access token.
+    ///     A user can have only one refresh token.
+    ///     A refresh token can only belong to one user.
+    ///     This is a navigation property.
+    /// </summary>
+    public virtual RefreshToken? RefreshToken { get; set; }
 }

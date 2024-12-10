@@ -14,4 +14,9 @@ public class RefreshTokenDto
     ///     Gets or sets the refresh token expiration date.
     /// </summary>
     public DateTime RefreshTokenExpirationDate { get; set; }
+
+    /// <summary>
+    ///     Gets or sets the user ID.
+    /// </summary>
+    public string? UserId { get; set; }
 }

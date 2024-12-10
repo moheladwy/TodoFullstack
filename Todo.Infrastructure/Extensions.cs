@@ -31,6 +31,7 @@ public static class Extensions
     {
         builder.Services.AddScoped<IRepository<TaskList, AddListDto, UpdateListDto>, ListRepository>();
         builder.Services.AddScoped<IRepository<Task, AddTaskDto, UpdateTaskDto>, TasksRepository>();
+        builder.Services.AddScoped<IRefreshTokenRepository, RefreshTokenRepository>();
     }
 
     /// <summary>

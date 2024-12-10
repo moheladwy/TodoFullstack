@@ -1,8 +1,10 @@
 using Microsoft.AspNetCore.Identity;
+using Microsoft.EntityFrameworkCore;
 using Todo.Core.DTOs.AuthDTOs;
 using Todo.Core.Entities;
 using Todo.Core.Exceptions;
 using Todo.Core.Interfaces;
+using Todo.Infrastructure.DatabaseContexts;
 using Task = System.Threading.Tasks.Task;
 
 namespace Todo.Infrastructure.Services;
@@ -23,6 +25,16 @@ public class AuthenticationService : IAuthService
     private readonly ITokenService _tokenService;
 
     /// <summary>
+    ///     The RefreshTokenRepository instance to use for refresh token operations.
+    /// </summary>
+    private readonly IRefreshTokenRepository _refreshTokenRepository;
+
+    /// <summary>
+    ///     The TodoIdentityContext instance to use for database operations.
+    /// </summary>
+    private readonly TodoIdentityContext _context;
+
+    /// <summary>
     ///     Constructor for the AuthenticationService class.
     /// </summary>
     /// <param name="userManager">
@@ -31,12 +43,22 @@ public class AuthenticationService : IAuthService
     /// <param name="tokenService">
     ///     The TokenService instance to use for token operations, it's registered in the DI container.
     /// </param>
+    /// <param name="context">
+    ///     The TodoIdentityContext instance to use for database operations, it's registered in the DI container.
+    /// </param>
+    /// <param name="refreshTokenRepository">
+    ///     The RefreshTokenRepository instance to use for refresh token operations, it's registered in the DI container.
+    /// </param>
     public AuthenticationService(
         UserManager<User> userManager,
-        ITokenService tokenService)
+        ITokenService tokenService,
+        TodoIdentityContext context,
+        IRefreshTokenRepository refreshTokenRepository)
     {
         _userManager = userManager;
         _tokenService = tokenService;
+        _context = context;
+        _refreshTokenRepository = refreshTokenRepository;
     }
 
     /// <summary>
@@ -69,15 +91,12 @@ public class AuthenticationService : IAuthService
 
         var token = _tokenService.GenerateToken(user);
         var refreshToken = _tokenService.GenerateRefreshToken();
+        refreshToken.UserId = user.Id;
 
-        return new AuthResponse
-        {
-            UserId = user.Id,
-            AccessToken = token.AccessToken,
-            AccessTokenExpirationDate = token.AccessTokenExpirationDate,
-            RefreshToken = refreshToken.RefreshToken,
-            RefreshTokenExpirationDate = refreshToken.RefreshTokenExpirationDate
-        };
+        var refreshTokenEntity = await _refreshTokenRepository.AddRefreshTokenAsync(refreshToken);
+        await UpdateUserRefreshToken(user, refreshTokenEntity);
+
+        return GenerateAuthResponse(user, token, refreshToken);
     }
 
     /// <summary>
@@ -105,25 +124,16 @@ public class AuthenticationService : IAuthService
         var token = _tokenService.GenerateToken(user);
         var refreshToken = _tokenService.GenerateRefreshToken();
 
-        if (user.RefreshToken?.ExpirationDate <= DateTime.UtcNow)
+        if (user.RefreshToken == null || user.RefreshToken?.ExpirationDate <= DateTime.UtcNow)
         {
-            user.RefreshToken = new RefreshToken
-            {
-                Id = new Guid(),
-                Token = refreshToken.RefreshToken,
-                ExpirationDate = refreshToken.RefreshTokenExpirationDate
-            };
-            await _userManager.UpdateAsync(user);
+            refreshToken.UserId = user.Id;
+
+            var refreshTokenEntity = await _refreshTokenRepository.AddRefreshTokenAsync(refreshToken);
+
+            await UpdateUserRefreshToken(user, refreshTokenEntity);
         }
 
-        return new AuthResponse
-        {
-            UserId = user.Id,
-            AccessToken = token.AccessToken,
-            AccessTokenExpirationDate = token.AccessTokenExpirationDate,
-            RefreshToken = refreshToken.RefreshToken,
-            RefreshTokenExpirationDate = refreshToken.RefreshTokenExpirationDate
-        };
+        return GenerateAuthResponse(user, token, refreshToken);
     }
 
     // BUG: The method throws an exception when trying to fetch the user with the provided refresh token.
@@ -137,30 +147,36 @@ public class AuthenticationService : IAuthService
         if (string.IsNullOrEmpty(refreshToken))
             throw new ArgumentNullException(nameof(refreshToken), "Refresh token cannot be null or empty");
 
-        var user = _userManager.Users.First(u => u.RefreshToken != null && u.RefreshToken.Token == refreshToken);
+        var user = await _userManager.Users.FirstOrDefaultAsync(u => u.RefreshToken.Token == refreshToken);
 
-        if (user.RefreshToken?.ExpirationDate <= DateTime.UtcNow)
+        if (user == null || user.RefreshToken?.ExpirationDate <= DateTime.UtcNow)
             throw new UnauthorizedAccessException("Invalid refresh token");
 
         var token = _tokenService.GenerateToken(user);
         var newRefreshToken = _tokenService.GenerateRefreshToken();
+        newRefreshToken.UserId = user.Id;
 
-        user.RefreshToken = new RefreshToken
-        {
-            Id = new Guid(),
-            Token = newRefreshToken.RefreshToken,
-            ExpirationDate = newRefreshToken.RefreshTokenExpirationDate
-        };
+        var refreshTokenEntity = await _refreshTokenRepository.AddRefreshTokenAsync(newRefreshToken);
+        await UpdateUserRefreshToken(user, refreshTokenEntity);
 
+        return GenerateAuthResponse(user, token, newRefreshToken);
+    }
+
+    private async Task UpdateUserRefreshToken(User user, RefreshToken refreshToken)
+    {
+        user.RefreshTokenId = refreshToken.Id;
         await _userManager.UpdateAsync(user);
+    }
 
+    private static AuthResponse GenerateAuthResponse(User user, AccessTokenDto token, RefreshTokenDto refreshToken)
+    {
         return new AuthResponse
         {
             UserId = user.Id,
             AccessToken = token.AccessToken,
             AccessTokenExpirationDate = token.AccessTokenExpirationDate,
-            RefreshToken = newRefreshToken.RefreshToken,
-            RefreshTokenExpirationDate = newRefreshToken.RefreshTokenExpirationDate
+            RefreshToken = refreshToken.RefreshToken,
+            RefreshTokenExpirationDate = refreshToken.RefreshTokenExpirationDate
         };
     }
 

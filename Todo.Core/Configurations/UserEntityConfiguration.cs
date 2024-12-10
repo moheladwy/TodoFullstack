@@ -27,5 +27,11 @@ public class UserEntityConfiguration : IEntityTypeConfiguration<User>
             .WithOne(list => list.User)
             .HasForeignKey(list => list.UserId)
             .OnDelete(DeleteBehavior.Cascade);
+
+        builder.Property(user => user.RefreshTokenId)
+            .IsRequired(false);
+
+        builder.HasIndex(user => user.RefreshTokenId)
+            .IsUnique();
     }
 }

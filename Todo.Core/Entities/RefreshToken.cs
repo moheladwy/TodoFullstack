@@ -32,11 +32,10 @@ public class RefreshToken
     ///     A foreign key to the user that the refresh token belongs to.
     /// </summary>
     [DataType(DataType.Text)]
-    [ForeignKey("User")]
     public string? UserId { get; set; }
 
     /// <summary>
     ///     A navigation property to the user that the refresh token belongs to.
     /// </summary>
-    public User User { get; set; }
+    public virtual User? User { get; set; }
 }

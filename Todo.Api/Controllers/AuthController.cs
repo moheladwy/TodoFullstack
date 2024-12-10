@@ -105,6 +105,7 @@ public class AuthController : ControllerBase
     /// <returns> An IActionResult representing the result of the logout. </returns>
     /// <exception cref="InvalidModelStateException">Thrown when the model state is invalid.</exception>
     [HttpPost("logout")]
+    [Authorize]
     public async Task<IActionResult> Logout([FromBody] string username)
     {
         if (string.IsNullOrWhiteSpace(username))

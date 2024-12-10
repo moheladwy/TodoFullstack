@@ -167,9 +167,6 @@ namespace Todo.Infrastructure.Migrations
                     b.HasIndex("Token")
                         .IsUnique();
 
-                    b.HasIndex("UserId")
-                        .IsUnique();
-
                     b.ToTable("RefreshTokens");
                 });
 
@@ -284,6 +281,9 @@ namespace Todo.Infrastructure.Migrations
                     b.Property<bool>("PhoneNumberConfirmed")
                         .HasColumnType("INTEGER");
 
+                    b.Property<Guid?>("RefreshTokenId")
+                        .HasColumnType("TEXT");
+
                     b.Property<string>("SecurityStamp")
                         .HasColumnType("TEXT");
 
@@ -302,6 +302,9 @@ namespace Todo.Infrastructure.Migrations
                     b.HasIndex("NormalizedUserName")
                         .IsUnique()
                         .HasDatabaseName("UserNameIndex");
+
+                    b.HasIndex("RefreshTokenId")
+                        .IsUnique();
 
                     b.ToTable("AspNetUsers", (string)null);
                 });
@@ -357,16 +360,6 @@ namespace Todo.Infrastructure.Migrations
                         .IsRequired();
                 });
 
-            modelBuilder.Entity("Todo.Core.Entities.RefreshToken", b =>
-                {
-                    b.HasOne("Todo.Core.Entities.User", "User")
-                        .WithOne("RefreshToken")
-                        .HasForeignKey("Todo.Core.Entities.RefreshToken", "UserId")
-                        .OnDelete(DeleteBehavior.Cascade);
-
-                    b.Navigation("User");
-                });
-
             modelBuilder.Entity("Todo.Core.Entities.Task", b =>
                 {
                     b.HasOne("Todo.Core.Entities.TaskList", "TaskList")
@@ -387,6 +380,21 @@ namespace Todo.Infrastructure.Migrations
                     b.Navigation("User");
                 });
 
+            modelBuilder.Entity("Todo.Core.Entities.User", b =>
+                {
+                    b.HasOne("Todo.Core.Entities.RefreshToken", "RefreshToken")
+                        .WithOne("User")
+                        .HasForeignKey("Todo.Core.Entities.User", "RefreshTokenId")
+                        .OnDelete(DeleteBehavior.Cascade);
+
+                    b.Navigation("RefreshToken");
+                });
+
+            modelBuilder.Entity("Todo.Core.Entities.RefreshToken", b =>
+                {
+                    b.Navigation("User");
+                });
+
             modelBuilder.Entity("Todo.Core.Entities.TaskList", b =>
                 {
                     b.Navigation("Tasks");
@@ -395,8 +403,6 @@ namespace Todo.Infrastructure.Migrations
             modelBuilder.Entity("Todo.Core.Entities.User", b =>
                 {
                     b.Navigation("Lists");
-
-                    b.Navigation("RefreshToken");
                 });
 #pragma warning restore 612, 618
         }
