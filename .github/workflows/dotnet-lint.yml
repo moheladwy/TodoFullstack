@@ -21,7 +21,7 @@ jobs:
                   cache: true
 
             - name: Restore dependencies
-              run: dotnet restore
+              run: dotnet restore --use-lock-file
 
             - name: Build
               run: dotnet build --no-restore
