@@ -1,12 +1,16 @@
 services:
   api:
-    build: Todo.Api
+    build: .
     image: todo-api:latest
     container_name: todo-api
     ports:
       - "8070:8080"
     volumes:
       - todo-db:/TodoApi/Database
+    environment:
+      - ASPNETCORE_ENVIRONMENT=Production
+    command:
+      - "sh -c dotnet Todo.Api.dll ef database update && dotnet Todo.Api.dll"
     
 volumes:
   todo-db:

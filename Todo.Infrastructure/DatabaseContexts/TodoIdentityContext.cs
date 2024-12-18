@@ -1,5 +1,6 @@
 using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore;
+using Todo.Core.Configurations;
 using Todo.Core.Entities;
 using Task = Todo.Core.Entities.Task;
 
@@ -24,6 +25,11 @@ public class TodoIdentityContext(DbContextOptions<TodoIdentityContext> options) 
     public DbSet<TaskList> Lists { get; init; }
 
     /// <summary>
+    ///     The DbSet for the RefreshToken model in the database.
+    /// </summary>
+    public DbSet<RefreshToken> RefreshTokens { get; init; }
+
+    /// <summary>
     ///     The OnModelCreating method that is called when the model is being created.
     /// </summary>
     /// <param name="modelBuilder">
@@ -33,10 +39,9 @@ public class TodoIdentityContext(DbContextOptions<TodoIdentityContext> options) 
     {
         base.OnModelCreating(modelBuilder);
 
-        modelBuilder.Entity<TaskList>()
-            .HasMany(list => list.Tasks)
-            .WithOne(task => task.TaskList)
-            .HasForeignKey(task => task.ListId)
-            .OnDelete(DeleteBehavior.Cascade);
+        modelBuilder.ApplyConfiguration(new TaskListEntityConfiguration());
+        modelBuilder.ApplyConfiguration(new TaskEntityConfiguration());
+        modelBuilder.ApplyConfiguration(new RefreshTokenEntityConfiguration());
+        modelBuilder.ApplyConfiguration(new UserEntityConfiguration());
     }
 }

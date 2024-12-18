@@ -1,9 +1,11 @@
 using System.IdentityModel.Tokens.Jwt;
 using System.Security.Claims;
+using System.Security.Cryptography;
 using System.Text;
-using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Logging;
+using Microsoft.Extensions.Options;
 using Microsoft.IdentityModel.Tokens;
+using Todo.Core.DTOs.AuthDTOs;
 using Todo.Core.Entities;
 using Todo.Core.Interfaces;
 using Todo.Infrastructure.Configurations;
@@ -16,41 +18,31 @@ namespace Todo.Infrastructure.Services;
 public class TokenService : ITokenService
 {
     /// <summary>
-    ///     The secret key used for generating JWT tokens.
-    ///     This key is used to sign the JWT token.
-    ///     The key is stored in the configuration.
-    /// </summary>
-    private readonly SymmetricSecurityKey _key;
-
-    /// <summary>
-    ///     The configuration to use for the TokenService.
-    /// </summary>
-    private readonly IConfiguration _configuration;
-
-    /// <summary>
     ///     The logger to use for the TokenService.
     /// </summary>
     private readonly ILogger<TokenService> _logger;
 
     /// <summary>
+    ///     The JWT configurations to use for the TokenService.
+    /// </summary>
+    private readonly JwtConfigurations _jwtConfigurations;
+
+    /// <summary>
     ///     Constructor for the TokenService.
     /// </summary>
-    /// <param name="configuration">
-    ///     The configuration to use for the TokenService.
-    /// </param>
     /// <param name="logger">
     ///     The logger to use for the TokenService.
+    /// </param>
+    /// <param name="jwtConfigurations">
+    ///     The JWT configurations to use for the TokenService.
     /// </param>
     /// <exception cref="InvalidOperationException">
     ///     Thrown when the JWT Secret Key is not found in the configuration.
     /// </exception>
-    public TokenService(IConfiguration configuration, ILogger<TokenService> logger)
+    public TokenService(ILogger<TokenService> logger, IOptions<JwtConfigurations> jwtConfigurations)
     {
-        _configuration = configuration;
         _logger = logger;
-        _key = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(_configuration["Jwt:SecretKey"] ??
-                                                               throw new InvalidOperationException(
-                                                                   "JWT Secret Key not found.")));
+        _jwtConfigurations = jwtConfigurations.Value;
     }
 
     /// <summary>
@@ -65,48 +57,104 @@ public class TokenService : ITokenService
     /// <exception cref="NullReferenceException">
     ///     Thrown when the user email or username is null.
     /// </exception>
-    public string GenerateToken(User user)
+    public AccessTokenDto GenerateToken(User user)
     {
         ArgumentNullException.ThrowIfNull(user, nameof(user));
-        var claims = new List<Claim>
-        {
-            new(JwtRegisteredClaimNames.Jti, user.Id),
-            new(JwtRegisteredClaimNames.Email, user.Email ?? throw new NullReferenceException("User email is null")),
-            new(JwtRegisteredClaimNames.GivenName,
-                user.UserName ?? throw new NullReferenceException("User username is null")),
-            new(ClaimTypes.Role, Roles.User)
-        };
+        var claims = InitializeClaimsList(user);
 
-        var credentials = new SigningCredentials(_key, SecurityAlgorithms.HmacSha512Signature);
+        var key = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(_jwtConfigurations.SecretKey));
         var tokenDescriptor = new SecurityTokenDescriptor
         {
             Subject = new ClaimsIdentity(claims),
-            Expires = DateTime.UtcNow.AddDays(Constants.TokenExpirationDays),
-            SigningCredentials = credentials,
-            Issuer = _configuration["Jwt:Issuer"],
-            Audience = _configuration["Jwt:Audience"]
+            Expires = DateTime.UtcNow.AddDays(_jwtConfigurations.AccessTokenExpirationDays),
+            SigningCredentials = new SigningCredentials(key, SecurityAlgorithms.HmacSha512Signature),
+            Issuer = _jwtConfigurations.Issuer,
+            Audience = _jwtConfigurations.Audience
         };
 
         var tokenHandler = new JwtSecurityTokenHandler();
         var token = tokenHandler.CreateToken(tokenDescriptor);
-        
+
+        var accessToken = new AccessTokenDto()
+        {
+            UserId = user.Id,
+            AccessToken = tokenHandler.WriteToken(token),
+            AccessTokenExpirationDate = DateTime.UtcNow.AddDays(_jwtConfigurations.AccessTokenExpirationDays)
+        };
+
         _logger.LogInformation("JWT token generated for user: {user.Email}", user.Email);
-        return tokenHandler.WriteToken(token);
+        return accessToken;
     }
 
     /// <summary>
-    ///     Gets the secret key used for generating JWT tokens.
+    ///     This is a helper function that initializes the claims list for the specified user.
     /// </summary>
-    /// <returns>
-    ///     The secret key used for generating JWT tokens.
-    /// </returns>
-    public string GetSecretKey() => _key.ToString();
+    /// <param name="user"> The user to initialize the claims list for. </param>
+    /// <returns> A list of claims for the specified user. </returns>
+    /// <exception cref="NullReferenceException"> Thrown when the user email or username is null. </exception>
+    private List<Claim> InitializeClaimsList(User user)
+    {
+        return
+        [
+            new Claim(JwtRegisteredClaimNames.Jti, user.Id),
+            new Claim(JwtRegisteredClaimNames.Email,
+                user.Email ?? throw new NullReferenceException("User email is null")),
+            new Claim(JwtRegisteredClaimNames.GivenName,
+                user.UserName ?? throw new NullReferenceException("User username is null")),
+            new Claim(JwtRegisteredClaimNames.Nbf, new DateTimeOffset(DateTime.Now).ToUnixTimeSeconds().ToString()),
+            new Claim(JwtRegisteredClaimNames.Exp,
+                new DateTimeOffset(DateTime.Now.AddDays(_jwtConfigurations.AccessTokenExpirationDays)).ToUnixTimeSeconds().ToString()),
+            new Claim(ClaimTypes.Role, Roles.User)
+        ];
+    }
 
     /// <summary>
-    ///     Gets the expiration days for the JWT token.
+    ///     Generates a refresh token.
     /// </summary>
     /// <returns>
-    ///     The expiration days for the JWT token.
+    ///     A refresh token with a random value and expiration date.
     /// </returns>
-    public int GetTokenExpirationDays() => Constants.TokenExpirationDays;
+    public RefreshTokenDto GenerateRefreshToken()
+    {
+        var randomNumber = new byte[64];
+
+        using var rng = RandomNumberGenerator.Create();
+        rng.GetBytes(randomNumber);
+
+        var refreshToken = new RefreshTokenDto
+        {
+            RefreshToken = Convert.ToBase64String(randomNumber),
+            RefreshTokenExpirationDate = DateTime.UtcNow.AddDays(_jwtConfigurations.RefreshTokenExpirationDays)
+        };
+
+        _logger.LogInformation("Refresh token generated.");
+        return refreshToken;
+    }
+
+    /// <summary>
+    ///     Validates the JWT token.
+    /// </summary>
+    /// <param name="token">
+    ///     The JWT token to validate.
+    /// </param>
+    /// <returns>
+    ///     A ClaimsPrincipal object representing the principal of the token.
+    /// </returns>
+    public ClaimsPrincipal GetPrincipalFromExpiredToken(string token)
+    {
+        var secretKey = Encoding.UTF8.GetBytes(_jwtConfigurations.SecretKey);
+
+        var validation = new TokenValidationParameters
+        {
+            ValidateIssuer = true,
+            ValidateAudience = true,
+            ValidateIssuerSigningKey = true,
+            ValidIssuer = _jwtConfigurations.Issuer,
+            ValidAudience = _jwtConfigurations.Audience,
+            IssuerSigningKey = new SymmetricSecurityKey(secretKey),
+            ValidateLifetime = false,
+        };
+
+        return new JwtSecurityTokenHandler().ValidateToken(token, validation, out _);
+    }
 }

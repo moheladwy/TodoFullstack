@@ -1,8 +1,10 @@
 using Microsoft.AspNetCore.Identity;
+using Microsoft.EntityFrameworkCore;
 using Todo.Core.DTOs.AuthDTOs;
 using Todo.Core.Entities;
 using Todo.Core.Exceptions;
 using Todo.Core.Interfaces;
+using Todo.Infrastructure.DatabaseContexts;
 using Task = System.Threading.Tasks.Task;
 
 namespace Todo.Infrastructure.Services;
@@ -23,6 +25,16 @@ public class AuthenticationService : IAuthService
     private readonly ITokenService _tokenService;
 
     /// <summary>
+    ///     The RefreshTokenRepository instance to use for refresh token operations.
+    /// </summary>
+    private readonly IRefreshTokenRepository _refreshTokenRepository;
+
+    /// <summary>
+    ///     The TodoIdentityContext instance to use for database operations.
+    /// </summary>
+    private readonly TodoIdentityContext _context;
+
+    /// <summary>
     ///     Constructor for the AuthenticationService class.
     /// </summary>
     /// <param name="userManager">
@@ -31,12 +43,22 @@ public class AuthenticationService : IAuthService
     /// <param name="tokenService">
     ///     The TokenService instance to use for token operations, it's registered in the DI container.
     /// </param>
+    /// <param name="context">
+    ///     The TodoIdentityContext instance to use for database operations, it's registered in the DI container.
+    /// </param>
+    /// <param name="refreshTokenRepository">
+    ///     The RefreshTokenRepository instance to use for refresh token operations, it's registered in the DI container.
+    /// </param>
     public AuthenticationService(
         UserManager<User> userManager,
-        ITokenService tokenService)
+        ITokenService tokenService,
+        TodoIdentityContext context,
+        IRefreshTokenRepository refreshTokenRepository)
     {
         _userManager = userManager;
         _tokenService = tokenService;
+        _context = context;
+        _refreshTokenRepository = refreshTokenRepository;
     }
 
     /// <summary>
@@ -51,7 +73,7 @@ public class AuthenticationService : IAuthService
     /// <exception cref="CreateUserException">
     ///     Thrown when the user creation in the system fails.
     /// </exception>
-    public async Task<User> Register(RegisterUserDto registerUserDto)
+    public async Task<AuthResponse> Register(RegisterUserDto registerUserDto)
     {
         // Create a new user instance with the provided credentials.
         var user = new User
@@ -67,7 +89,14 @@ public class AuthenticationService : IAuthService
         if (!result.Succeeded) 
             throw new CreateUserException($"Failed to create user because of: {string.Join(", ", result.Errors.Select(e => e.Description))}");
 
-        return user;
+        var token = _tokenService.GenerateToken(user);
+        var refreshToken = _tokenService.GenerateRefreshToken();
+        refreshToken.UserId = user.Id;
+
+        var refreshTokenEntity = await _refreshTokenRepository.AddRefreshTokenAsync(refreshToken);
+        await UpdateUserRefreshToken(user, refreshTokenEntity);
+
+        return GenerateAuthResponse(user, token, refreshToken);
     }
 
     /// <summary>
@@ -85,44 +114,69 @@ public class AuthenticationService : IAuthService
     /// <exception cref="InvalidPasswordException">
     ///     Thrown when the password provided is invalid.
     /// </exception>
-    public async Task<User> Login(LoginUserDto loginUserDto)
+    public async Task<AuthResponse> Login(LoginUserDto loginUserDto)
     {
         var user = await _userManager.FindByEmailAsync(loginUserDto.Email) ??
                    throw new InvalidEmailException("Invalid email");
-        var result = await _userManager.CheckPasswordAsync(user, loginUserDto.Password);
-
-        if (!result)
+        if (!await _userManager.CheckPasswordAsync(user, loginUserDto.Password))
             throw new InvalidPasswordException($"Invalid password for the email {loginUserDto.Email} provided");
         
-        return user;
+        var token = _tokenService.GenerateToken(user);
+        var refreshToken = _tokenService.GenerateRefreshToken();
+
+        if (user.RefreshToken == null || user.RefreshToken?.ExpirationDate <= DateTime.UtcNow)
+        {
+            refreshToken.UserId = user.Id;
+
+            var refreshTokenEntity = await _refreshTokenRepository.AddRefreshTokenAsync(refreshToken);
+
+            await UpdateUserRefreshToken(user, refreshTokenEntity);
+        }
+
+        return GenerateAuthResponse(user, token, refreshToken);
     }
 
-    public async Task<AuthResponse> RefreshToken(RefreshTokenRequest request)
+    /// <summary>
+    ///     Login a user with the provided refresh token.
+    /// </summary>
+    /// <param name="refreshToken">The refresh token to use for logging in the user.</param>
+    /// <returns>An <see cref="AuthResponse"/> indicating the result of the login process.</returns>
+    public async Task<AuthResponse> LoginWithRefreshToken(string refreshToken)
     {
-        // var principal = _tokenService.GetPrincipalFromExpiredToken(request.AccessToken) ??
-        //                 throw new InvalidTokenException("Invalid access token");
-        //
-        // var username = principal.Identity?.Name;
-        // if (username == null) throw new InvalidTokenException("Invalid access token");
-        //
-        // var user = await _userManager.FindByNameAsync(username) ??
-        //            throw new UserNotFoundException($"User with username {username} not found");
-        //
-        // if (user.RefreshToken != request.RefreshToken || user.RefreshTokenExpirationDate <= DateTime.UtcNow)
-        //     throw new UnauthorizedAccessException("Invalid refresh token");
-        //
-        // var token = _tokenService.GenerateToken(user);
-        // var refreshToken = _tokenService.GenerateRefreshToken();
-        //
-        // return new AuthResponse
-        // {
-        //     Id = user.Id,
-        //     AccessToken = token.Token,
-        //     AccessTokenExpirationDate = token.ExpirationDate,
-        //     RefreshToken = refreshToken.RefreshToken,
-        //     RefreshTokenExpirationDate = refreshToken.ExpirationDate
-        // };
-        throw new NotImplementedException();
+        if (string.IsNullOrEmpty(refreshToken))
+            throw new ArgumentNullException(nameof(refreshToken), "Refresh token cannot be null or empty");
+
+        var user = await _userManager.Users.FirstOrDefaultAsync(u => u.RefreshToken.Token == refreshToken);
+
+        if (user == null || user.RefreshToken?.ExpirationDate <= DateTime.UtcNow)
+            throw new UnauthorizedAccessException("Invalid refresh token");
+
+        var token = _tokenService.GenerateToken(user);
+        var newRefreshToken = _tokenService.GenerateRefreshToken();
+        newRefreshToken.UserId = user.Id;
+
+        var refreshTokenEntity = await _refreshTokenRepository.AddRefreshTokenAsync(newRefreshToken);
+        await UpdateUserRefreshToken(user, refreshTokenEntity);
+
+        return GenerateAuthResponse(user, token, newRefreshToken);
+    }
+
+    private async Task UpdateUserRefreshToken(User user, RefreshToken refreshToken)
+    {
+        user.RefreshTokenId = refreshToken.Id;
+        await _userManager.UpdateAsync(user);
+    }
+
+    private static AuthResponse GenerateAuthResponse(User user, AccessTokenDto token, RefreshTokenDto refreshToken)
+    {
+        return new AuthResponse
+        {
+            UserId = user.Id,
+            AccessToken = token.AccessToken,
+            AccessTokenExpirationDate = token.AccessTokenExpirationDate,
+            RefreshToken = refreshToken.RefreshToken,
+            RefreshTokenExpirationDate = refreshToken.RefreshTokenExpirationDate
+        };
     }
 
     /// <summary>

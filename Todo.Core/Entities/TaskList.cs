@@ -1,5 +1,6 @@
 using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
+using System.Text.Json.Serialization;
 
 namespace Todo.Core.Entities;
 
@@ -47,4 +48,13 @@ public class TaskList
     /// </summary>
     [ForeignKey("UserId")]
     public string? UserId { get; set; }
+
+    /// <summary>
+    ///     The user that the list of tasks belongs to.
+    ///     This is a navigation property that links the list of tasks to the user.
+    ///     The user is not mapped to the database.
+    ///     The user is not being serialized.
+    /// </summary>
+    [JsonIgnore]
+    public virtual User? User { get; set; }
 }

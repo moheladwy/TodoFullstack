@@ -15,7 +15,6 @@ namespace Todo.Api.Controllers;
 public class AuthController : ControllerBase
 {
     private readonly IAuthService _authenticationService;
-    private readonly ITokenService _tokenService;
     private readonly ILogger<AuthController> _logger;
 
     /// <summary>
@@ -24,22 +23,17 @@ public class AuthController : ControllerBase
     /// <param name="authenticationService">
     ///     The service to use for authentication operations.
     /// </param>
-    /// <param name="tokenService">
-    ///     The service to use for token operations.
-    /// </param>
     /// <param name="logger">
     ///     The logger to use for logging.
     /// </param>
-    public AuthController(IAuthService authenticationService, ITokenService tokenService,
-        ILogger<AuthController> logger)
+    public AuthController(IAuthService authenticationService, ILogger<AuthController> logger)
     {
         _authenticationService = authenticationService;
-        _tokenService = tokenService;
         _logger = logger;
     }
 
     /// <summary>
-    ///     Login endpoint for users to authenticate themselves and receive a JWT token for authorization.
+    ///     Login endpoint for users to authenticate themselves using email and password, and receive a JWT token for authorization.
     /// </summary>
     /// <param name="loginDto">
     ///     The credentials to use for logging in as a user (email and password).
@@ -55,15 +49,28 @@ public class AuthController : ControllerBase
         if (!ModelState.IsValid)
             throw new InvalidModelStateException($"Invalid model state because: {ModelState.ValidationState}");
 
-        var user = await _authenticationService.Login(loginDto);
-        _logger.LogInformation("User logged in successfully with email: {email}", user.Email);
+        var response = await _authenticationService.Login(loginDto);
 
-        return Ok(new AuthResponse
-        {
-            Id = user.Id,
-            Token = _tokenService.GenerateToken(user),
-            ExpiresInDays = _tokenService.GetTokenExpirationDays()
-        });
+        _logger.LogInformation("User logged in successfully with Email: {Email}", loginDto.Email);
+        return Ok(response);
+    }
+
+    /// <summary>
+    ///     Login endpoint for users to authenticate themselves using refresh token and receive a JWT token for authorization using a refresh token.
+    /// </summary>
+    /// <param name="refreshToken">The refresh token to use for logging in the user.</param>
+    /// <returns> An IActionResult representing the result of the login. </returns>
+    /// <exception cref="InvalidModelStateException">Thrown when the model state is invalid.</exception>
+    [HttpPost("refresh")]
+    public async Task<IActionResult> LoginWithRefreshToken([FromBody] string refreshToken)
+    {
+        if (!ModelState.IsValid)
+            throw new InvalidModelStateException($"Invalid model state because: {ModelState.ValidationState}");
+
+        var response = await _authenticationService.LoginWithRefreshToken(refreshToken);
+
+        _logger.LogInformation("User logged in successfully with Refresh Token");
+        return Ok(response);
     }
 
     /// <summary>
@@ -85,14 +92,28 @@ public class AuthController : ControllerBase
         if (!ModelState.IsValid)
             throw new InvalidModelStateException($"Invalid model state because: {ModelState.ValidationState}");
 
-        var user = await _authenticationService.Register(registerDto);
+        var response = await _authenticationService.Register(registerDto);
+
         _logger.LogInformation("User registered successfully with email: {email}", registerDto.Email);
-        
-        return Ok(new AuthResponse()
-        {
-            Id = user.Id,
-            Token = _tokenService.GenerateToken(user),
-            ExpiresInDays = _tokenService.GetTokenExpirationDays()
-        });
+        return Ok(response);
+    }
+
+    /// <summary>
+    ///     Logout endpoint for users to log out of the system.
+    /// </summary>
+    /// <param name="username">The username of the user to log out.</param>
+    /// <returns> An IActionResult representing the result of the logout. </returns>
+    /// <exception cref="InvalidModelStateException">Thrown when the model state is invalid.</exception>
+    [HttpPost("logout")]
+    [Authorize]
+    public async Task<IActionResult> Logout([FromBody] string username)
+    {
+        if (string.IsNullOrWhiteSpace(username))
+            throw new InvalidModelStateException("Username is required");
+
+        await _authenticationService.Logout(username);
+
+        _logger.LogInformation("User logged out successfully with username: {username}", username);
+        return Ok();
     }
 }

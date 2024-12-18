@@ -2,15 +2,23 @@ using System.ComponentModel.DataAnnotations;
 
 namespace Todo.Core.DTOs.AuthDTOs;
 
+/// <summary>
+///     Data transfer object for user login.
+/// </summary>
 public class LoginUserDto
 {
+    /// <summary>
+    ///     Email of the user.
+    /// </summary>
     [Required]
     [EmailAddress]
     public required string Email { get; set; }
 
+    /// <summary>
+    ///     Password of the user.
+    /// </summary>
     [Required]
-    [MinLength(12)]
-    [MaxLength(100)]
+    [StringLength(100, MinimumLength = 12)]
     [DataType(DataType.Password)]
     [RegularExpression(
         @"^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[!@#$%^&*()_+\-=[\]{};':""\\|,.<>\/?]).{12,100}$",
