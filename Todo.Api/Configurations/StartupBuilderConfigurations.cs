@@ -23,8 +23,9 @@ public static class StartupBuilderConfigurations
         builder.AddAuthenticationService();
         builder.Services.AddAuthorizationBuilder();
         builder.AddIdentityService();
-        builder.RegisterRepositories();
         builder.RegisterServices();
+        builder.RegisterRepositories();
+        builder.RegisterCachingRepositories();
 
         builder.Services.AddHttpClient();
         builder.Services.AddControllers().AddJsonOptions(options =>

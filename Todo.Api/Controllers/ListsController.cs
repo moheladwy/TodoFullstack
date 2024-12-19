@@ -27,7 +27,7 @@ public class ListsController : ControllerBase
 {
     private readonly IRepository<TaskList, AddListDto, UpdateListDto> _listRepository;
     private readonly ILogger<ListsController> _logger;
-    private readonly IAccountService _accountService;
+    private readonly IAccountRepository _accountRepository;
     private User? _authenticatedUser;
 
     /// <summary>
@@ -39,16 +39,16 @@ public class ListsController : ControllerBase
     /// <param name="logger">
     ///     The logger for the ListsController class.
     /// </param>
-    /// <param name="accountService">
+    /// <param name="accountRepository">
     ///     The account service for managing user operations.
     /// </param>
     public ListsController(
         IRepository<TaskList, AddListDto, UpdateListDto> listRepository,
         ILogger<ListsController> logger,
-        IAccountService accountService)
+        IAccountRepository accountRepository)
     {
         _listRepository = listRepository;
-        _accountService = accountService;
+        _accountRepository = accountRepository;
         _logger = logger;
     }
 
@@ -63,7 +63,7 @@ public class ListsController : ControllerBase
     [HttpGet("all-lists")]
     public async Task<ActionResult<List<TaskList>>> GetAllLists()
     {
-        _authenticatedUser = await _accountService.GetUserByClaims(User);
+        _authenticatedUser = await _accountRepository.GetUserByClaims(User);
         var lists = await _listRepository.GetAllAsync(_authenticatedUser.Id);
         
         _logger.LogInformation("Lists for user with ID: {userId} retrieved successfully.", _authenticatedUser.Id);
@@ -107,7 +107,7 @@ public class ListsController : ControllerBase
         if (!ModelState.IsValid)
             throw new InvalidModelStateException($"Invalid model state because of the following errors: {ModelState.ValidationState}");
 
-        _authenticatedUser = await _accountService.GetUserByClaims(User);
+        _authenticatedUser = await _accountRepository.GetUserByClaims(User);
         if (_authenticatedUser.Id != addListDto.UserId)
             throw new UnauthorizedAccessException($"User with Id: {_authenticatedUser.Id} is not authorized to add a list for another user.");
 

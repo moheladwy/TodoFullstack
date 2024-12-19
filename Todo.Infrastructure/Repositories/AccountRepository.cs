@@ -7,12 +7,12 @@ using Todo.Core.Exceptions;
 using Todo.Core.Interfaces;
 using Task = System.Threading.Tasks.Task;
 
-namespace Todo.Infrastructure.Services;
+namespace Todo.Infrastructure.Repositories;
 
 /// <summary>
 ///     AccountService class is used to manage user operations like changing password, updating user information etc.
 /// </summary>
-public class AccountService : IAccountService
+public class AccountRepository : IAccountRepository
 {
     /// <summary>
     ///     UserManager instance to manage user operations.
@@ -22,7 +22,7 @@ public class AccountService : IAccountService
     /// <summary>
     ///     ILogger instance to log information, warnings, and errors.
     /// </summary>
-    private readonly ILogger<AccountService> _logger;
+    private readonly ILogger<AccountRepository> _logger;
 
     /// <summary>
     ///     Constructor of AccountService class.
@@ -34,7 +34,7 @@ public class AccountService : IAccountService
     ///    ILogger instance to log information, warnings, and errors, it's injected by dependency injection container.
     ///    It's used to log information, warnings, and errors.
     /// </param>
-    public AccountService(UserManager<User> userManager, ILogger<AccountService> logger)
+    public AccountRepository(UserManager<User> userManager, ILogger<AccountRepository> logger)
     {
         _userManager = userManager;
         _logger = logger;
