@@ -113,7 +113,7 @@ public class AccountRepository : IAccountRepository
             throw new PasswordDidNotChangeException($"Failed to change password because of: {string.Join(", ",
                 result.Errors.Select(e => e.Description))}");
 
-        _logger.LogInformation("Password changed successfully for user with id: {changePasswordDto.Id}", changePasswordDto.Id);
+        _logger.LogInformation("Password changed successfully for user with username: {username}", user.UserName);
     }
 
     /// <summary>
