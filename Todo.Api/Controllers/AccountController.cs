@@ -21,21 +21,21 @@ namespace Todo.Api.Controllers;
 [Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme)]
 public class AccountController : ControllerBase
 {
-    private readonly IAccountService _accountService;
+    private readonly IAccountRepository _accountRepository;
     private readonly ILogger<AccountController> _logger;
 
     /// <summary>
     ///     Constructor for the AccountController.
     /// </summary>
-    /// <param name="accountService">
+    /// <param name="accountRepository">
     ///     The service to use for account operations.
     /// </param>
     /// <param name="logger">
     ///     The logger to use for logging.
     /// </param>
-    public AccountController(IAccountService accountService, ILogger<AccountController> logger)
+    public AccountController(IAccountRepository accountRepository, ILogger<AccountController> logger)
     {
-        _accountService = accountService;
+        _accountRepository = accountRepository;
         _logger = logger;
     }
 
@@ -53,7 +53,7 @@ public class AccountController : ControllerBase
     [HttpGet("get-user/{id}")]
     public async Task<IActionResult> GetUserById([FromRoute] string id)
     {
-        var userInfo = await _accountService.GetUserById(id);
+        var userInfo = await _accountRepository.GetUserById(id);
         _logger.LogInformation("User information retrieved successfully for user with id: {id}", userInfo.Id);
         return Ok(userInfo);
     }
@@ -75,7 +75,7 @@ public class AccountController : ControllerBase
         if (!ModelState.IsValid)
             throw new InvalidModelStateException($"Failed to change password because: {ModelState.ValidationState}");
 
-        await _accountService.ChangePassword(changePasswordDto);
+        await _accountRepository.ChangePassword(changePasswordDto);
         
         _logger.LogInformation("Password changed successfully for user with id: {id}", changePasswordDto.Id);
         return Ok("Password changed successfully.");
@@ -98,7 +98,7 @@ public class AccountController : ControllerBase
         if (!ModelState.IsValid)
             throw new InvalidModelStateException($"Failed to update user information because: {ModelState.ValidationState}");
 
-        await _accountService.UpdateUserInfo(updateUserInfoDto);
+        await _accountRepository.UpdateUserInfo(updateUserInfoDto);
         
         _logger.LogInformation("User information updated successfully for user with id: {id}", updateUserInfoDto.Id);
         return Ok("User information updated successfully.");
@@ -120,7 +120,7 @@ public class AccountController : ControllerBase
     [HttpDelete("delete-account/{id}")]
     public async Task<IActionResult> DeleteAccount([FromRoute] string id)
     {
-        await _accountService.DeleteAccount(id);
+        await _accountRepository.DeleteAccount(id);
         
         _logger.LogInformation("Account deleted successfully for user with id: {id}", id);
         return Ok("Account deleted successfully.");

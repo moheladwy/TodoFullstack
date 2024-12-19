@@ -24,14 +24,22 @@ public static class Extensions
     {
         builder.Services.AddScoped<ITokenService, TokenService>();
         builder.Services.AddScoped<IAuthService, AuthenticationService>();
-        builder.Services.AddScoped<IAccountService, AccountService>();
     }
 
     public static void RegisterRepositories(this WebApplicationBuilder builder)
     {
-        builder.Services.AddScoped<IRepository<TaskList, AddListDto, UpdateListDto>, ListRepository>();
-        builder.Services.AddScoped<IRepository<Task, AddTaskDto, UpdateTaskDto>, TasksRepository>();
+        builder.Services.AddScoped<ListRepository>();
+        builder.Services.AddScoped<TasksRepository>();
+        builder.Services.AddScoped<AccountRepository>();
         builder.Services.AddScoped<IRefreshTokenRepository, RefreshTokenRepository>();
+    }
+
+    public static void RegisterCachingRepositories(this WebApplicationBuilder builder)
+    {
+        builder.Services.AddMemoryCache();
+        builder.Services.AddScoped<IAccountRepository, CachedAccountRepository>();
+        builder.Services.AddScoped<IRepository<TaskList, AddListDto, UpdateListDto>, CachedListRepository>();
+        builder.Services.AddScoped<IRepository<Task, AddTaskDto, UpdateTaskDto>, CachedTasksRepository>();
     }
 
     /// <summary>

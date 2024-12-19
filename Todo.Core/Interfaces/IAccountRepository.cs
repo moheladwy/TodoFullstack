@@ -9,7 +9,7 @@ namespace Todo.Core.Interfaces;
 ///     IAccountService interface is used to manage user operations like get user information,
 ///     changing password, updating user information etc.
 /// </summary>
-public interface IAccountService
+public interface IAccountRepository
 {
     /// <summary>
     ///    GetUserById method is used to get user by id.
