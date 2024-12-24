@@ -5,7 +5,7 @@ using Todo.Core.Interfaces;
 using Todo.Infrastructure.DatabaseContexts;
 using Task_Entity = Todo.Core.Entities.Task;
 
-namespace Todo.Infrastructure.Repositories;
+namespace Todo.Infrastructure.Repositories.DB;
 
 /// <summary>
 ///     A class that implements the IRepository interface for the Task entity.

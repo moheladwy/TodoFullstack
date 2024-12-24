@@ -1,0 +1,10 @@
+Jenkinsfile
+LICENSE
+README.md
+.github
+.gitignore
+.idea
+.vscode
+Dockerfile
+docker-compose.yml
+.dockerignore
