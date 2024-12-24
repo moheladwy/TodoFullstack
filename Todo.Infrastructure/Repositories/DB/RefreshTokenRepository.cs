@@ -5,7 +5,7 @@ using Todo.Core.Interfaces;
 using Todo.Infrastructure.DatabaseContexts;
 using Task = System.Threading.Tasks.Task;
 
-namespace Todo.Infrastructure.Repositories;
+namespace Todo.Infrastructure.Repositories.DB;
 
 public class RefreshTokenRepository : IRefreshTokenRepository
 {

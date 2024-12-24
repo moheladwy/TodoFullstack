@@ -7,7 +7,7 @@ using Todo.Core.Exceptions;
 using Todo.Core.Interfaces;
 using Task = System.Threading.Tasks.Task;
 
-namespace Todo.Infrastructure.Repositories;
+namespace Todo.Infrastructure.Repositories.DB;
 
 /// <summary>
 ///     AccountService class is used to manage user operations like changing password, updating user information etc.

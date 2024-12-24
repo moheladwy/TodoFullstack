@@ -1,4 +1,12 @@
 services:
+  cache:
+    image: redis:alpine
+    container_name: todo-redis-cache
+    networks:
+      - todo-network
+    ports:
+      - "6379:6379"
+
   api:
     build: .
     image: todo-api:latest
@@ -7,6 +15,8 @@ services:
       - "8070:8080"
     volumes:
       - todo-db:/TodoApi/Database
+    networks:
+      - todo-network
     environment:
       - ASPNETCORE_ENVIRONMENT=Production
     command:
@@ -15,3 +25,8 @@ services:
 volumes:
   todo-db:
     name: todo-db
+
+networks:
+  todo-network:
+    driver: bridge
+    name: todo-network

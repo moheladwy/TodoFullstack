@@ -1,51 +1,49 @@
-using Microsoft.Extensions.Caching.Memory;
 using Todo.Core.DTOs.TasksDtos;
-using Todo.Core.Exceptions;
 using Todo.Core.Interfaces;
-using Todo.Infrastructure.Configurations;
+using Todo.Infrastructure.Repositories.DB;
 using Task_Entity = Todo.Core.Entities.Task;
 
-namespace Todo.Infrastructure.Repositories;
+namespace Todo.Infrastructure.Repositories.Cached;
 
 public class CachedTasksRepository : IRepository<Task_Entity, AddTaskDto, UpdateTaskDto>
 {
     private readonly TasksRepository _tasksRepository;
-    private readonly IMemoryCache _memoryCache;
+    private readonly IRedisCacheService _cacheService;
 
-    public CachedTasksRepository(TasksRepository tasksRepository, IMemoryCache memoryCache)
+    /// <summary>
+    ///     Initializes a new instance of the <see cref="CachedTasksRepository"/> class.
+    /// </summary>
+    /// <param name="tasksRepository"></param>
+    /// <param name="cacheService"></param>
+    public CachedTasksRepository(TasksRepository tasksRepository, IRedisCacheService cacheService)
     {
         _tasksRepository = tasksRepository;
-        _memoryCache = memoryCache;
+        _cacheService = cacheService;
     }
     
     public async Task<IEnumerable<Task_Entity>> GetAllAsync(string id)
     {
         var cacheKey = $"List-{id}-Tasks";
 
-        var cachedTasks = await _memoryCache.GetOrCreateAsync<IEnumerable<Task_Entity>>(
-            cacheKey,
-            entry =>
-            {
-                entry.SetAbsoluteExpiration(TimeSpan.FromMinutes(Constants.TimeSpanByMinutesForCaching));
-                return _tasksRepository.GetAllAsync(id);
-            });
+        var cachedTasks = await _cacheService.GetData<IEnumerable<Task_Entity>>(cacheKey);
+        if (cachedTasks is not null) return cachedTasks;
 
-        return cachedTasks ?? [];
+        var tasks = await _tasksRepository.GetAllAsync(id);
+        var taskEntities = tasks.ToList();
+        await _cacheService.SetData(cacheKey, taskEntities);
+        return taskEntities;
     }
 
     public async Task<Task_Entity> GetByIdAsync(Guid id)
     {
         var cacheKey = $"Task-{id}";
 
-        var cachedTask = await _memoryCache.GetOrCreateAsync(
-            cacheKey,
-            entry =>
-            {
-                entry.SetAbsoluteExpiration(TimeSpan.FromMinutes(Constants.TimeSpanByMinutesForCaching));
-                return _tasksRepository.GetByIdAsync(id);
-            });
+        var cachedTask = await _cacheService.GetData<Task_Entity>(cacheKey);
+        if (cachedTask is not null) return cachedTask;
 
-        return cachedTask ?? throw new TaskNotFoundException($"The task with id: {id} was not found.");
+        var task = await _tasksRepository.GetByIdAsync(id);
+        await _cacheService.SetData(cacheKey, task);
+        return task;
     }
 
     public async Task<Task_Entity> AddAsync(AddTaskDto entity)
@@ -58,11 +56,9 @@ public class CachedTasksRepository : IRepository<Task_Entity, AddTaskDto, Update
     public async Task<Task_Entity> UpdateAsync(UpdateTaskDto entity)
     {
         var updatedTask = await _tasksRepository.UpdateAsync(entity);
-
         var taskEntity = await _tasksRepository.GetByIdAsync(entity.Id);
         await UpdateAllTasksInCache(taskEntity.ListId.ToString() ??
                                     throw new ArgumentNullException(taskEntity.ListId.ToString(), "The ListId cannot be null."));
-
         return updatedTask;
     }
     
@@ -72,9 +68,7 @@ public class CachedTasksRepository : IRepository<Task_Entity, AddTaskDto, Update
     {
         var task = await GetByIdAsync(id);
         await _tasksRepository.DeleteAsync(id);
-
-        _memoryCache.Remove($"Task-{id}");
-
+        await _cacheService.RemoveData($"Task-{id}");
         await UpdateAllTasksInCache(task.ListId.ToString() ??
                                     throw new ArgumentNullException(task.ListId.ToString(), "The ListId cannot be null."));
     }
@@ -82,7 +76,9 @@ public class CachedTasksRepository : IRepository<Task_Entity, AddTaskDto, Update
     private async Task UpdateAllTasksInCache(string listId)
     {
         var cacheKey = $"List-{listId}-Tasks";
-        _memoryCache.Remove(cacheKey);
-        _memoryCache.CreateEntry(cacheKey).Value = await _tasksRepository.GetAllAsync(listId);
+        var task = await _tasksRepository.GetAllAsync(listId);
+        var taskEntities = task.ToList();
+        await _cacheService.RemoveData(cacheKey);
+        await _cacheService.SetData(cacheKey, taskEntities);
     }
 }

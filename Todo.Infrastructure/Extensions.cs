@@ -12,7 +12,8 @@ using Todo.Core.Entities;
 using Todo.Core.Interfaces;
 using Todo.Infrastructure.Configurations;
 using Todo.Infrastructure.DatabaseContexts;
-using Todo.Infrastructure.Repositories;
+using Todo.Infrastructure.Repositories.Cached;
+using Todo.Infrastructure.Repositories.DB;
 using Todo.Infrastructure.Services;
 using Task = Todo.Core.Entities.Task;
 
@@ -36,7 +37,12 @@ public static class Extensions
 
     public static void RegisterCachingRepositories(this WebApplicationBuilder builder)
     {
-        builder.Services.AddMemoryCache();
+        builder.Services.AddStackExchangeRedisCache(options =>
+        {
+            options.Configuration = builder.Configuration.GetConnectionString(Constants.RedisConnectionStringName);
+            options.InstanceName = "TodoFullStack_";
+        });
+        builder.Services.AddScoped<IRedisCacheService, RedisCachingService>();
         builder.Services.AddScoped<IAccountRepository, CachedAccountRepository>();
         builder.Services.AddScoped<IRepository<TaskList, AddListDto, UpdateListDto>, CachedListRepository>();
         builder.Services.AddScoped<IRepository<Task, AddTaskDto, UpdateTaskDto>, CachedTasksRepository>();
