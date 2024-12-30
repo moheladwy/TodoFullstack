@@ -5,7 +5,7 @@ namespace Todo.Api.Configurations;
 
 public static class StartupApplicationConfiguration
 {
-        /// <summary>
+    /// <summary>
     ///    Initializes the application with the necessary services and middleware.
     /// </summary>
     /// <param name="app">
@@ -22,12 +22,12 @@ public static class StartupApplicationConfiguration
             app.ProductionMode();
 
         app.UseHttpsRedirection();
-        app.UseHttpLogging();
-        app.UseRouting();
-        app.UseSwagger();
-        app.UseSwaggerUI();
         app.UseAuthentication();
         app.UseAuthorization();
+        app.UseRouting();
+        app.UseHttpLogging();
+        app.UseSwagger();
+        app.UseSwaggerUI();
         app.UseStatusCodePages();
         app.MapControllers();
     }

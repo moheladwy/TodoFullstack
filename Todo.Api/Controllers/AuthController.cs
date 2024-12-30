@@ -43,7 +43,7 @@ public class AuthController : ControllerBase
     ///     returns BadRequest if the ModelState is invalid or an exception is thrown,
     ///     otherwise returns Ok with the JWT token.
     /// </returns>
-    [HttpPost("login")]
+    [HttpPost("jwt/login")]
     public async Task<IActionResult> Login([FromBody] LoginUserDto loginDto)
     {
         if (!ModelState.IsValid)
@@ -61,7 +61,7 @@ public class AuthController : ControllerBase
     /// <param name="refreshToken">The refresh token to use for logging in the user.</param>
     /// <returns> An IActionResult representing the result of the login. </returns>
     /// <exception cref="InvalidModelStateException">Thrown when the model state is invalid.</exception>
-    [HttpPost("refresh")]
+    [HttpPost("jwt/refresh")]
     public async Task<IActionResult> LoginWithRefreshToken([FromBody] string refreshToken)
     {
         if (!ModelState.IsValid)
@@ -86,7 +86,7 @@ public class AuthController : ControllerBase
     ///     returns BadRequest if the ModelState is invalid or an exception is thrown,
     ///     otherwise returns Ok.
     /// </returns>
-    [HttpPost("register")]
+    [HttpPost("jwt/register")]
     public async Task<IActionResult> Register([FromBody] RegisterUserDto registerDto)
     {
         if (!ModelState.IsValid)
@@ -104,7 +104,7 @@ public class AuthController : ControllerBase
     /// <param name="username">The username of the user to log out.</param>
     /// <returns> An IActionResult representing the result of the logout. </returns>
     /// <exception cref="InvalidModelStateException">Thrown when the model state is invalid.</exception>
-    [HttpPost("logout")]
+    [HttpPost("jwt/logout")]
     [Authorize]
     public async Task<IActionResult> Logout([FromBody] string username)
     {
