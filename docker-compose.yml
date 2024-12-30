@@ -1,32 +1,34 @@
 services:
-  cache:
-    image: redis:alpine
-    container_name: todo-redis-cache
-    networks:
-      - todo-network
-    ports:
-      - "6379:6379"
+    cache:
+        image: redis:alpine
+        container_name: todo-redis-cache
+        networks:
+            - todo-network
+        ports:
+            - "6379:6379"
 
-  api:
-    build: .
-    image: todo-api:latest
-    container_name: todo-api
-    ports:
-      - "8070:8080"
-    volumes:
-      - todo-db:/TodoApi/Database
-    networks:
-      - todo-network
-    environment:
-      - ASPNETCORE_ENVIRONMENT=Production
-    command:
-      - "sh -c dotnet Todo.Api.dll ef database update && dotnet Todo.Api.dll"
-    
+    api:
+        build: .
+        image: todo-api:latest
+        container_name: todo-api
+        ports:
+            - "8070:8080"
+        volumes:
+            - todo-db:/TodoApi/Database
+        networks:
+            - todo-network
+        environment:
+            - ASPNETCORE_ENVIRONMENT=Production
+        depends_on:
+            - cache
+        command:
+            - "sh -c dotnet Todo.Api.dll ef database update && dotnet Todo.Api.dll"
+
 volumes:
-  todo-db:
-    name: todo-db
+    todo-db:
+        name: todo-db
 
 networks:
-  todo-network:
-    driver: bridge
-    name: todo-network
+    todo-network:
+        driver: bridge
+        name: todo-network
