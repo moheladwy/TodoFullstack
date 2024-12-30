@@ -14,3 +14,6 @@ Database
 
 # Rider
 .idea
+
+# OAuth
+OAuthClientCredentials.json
