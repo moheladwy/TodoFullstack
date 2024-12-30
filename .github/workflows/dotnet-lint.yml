@@ -21,9 +21,12 @@ jobs:
 
             - name: Restore dependencies
               run: dotnet restore
+              working-directory: server
 
             - name: Build
               run: dotnet build --no-restore
+              working-directory: server
 
             - name: Test
               run: dotnet test --no-build --verbosity normal
+              working-directory: server
