@@ -10,7 +10,6 @@ export default function Dashboard() {
 	const [lists, setLists] = useState<List[]>([]);
 	const [selectedList, setSelectedList] = useState<List | null>(null);
 	const [isLoading, setIsLoading] = useState(true);
-	const [error, setError] = useState<string | null>(null);
 	const { isSidebarOpen, toggleSidebar } = UseAuth();
 
 	useEffect(() => {
@@ -34,7 +33,6 @@ export default function Dashboard() {
 				}
 			} catch (err) {
 				console.error("Fetch error:", err);
-				setError("Failed to fetch lists");
 			} finally {
 				setIsLoading(false);
 			}
@@ -59,7 +57,6 @@ export default function Dashboard() {
 					});
 				} catch (err) {
 					console.error("Failed to fetch tasks:", err);
-					setError("Failed to fetch tasks");
 				}
 			}
 		};
@@ -69,8 +66,6 @@ export default function Dashboard() {
 
 	if (isLoading)
 		return <div className="text-center fs-1 py-1">Loading...</div>;
-	if (error)
-		return <div className="text-center fs-1 py-1 text-danger">{error}</div>;
 
 	return (
 		<div className="container-fluid h-90">
