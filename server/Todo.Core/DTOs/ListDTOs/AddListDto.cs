@@ -23,6 +23,5 @@ public class AddListDto
     /// <summary>
     ///     The user id of the list.
     /// </summary>
-    [Required]
-    public required string UserId { get; init; }
+    public string? UserId { get; init; }
 }

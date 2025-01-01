@@ -11,8 +11,8 @@ using Todo.Infrastructure.DatabaseContexts;
 namespace Todo.Infrastructure.Migrations
 {
     [DbContext(typeof(TodoIdentityContext))]
-    [Migration("20241208233148_SecondMigration")]
-    partial class SecondMigration
+    [Migration("20241231205423_Initial")]
+    partial class Initial
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -182,9 +182,6 @@ namespace Todo.Infrastructure.Migrations
                     b.Property<string>("Description")
                         .HasMaxLength(500)
                         .HasColumnType("TEXT");
-
-                    b.Property<DateTime?>("DueDate")
-                        .HasColumnType("date");
 
                     b.Property<bool>("IsCompleted")
                         .HasColumnType("INTEGER");

@@ -1,5 +1,6 @@
 using Microsoft.EntityFrameworkCore;
 using Todo.Core.DTOs.TasksDtos;
+using Todo.Core.Enums;
 using Todo.Core.Exceptions;
 using Todo.Core.Interfaces;
 using Todo.Infrastructure.DatabaseContexts;
@@ -88,8 +89,8 @@ public class TasksRepository : IRepository<Task_Entity, AddTaskDto, UpdateTaskDt
         {
             Name = dto.Name,
             Description = dto.Description ?? string.Empty,
-            DueDate = dto.DueDate,
-            Priority = dto.Priority,
+            // DueDate = dto.DueDate ?? null,
+            Priority = (TaskPriority)dto.Priority,
             ListId = dto.ListId
         };
 
@@ -147,7 +148,7 @@ public class TasksRepository : IRepository<Task_Entity, AddTaskDto, UpdateTaskDt
         // Update the task's is completed status if the new value is not null.
         entity.IsCompleted = dto.IsCompleted ?? entity.IsCompleted;
         // Update the task's due date.
-        entity.DueDate = dto.DueDate;
+        // entity.DueDate = dto.DueDate;
         // Update the task's priority.
         entity.Priority = dto.Priority;
 

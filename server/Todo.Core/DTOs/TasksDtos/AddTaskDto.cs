@@ -18,20 +18,19 @@ public class AddTaskDto
     /// <summary>
     ///     The description of the task.
     /// </summary>
-    [StringLength(500, ErrorMessage = "The field Description must not exceed 500 characters.")]
+    [StringLength(500, MinimumLength = 0, ErrorMessage = "The field Description must not exceed 500 characters.")]
     public string? Description { get; init; }
 
     /// <summary>
     ///     The due date of the task.
     /// </summary>
-    [DataType(DataType.Date)]
-    public DateTime? DueDate { get; set; }
+    // [DataType(DataType.Date)]
+    // public DateTime? DueDate { get; set; }
 
     /// <summary>
     ///     The priority of the task.
     /// </summary>
-    [DataType(DataType.Custom)]
-    public TaskPriority? Priority { get; init; } = TaskPriority.Low;
+    public int Priority { get; init; } = 3;
 
     /// <summary>
     ///     The status of the task.
