@@ -1,8 +1,10 @@
-name: Docker Image Deploy
+name: Docker Image Deploy for React Client
 
 on:
     push:
         branches: ["main"]
+        paths:
+            - "client/**"
 
 jobs:
     build:
@@ -23,16 +25,16 @@ jobs:
 
             - name: Build the Docker image
               run: |
-                  docker build -t ${{ secrets.DOCKERHUB_USERNAME }}/todo-api:${{ env.DATE_TAG }} server
+                  docker build -t ${{ secrets.DOCKERHUB_USERNAME }}/todo-client:${{ env.DATE_TAG }} client
 
             - name: Tag the Docker image
               run: |
                   # Tag with timestamp
-                  docker tag ${{ secrets.DOCKERHUB_USERNAME }}/todo-api:${{ env.DATE_TAG }} ${{ secrets.DOCKERHUB_USERNAME }}/todo-api:${{ env.DATE_TAG }}
+                  docker tag ${{ secrets.DOCKERHUB_USERNAME }}/todo-client:${{ env.DATE_TAG }} ${{ secrets.DOCKERHUB_USERNAME }}/todo-client:${{ env.DATE_TAG }}
                   # Tag as latest
-                  docker tag ${{ secrets.DOCKERHUB_USERNAME }}/todo-api:${{ env.DATE_TAG }} ${{ secrets.DOCKERHUB_USERNAME }}/todo-api:latest
+                  docker tag ${{ secrets.DOCKERHUB_USERNAME }}/todo-client:${{ env.DATE_TAG }} ${{ secrets.DOCKERHUB_USERNAME }}/todo-client:latest
 
             - name: Push the Docker image
               run: |
-                  docker push ${{ secrets.DOCKERHUB_USERNAME }}/todo-api:${{ env.DATE_TAG }}
-                  docker push ${{ secrets.DOCKERHUB_USERNAME }}/todo-api:latest
+                  docker push ${{ secrets.DOCKERHUB_USERNAME }}/todo-client:${{ env.DATE_TAG }}
+                  docker push ${{ secrets.DOCKERHUB_USERNAME }}/todo-client:latest
