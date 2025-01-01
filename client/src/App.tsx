@@ -1,10 +1,36 @@
 import "./App.css";
+import { BrowserRouter, Routes, Route, Navigate } from "react-router";
+import { AuthProvider } from "./Authentication/context/AuthContext";
+import Login from "./Authentication/Login";
+import Register from "./Authentication/Register";
+import Dashboard from "./Dashboard/Dashboard";
+import Navbar from "./Navbar/Navbar";
+import ProtectedRoute from "./Authentication/ProtectedRoute";
 
 export default function App() {
 	return (
-		<h1>
-			Todo Application using ReactJS with TS for the Frontend and ASP.NET
-			Core 8 Web API for the backend
-		</h1>
+		<BrowserRouter>
+			<AuthProvider>
+				<div className="app-container">
+					<Navbar />
+					<Routes>
+						<Route
+							index
+							element={<Navigate to="/dashboard" replace />}
+						/>
+						<Route path="/login" element={<Login />} />
+						<Route path="/register" element={<Register />} />
+						<Route
+							path="/dashboard"
+							element={
+								<ProtectedRoute>
+									<Dashboard />
+								</ProtectedRoute>
+							}
+						/>
+					</Routes>
+				</div>
+			</AuthProvider>
+		</BrowserRouter>
 	);
 }
