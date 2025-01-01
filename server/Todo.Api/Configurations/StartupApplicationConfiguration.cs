@@ -21,7 +21,6 @@ public static class StartupApplicationConfiguration
         else
             app.ProductionMode();
 
-        app.UseCors(Constants.ClientCrossOriginPolicyName);
         app.UseHttpsRedirection();
         app.UseHttpLogging();
         app.UseRouting();
@@ -64,6 +63,7 @@ public static class StartupApplicationConfiguration
     private static void DevelopmentMode(this WebApplication app)
     {
         app.UseDeveloperExceptionPage();
+        app.UseCors(Constants.ClientCrossOriginPolicyDevName);
     }
 
     /// <summary>
@@ -75,5 +75,6 @@ public static class StartupApplicationConfiguration
     private static void ProductionMode(this WebApplication app)
     {
         app.UseExceptionHandler("/error");
+        app.UseCors(Constants.ClientCrossOriginPolicyProductionName);
     }
 }
