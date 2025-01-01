@@ -2,7 +2,7 @@ name: React TypeScript Linting
 
 on:
     push:
-        branches: "**"
+        branches-ignore: ["main"]
         paths:
             - "client/**"
     pull_request:

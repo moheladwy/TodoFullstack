@@ -2,7 +2,7 @@ name: ASP.NET Linting
 
 on:
     push:
-        branches: "**"
+        branches-ignore: ["main"]
         paths:
             - "server/**"
     pull_request:
