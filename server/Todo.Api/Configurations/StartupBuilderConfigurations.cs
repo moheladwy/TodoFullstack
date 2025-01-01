@@ -48,16 +48,14 @@ public static class StartupBuilderConfigurations
                 builder
                     .AllowAnyOrigin()
                     .AllowAnyMethod()
-                    .AllowAnyHeader()
-                    .AllowCredentials();
+                    .AllowAnyHeader();
             });
             options.AddPolicy(Constants.ClientCrossOriginPolicyProductionName, builder =>
             {
                 builder
-                    .WithOrigins(Constants.ClientCrossOriginPolicyProductionURL)
+                    .AllowAnyOrigin()
                     .AllowAnyMethod()
-                    .AllowAnyHeader()
-                    .AllowCredentials();
+                    .AllowAnyHeader();
             });
         });
     }
