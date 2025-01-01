@@ -43,10 +43,18 @@ public static class StartupBuilderConfigurations
     {
         builder.Services.AddCors(options =>
         {
-            options.AddPolicy(Constants.ClientCrossOriginPolicyName, builder =>
+            options.AddPolicy(Constants.ClientCrossOriginPolicyDevName, builder =>
             {
                 builder
-                    .WithOrigins(Constants.ClientCrossOriginPolicyURL)
+                    .WithOrigins(Constants.ClientCrossOriginPolicyDevURL)
+                    .AllowAnyMethod()
+                    .AllowAnyHeader()
+                    .AllowCredentials();
+            });
+            options.AddPolicy(Constants.ClientCrossOriginPolicyProductionName, builder =>
+            {
+                builder
+                    .WithOrigins(Constants.ClientCrossOriginPolicyProductionURL)
                     .AllowAnyMethod()
                     .AllowAnyHeader()
                     .AllowCredentials();
