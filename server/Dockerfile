@@ -23,6 +23,8 @@ RUN dotnet publish -c $BUILD_CONFIGURATION -o /Todo/publish /p:UseAppHost=false
 FROM base AS final
 WORKDIR /Todo
 
+ENV ASPNETCORE_ENVIRONMENT=Production
+
 RUN mkdir -p Database
 COPY --from=publish /Todo/publish .
 COPY --from=build   /Todo/src/Todo.Infrastructure/Migrations Migrations

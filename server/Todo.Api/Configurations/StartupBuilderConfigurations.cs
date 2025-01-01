@@ -46,7 +46,7 @@ public static class StartupBuilderConfigurations
             options.AddPolicy(Constants.ClientCrossOriginPolicyDevName, builder =>
             {
                 builder
-                    .WithOrigins(Constants.ClientCrossOriginPolicyDevURL)
+                    .AllowAnyOrigin()
                     .AllowAnyMethod()
                     .AllowAnyHeader()
                     .AllowCredentials();
