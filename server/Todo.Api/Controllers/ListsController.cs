@@ -1,6 +1,7 @@
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using Todo.Api.Helpers;
 using Todo.Core.DTOs.ListDTOs;
 using Todo.Core.Entities;
 using Todo.Core.Exceptions;
@@ -61,13 +62,14 @@ public class ListsController : ControllerBase
     ///     If an exception occurs, a BadRequest response is returned with the exception message.
     /// </returns>
     [HttpGet("all-lists")]
-    public async Task<ActionResult<List<TaskList>>> GetAllLists()
+    public async Task<ActionResult<IEnumerable<ListsDto>>> GetAllLists()
     {
         _authenticatedUser = await _accountRepository.GetUserByClaims(User);
         var lists = await _listRepository.GetAllAsync(_authenticatedUser.Id);
-        
-        _logger.LogInformation("Lists for user with ID: {userId} retrieved successfully.", _authenticatedUser.Id);
-        return Ok(lists);
+
+        _logger.LogInformation("Lists for user with ID: {userId} retrieved successfully.",
+         _authenticatedUser.Id);
+        return Ok(ListsHelper.MapToListsDto(lists));
     }
 
     /// <summary>
@@ -84,9 +86,9 @@ public class ListsController : ControllerBase
     public async Task<ActionResult<TaskList>> GetListById([FromRoute] Guid listId)
     {
         var list = await _listRepository.GetByIdAsync(listId);
-        
+
         _logger.LogInformation("List with ID: {listId} retrieved successfully.", listId);
-        return Ok(list);
+        return Ok(ListsHelper.MapToListsDto(list));
     }
 
     /// <summary>
@@ -108,14 +110,16 @@ public class ListsController : ControllerBase
             throw new InvalidModelStateException($"Invalid model state because of the following errors: {ModelState.ValidationState}");
 
         _authenticatedUser = await _accountRepository.GetUserByClaims(User);
-        if (_authenticatedUser.Id != addListDto.UserId)
-            throw new UnauthorizedAccessException($"User with Id: {_authenticatedUser.Id} is not authorized to add a list for another user.");
-
-        var list = await _listRepository.AddAsync(addListDto);
+        var list = await _listRepository.AddAsync(new AddListDto
+        {
+            Name = addListDto.Name,
+            Description = addListDto.Description,
+            UserId = _authenticatedUser.Id
+        });
 
         _logger.LogInformation("New list with ID: {id} added successfully to the user with ID: {userId}.", list.Id,
             _authenticatedUser.Id);
-        return Ok(list);
+        return Ok(ListsHelper.MapToListsDto(list));
     }
 
     /// <summary>
@@ -136,7 +140,7 @@ public class ListsController : ControllerBase
             throw new InvalidModelStateException($"Invalid model state because of the following errors: {ModelState.ValidationState}");
 
         var updatedTask = await _listRepository.UpdateAsync(list);
-        
+
         _logger.LogInformation("List with ID: {entity.Id} updated successfully.", list.Id);
         return Ok(updatedTask);
     }
@@ -155,7 +159,7 @@ public class ListsController : ControllerBase
     public async Task<ActionResult> DeleteList([FromRoute] Guid id)
     {
         await _listRepository.DeleteAsync(id);
-        
+
         _logger.LogInformation("List with ID: {id} and all its tasks deleted successfully.", id);
         return Ok();
     }

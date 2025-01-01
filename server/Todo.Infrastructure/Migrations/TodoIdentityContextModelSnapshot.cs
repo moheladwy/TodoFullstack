@@ -180,9 +180,6 @@ namespace Todo.Infrastructure.Migrations
                         .HasMaxLength(500)
                         .HasColumnType("TEXT");
 
-                    b.Property<DateTime?>("DueDate")
-                        .HasColumnType("date");
-
                     b.Property<bool>("IsCompleted")
                         .HasColumnType("INTEGER");
 

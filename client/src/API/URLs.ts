@@ -1,0 +1,7 @@
+const BASE_URL = import.meta.env.VITE_SERVER_URL;
+const REFRESH_PATH = import.meta.env.VITE_SERVER_REFRESH_PATH;
+const REGISTER_PATH = import.meta.env.VITE_SERVER_REGISTER_PATH;
+const LOGIN_PATH = import.meta.env.VITE_SERVER_LOGIN_PATH;
+const LOGOUT_PATH = import.meta.env.VITE_SERVER_LOGOUT_PATH;
+
+export { BASE_URL, REFRESH_PATH, REGISTER_PATH, LOGIN_PATH, LOGOUT_PATH };

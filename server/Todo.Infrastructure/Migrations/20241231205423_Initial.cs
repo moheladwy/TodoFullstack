@@ -6,7 +6,7 @@ using Microsoft.EntityFrameworkCore.Migrations;
 namespace Todo.Infrastructure.Migrations
 {
     /// <inheritdoc />
-    public partial class SecondMigration : Migration
+    public partial class Initial : Migration
     {
         /// <inheritdoc />
         protected override void Up(MigrationBuilder migrationBuilder)
@@ -207,7 +207,6 @@ namespace Todo.Infrastructure.Migrations
                     Name = table.Column<string>(type: "TEXT", maxLength: 100, nullable: false),
                     Description = table.Column<string>(type: "TEXT", maxLength: 500, nullable: true),
                     IsCompleted = table.Column<bool>(type: "INTEGER", nullable: false),
-                    DueDate = table.Column<DateTime>(type: "date", nullable: true),
                     Priority = table.Column<int>(type: "int", nullable: true),
                     ListId = table.Column<Guid>(type: "TEXT", nullable: true)
                 },

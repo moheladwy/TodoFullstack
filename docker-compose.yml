@@ -8,13 +8,16 @@ services:
             - "6379:6379"
 
     api:
-        build: .
+        build:
+            context: server
+            dockerfile: Dockerfile
         image: todo-api:latest
         container_name: todo-api
         ports:
             - "8070:8080"
+            - "8443:8443"
         volumes:
-            - todo-db:/TodoApi/Database
+            - todo-db:/Todo/Database
         networks:
             - todo-network
         environment:
@@ -24,9 +27,45 @@ services:
         command:
             - "sh -c dotnet Todo.Api.dll ef database update && dotnet Todo.Api.dll"
 
+    client:
+        build: client
+        image: todo-client:latest
+        container_name: todo-client
+        command: ["npm", "run", "build"]
+        networks:
+            - todo-network
+        environment:
+            - VITE_SERVER_URL=https://todo-api:8443/api
+            - VITE_SERVER_LOGIN_PATH=Auth/login
+            - VITE_SERVER_REGISTER_PATH=Auth/register
+            - VITE_SERVER_REFRESH_PATH=Auth/refresh
+            - VITE_SERVER_LOGOUT_PATH=Auth/logout
+        depends_on:
+            - api
+        volumes:
+            - dist:/Todo
+
+    reverse-proxy:
+        image: nginx:alpine
+        container_name: todo-reverse-proxy
+        ports:
+            - "80:80"
+            - "443:443"
+        volumes:
+            - ./nginx.conf:/etc/nginx/conf.d/default.conf
+            - /var/run/docker.sock:/tmp/docker.sock:ro
+        networks:
+            - todo-network
+        depends_on:
+            - cache
+            - api
+            - client
+
 volumes:
     todo-db:
         name: todo-db
+    dist:
+        name: dist
 
 networks:
     todo-network:

@@ -25,8 +25,8 @@ public class TaskEntityConfiguration : IEntityTypeConfiguration<Task>
         builder.Property(task => task.Description)
             .HasMaxLength(500);
 
-        builder.Property(task => task.DueDate)
-            .HasColumnType("date");
+        // builder.Property(task => task.DueDate)
+        //     .HasColumnType("date");
 
         builder.Property(task => task.IsCompleted)
             .IsRequired();

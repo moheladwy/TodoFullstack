@@ -42,8 +42,8 @@ public class Task
     /// <summary>
     ///    The due date of the task, optional, and can be null.
     /// </summary>
-    [DataType(DataType.Date)]
-    public DateTime? DueDate { get; set; }
+    // [DataType(DataType.Date)]
+    // public DateTime? DueDate { get; set; }
 
     /// <summary>
     ///     The priority of the task, optional, and can be null.

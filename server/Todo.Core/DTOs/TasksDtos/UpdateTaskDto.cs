@@ -29,14 +29,13 @@ public class UpdateTaskDto
     /// <summary>
     ///     Gets or sets the task due date.
     /// </summary>
-    [DataType(DataType.Date)]
-    public DateTime? DueDate { get; set; }
+    // [DataType(DataType.Date)]
+    // public DateTime? DueDate { get; set; }
 
     /// <summary>
     ///     Gets or sets the task priority.
     /// </summary>
-    [DataType(DataType.Custom)]
-    public TaskPriority? Priority { get; init; } = TaskPriority.Low;
+    public TaskPriority Priority { get; set; } = TaskPriority.Low;
 
     /// <summary>
     ///     Gets or sets the task status.

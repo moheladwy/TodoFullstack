@@ -40,7 +40,6 @@ public class ListRepository : IRepository<TaskList, AddListDto, UpdateListDto>
         return await _identityContext.Lists
             .AsNoTracking() // No need to track the entities since we are not going to modify them in this request (we are only reading them).
             .Where(l => l.UserId == id) // Filter the lists by the current user.
-            .Include(l => l.Tasks) // Include the items in the list.
             .ToListAsync(); // Execute the query and return the results as a list.
     }
 
@@ -58,7 +57,6 @@ public class ListRepository : IRepository<TaskList, AddListDto, UpdateListDto>
         return await _identityContext.Lists
             .AsNoTracking() // No need to track the entities since we are not going to modify them in this request (we are only reading them).
             .Where(l => l.Id == id) // Filter the lists by the specified ID.
-            .Include(l => l.Tasks) // Include the items in the list.
             .FirstAsync(); // Execute the query and return the first result.
     }
 

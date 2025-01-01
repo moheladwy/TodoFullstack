@@ -23,15 +23,34 @@ public static class StartupBuilderConfigurations
         builder.AddAuthenticationService();
         builder.Services.AddAuthorizationBuilder();
         builder.AddIdentityService();
+        builder.AddCorsService();
         builder.RegisterServices();
         builder.RegisterRepositories();
         builder.RegisterCachingRepositories();
 
         builder.Services.AddHttpClient();
-        builder.Services.AddControllers().AddJsonOptions(options =>
+        builder.Services.AddControllers();
+    }
+
+    /// <summary>
+    ///    Adds the database connection string to the application builder.
+    /// </summary>
+    /// <param name="builder"></param> <summary>
+    /// 
+    /// </summary>
+    /// <param name="builder"></param>
+    public static void AddCorsService(this WebApplicationBuilder builder)
+    {
+        builder.Services.AddCors(options =>
         {
-            options.JsonSerializerOptions.ReferenceHandler =
-                System.Text.Json.Serialization.ReferenceHandler.Preserve;
+            options.AddPolicy(Constants.ClientCrossOriginPolicyName, builder =>
+            {
+                builder
+                    .WithOrigins(Constants.ClientCrossOriginPolicyURL)
+                    .AllowAnyMethod()
+                    .AllowAnyHeader()
+                    .AllowCredentials();
+            });
         });
     }
 
