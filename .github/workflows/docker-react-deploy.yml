@@ -25,8 +25,14 @@ jobs:
 
             - name: Build the Docker image
               run: |
-                  docker build -t ${{ secrets.DOCKERHUB_USERNAME }}/todo-client:${{ env.DATE_TAG }} client
-
+                  docker build \
+                  --build-arg VITE_SERVER_URL=${{ secrets.VITE_SERVER_URL }} \
+                  --build-arg VITE_SERVER_LOGIN_PATH=Auth/login \
+                  --build-arg VITE_SERVER_REGISTER_PATH=Auth/register \
+                  --build-arg VITE_SERVER_REFRESH_PATH=Auth/refresh \
+                  --build-arg VITE_SERVER_LOGOUT_PATH=Auth/logout \
+                  -t ${{ secrets.DOCKERHUB_USERNAME }}/todo-client:${{ env.DATE_TAG }} client
+                  
             - name: Tag the Docker image
               run: |
                   # Tag with timestamp
