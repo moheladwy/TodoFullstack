@@ -1,5 +1,6 @@
 import { createContext, useContext, useState, useEffect } from "react";
 import { BASE_URL, REFRESH_PATH } from "../../API/URLs";
+import { HttpMethods } from "../../API/interfaces";
 
 interface AuthContextType {
 	isAuthenticated: boolean;
@@ -14,9 +15,9 @@ interface AuthContextType {
 
 const AuthContext = createContext<AuthContextType | null>(null);
 
-const RefreshToken = async (refreshToken: string) => {
+const RefreshAccessToken = async (refreshToken: string) => {
 	return await fetch(`${BASE_URL}/${REFRESH_PATH}`, {
-		method: "POST",
+		method: HttpMethods.POST,
 		headers: {
 			"Content-Type": "application/json",
 		},
@@ -36,7 +37,7 @@ function AuthProvider({ children }: { children: React.ReactNode }) {
 
 	useEffect(() => {
 		const initializeAuth = async () => {
-			const token = sessionStorage.getItem("accessToken");
+			const token = localStorage.getItem("accessToken");
 			const refreshToken = localStorage.getItem("refreshToken");
 			if (token) {
 				setAccessToken(token);
@@ -44,7 +45,7 @@ function AuthProvider({ children }: { children: React.ReactNode }) {
 				setUserId(localStorage.getItem("userId"));
 			} else if (refreshToken) {
 				try {
-					const response = await RefreshToken(refreshToken);
+					const response = await RefreshAccessToken(refreshToken);
 					if (!response.ok) throw new Error("Token refresh failed");
 
 					const data = await response.json();
@@ -62,13 +63,13 @@ function AuthProvider({ children }: { children: React.ReactNode }) {
 	}, []);
 
 	const login = (token: string) => {
-		sessionStorage.setItem("accessToken", token);
+		localStorage.setItem("accessToken", token);
 		setAccessToken(token);
 		setIsAuthenticated(true);
 	};
 
 	const logout = () => {
-		sessionStorage.removeItem("accessToken");
+		localStorage.removeItem("accessToken");
 		localStorage.removeItem("refreshToken");
 		localStorage.removeItem("userId");
 		setAccessToken(null);
@@ -83,7 +84,7 @@ function AuthProvider({ children }: { children: React.ReactNode }) {
 		}
 
 		try {
-			const response = await RefreshToken(refreshToken);
+			const response = await RefreshAccessToken(refreshToken);
 			if (!response.ok) throw new Error("Token refresh failed");
 
 			const data = await response.json();

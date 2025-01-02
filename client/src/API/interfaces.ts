@@ -6,6 +6,14 @@ export interface AuthResponse {
 	refreshTokenExpirationDate: string;
 }
 
+export enum HttpMethods {
+	GET = "GET",
+	POST = "POST",
+	PUT = "PUT",
+	DELETE = "DELETE",
+	PATCH = "PATCH",
+}
+
 export enum TaskPriority {
 	Urgent = 0,
 	High = 1,

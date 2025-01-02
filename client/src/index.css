@@ -3,10 +3,17 @@ body {
 	margin: 0;
 	font-family: "Roboto", sans-serif;
 	width: 100%;
+	background-color: black;
 }
 
 .cursor-pointer {
 	cursor: pointer;
+}
+
+.task-details {
+	height: calc(100vh - 48px);
+	position: sticky;
+	top: 0;
 }
 
 .t-smooth {

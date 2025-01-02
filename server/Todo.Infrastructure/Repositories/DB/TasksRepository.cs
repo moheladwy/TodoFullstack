@@ -142,14 +142,10 @@ public class TasksRepository : IRepository<Task_Entity, AddTaskDto, UpdateTaskDt
         // Update the task's name if the new value is not null or empty.
         if (!string.IsNullOrEmpty(dto.Name))
             entity.Name = dto.Name;
-        // Update the task's description if the new value is not null or empty.
-        if (!string.IsNullOrEmpty(dto.Description))
-            entity.Description = dto.Description;
-        // Update the task's is completed status if the new value is not null.
+        entity.Description = (dto.Description is not null) ? dto.Description : string.Empty;
         entity.IsCompleted = dto.IsCompleted ?? entity.IsCompleted;
         // Update the task's due date.
         // entity.DueDate = dto.DueDate;
-        // Update the task's priority.
         entity.Priority = dto.Priority;
 
         return entity;

@@ -5,6 +5,7 @@ import { UseAuth } from "../Authentication/context/AuthContext";
 import MainContent from "./MainContent";
 import Sidebar from "./Sidebar";
 import { listsApi } from "../API/ListsActions";
+import { BASE_URL } from "../API/URLs";
 
 export default function Dashboard() {
 	const [lists, setLists] = useState<List[]>([]);
@@ -16,6 +17,7 @@ export default function Dashboard() {
 		const fetchLists = async () => {
 			try {
 				setIsLoading(true);
+				console.log("Fetching lists from API URL: ", BASE_URL);
 				const response = await listsApi.getAllLists();
 				const sortedLists = [...response].sort((a, b) => {
 					const nameA = a.name.toLowerCase();
@@ -65,10 +67,14 @@ export default function Dashboard() {
 	}, [selectedList?.id]);
 
 	if (isLoading)
-		return <div className="text-center fs-1 py-1">Loading...</div>;
+		return (
+			<div className="text-center text-light fs-3 py-5 justtify-content-center">
+				Loading...
+			</div>
+		);
 
 	return (
-		<div className="container-fluid h-90">
+		<div className="container-fluid h-90 bg-dark text-light">
 			<div className="row bg-dark">
 				{isSidebarOpen ? (
 					<Sidebar

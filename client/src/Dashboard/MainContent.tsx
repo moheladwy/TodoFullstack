@@ -2,20 +2,15 @@ import { useState } from "react";
 import { List, Task, TaskPriority } from "../API/interfaces";
 import { tasksApi } from "../API/TasksActions";
 import { UseAuth } from "../Authentication/context/AuthContext";
+import ListActions from "./ListActions";
+import { GroupBy, SortBy } from "./MainContentHelpers";
+import Tasks from "./Tasks";
+import TaskDetails from "./TaskDetails";
 
 interface MainContentProps {
 	selectedList: List | null;
 	setSelectedList: (list: List) => void;
 }
-
-const sortTasks = (tasks: Task[]): Task[] => {
-	return [...tasks].sort((a, b) => {
-		if (a.isCompleted !== b.isCompleted) {
-			return a.isCompleted ? 1 : -1;
-		}
-		return a.name.localeCompare(b.name);
-	});
-};
 
 export default function MainContent({
 	selectedList,
@@ -23,6 +18,9 @@ export default function MainContent({
 }: MainContentProps) {
 	const [newTaskName, setNewTaskName] = useState<string>("");
 	const [error, setError] = useState<string | null>(null);
+	const [sortBy, setSortBy] = useState<SortBy>(SortBy.Name);
+	const [groupBy, setGroupBy] = useState<GroupBy>(GroupBy.Completed);
+	const [selectedTask, setSelectedTask] = useState<Task | null>(null);
 	const { isSidebarOpen } = UseAuth();
 
 	const handleAddTask = async (e: React.FormEvent) => {
@@ -44,6 +42,32 @@ export default function MainContent({
 			setNewTaskName("");
 		} catch (err) {
 			setError("Failed to create task");
+			console.error(err);
+		}
+	};
+
+	const handleTaskSelect = (task: Task) => {
+		if (selectedTask && selectedTask.id === task.id) {
+			setSelectedTask(null);
+			return;
+		}
+		setSelectedTask(task);
+	};
+
+	const handleTaskUpdate = async (updatedTask: Task) => {
+		try {
+			setSelectedTask(updatedTask);
+			const result = await tasksApi.updateTask(updatedTask);
+			if (selectedList && selectedList.tasks) {
+				setSelectedList({
+					...selectedList,
+					tasks: selectedList.tasks.map((t) =>
+						t.id === result.id ? result : t
+					),
+				});
+			}
+		} catch (err) {
+			setError("Failed to update task");
 			console.error(err);
 		}
 	};
@@ -87,84 +111,53 @@ export default function MainContent({
 		<main
 			className={`${
 				isSidebarOpen ? `col-md-9 ms-sm-auto col-lg-10` : `w-97`
-			} px-md-4 t-smooth bg-light text-dark`}
+			} pl-md-4 t-smooth bg-white text-dark`}
 			style={{
-				borderTopLeftRadius: "1rem",
 				height: "94vh",
 				overflowY: "auto",
 			}}
 		>
 			{selectedList ? (
-				<>
-					<div className="d-flex justify-content-stretch flex-wrap flex-md-nowrap align-items-center pt-3 pb-2 px-0 mx-0 mb-3">
-						{error && (
-							<div className="alert alert-danger">{error}</div>
-						)}
-						<h1 className="h2 w-15 mx-3">{selectedList.name}</h1>
-						<form
-							onSubmit={handleAddTask}
-							className="row g-1 w-100"
-						>
-							<div className="col">
-								<input
-									type="text"
-									className="form-control"
-									value={newTaskName}
-									onChange={(e) =>
-										setNewTaskName(e.target.value)
-									}
-									placeholder="Add a new task..."
-								/>
-							</div>
-							<div className="col-auto">
-								<button
-									type="submit"
-									className="btn btn-primary"
-								>
-									Add Task
-								</button>
-							</div>
-						</form>
+				<div className="row h-100">
+					<div
+						className={`${selectedTask ? "col-md-9" : "col-12"}`}
+						style={{
+							borderTopRightRadius: `${
+								selectedTask ? "2rem" : "0rem"
+							}`,
+						}}
+					>
+						<ListActions
+							selectedList={selectedList}
+							sortBy={sortBy}
+							groupBy={groupBy}
+							setSortBy={setSortBy}
+							setGroupBy={setGroupBy}
+							error={error}
+							newTaskName={newTaskName}
+							setNewTaskName={setNewTaskName}
+							handleAddTask={handleAddTask}
+						/>
+						<Tasks
+							selectedList={selectedList}
+							handleDeleteTask={handleDeleteTask}
+							handleToggleTask={handleToggleTask}
+							handleTaskSelect={handleTaskSelect}
+							selectedTask={selectedTask}
+							groupBy={groupBy}
+							sortBy={sortBy}
+						/>
 					</div>
-
-					<div className="list-group mt-3">
-						{selectedList?.tasks &&
-							sortTasks(selectedList.tasks).map((task) => (
-								<div
-									key={task.id}
-									className="list-group-item d-flex justify-content-between align-items-center"
-								>
-									<div className="form-check">
-										<input
-											className="form-check-input"
-											type="checkbox"
-											checked={task.isCompleted}
-											onChange={() =>
-												handleToggleTask(task)
-											}
-										/>
-										<label
-											className={`form-check-label ${
-												task.isCompleted
-													? "text-decoration-line-through"
-													: ""
-											}`}
-										>
-											{task.name}
-										</label>
-									</div>
-									<button
-										onClick={() =>
-											handleDeleteTask(task.id)
-										}
-										className="btn btn-outline-danger btn-sm"
-									>
-										<i className="bi bi-trash-fill"></i>
-									</button>
-								</div>
-							))}
-					</div>
-				</>
+					{selectedTask && (
+						<div className="col-md-3 h-100 px-0">
+							<TaskDetails
+								task={selectedTask}
+								onUpdateTask={handleTaskUpdate}
+								onClose={() => setSelectedTask(null)}
+							/>
+						</div>
+					)}
+				</div>
 			) : (
 				<div className="text-center mt-5 text-muted">
 					Select a list or create a new one

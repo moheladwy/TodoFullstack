@@ -11,9 +11,12 @@ export default function Navbar() {
 	};
 
 	return (
-		<nav className="navbar navbar-expand-lg navbar-dark bg-dark py-0 h-10">
-			<div className="container-fluid">
-				<Link className="navbar-brand fs-1 fw-bold" to="/">
+		<nav
+			className="navbar navbar-expand-lg navbar-dark py-0 h-10"
+			style={{ backgroundColor: "rgb(24, 26, 28)" }}
+		>
+			<div className="container-fluid mx-5">
+				<Link className="navbar-brand fs-1 fw-bold mx-5" to="/">
 					Tasker
 				</Link>
 				<button
