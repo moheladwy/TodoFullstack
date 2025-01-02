@@ -25,7 +25,6 @@ WORKDIR /Todo
 
 ENV ASPNETCORE_ENVIRONMENT=Production
 
-RUN mkdir -p Database
 COPY --from=publish /Todo/publish .
 COPY --from=build   /Todo/src/Todo.Infrastructure/Migrations Migrations
 

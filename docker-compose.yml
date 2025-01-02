@@ -16,8 +16,6 @@ services:
         ports:
             - "8070:8080"
             - "8443:8443"
-        volumes:
-            - todo-db:/Todo/Database
         networks:
             - todo-network
         environment:
@@ -62,8 +60,6 @@ services:
             - client
 
 volumes:
-    todo-db:
-        name: todo-db
     dist:
         name: dist
 
