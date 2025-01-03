@@ -1,8 +1,8 @@
 import axios from "axios";
-import { BASE_URL, REFRESH_PATH } from "./URLs";
+import { BASE_URL, AUTH_URLs } from "./URLs";
 
 const api = axios.create({
-	baseURL: `${BASE_URL}`,
+	baseURL: BASE_URL,
 	headers: {
 		"Content-Type": "application/json",
 	},
@@ -23,9 +23,6 @@ api.interceptors.request.use(
 
 api.interceptors.response.use(
 	(response) => {
-		if (response.data?.$values) {
-			console.log("Parsed API Response:", response.data.$values);
-		}
 		return response;
 	},
 	async (error) => {
@@ -42,7 +39,7 @@ api.interceptors.response.use(
 
 			try {
 				const response = await axios.post(
-					`/${REFRESH_PATH}`,
+					AUTH_URLs.REFRESH_ACCESS_TOKEN_BY_REFRESH_TOKEN,
 					refreshToken
 				);
 				const { accessToken } = response.data;

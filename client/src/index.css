@@ -16,6 +16,21 @@ body {
 	top: 0;
 }
 
+.hover:hover {
+	background-color: #252525;
+	color: white;
+}
+
+.selected {
+	background-color: #202020;
+	color: white;
+}
+
+.not-selected {
+	background-color: #303030;
+	color: white;
+}
+
 .t-smooth {
 	transition: transform 0.3s ease-in-out;
 }

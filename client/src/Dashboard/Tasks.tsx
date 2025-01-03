@@ -39,7 +39,9 @@ export default function Tasks({
 							<div
 								key={task.id}
 								className={`list-group-item d-flex justify-content-between align-items-center cursor-pointer ${
-									selectedTask?.id === task.id ? "active" : ""
+									selectedTask?.id === task.id
+										? "selected"
+										: ""
 								}`}
 								onClick={() => handleTaskSelect(task)}
 							>

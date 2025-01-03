@@ -1,20 +1,23 @@
 import { useState } from "react";
 import { List, Task, TaskPriority } from "../API/interfaces";
-import { tasksApi } from "../API/TasksActions";
+import { tasksApi } from "../API/Calls/TasksCalls";
 import { UseAuth } from "../Authentication/context/AuthContext";
-import ListActions from "./ListActions";
+import ListHeader from "./ListHeader";
 import { GroupBy, SortBy } from "./MainContentHelpers";
 import Tasks from "./Tasks";
 import TaskDetails from "./TaskDetails";
+import { listsApi } from "../API/Calls/ListsCalls";
 
 interface MainContentProps {
 	selectedList: List | null;
 	setSelectedList: (list: List) => void;
+	onListUpdate: (list: List) => void;
 }
 
 export default function MainContent({
 	selectedList,
 	setSelectedList,
+	onListUpdate,
 }: MainContentProps) {
 	const [newTaskName, setNewTaskName] = useState<string>("");
 	const [error, setError] = useState<string | null>(null);
@@ -107,6 +110,29 @@ export default function MainContent({
 		}
 	};
 
+	const handleListUpdate = async (updatedName: string) => {
+		if (!selectedList) return;
+
+		try {
+			const updatedList = await listsApi.updateList(
+				selectedList.id,
+				updatedName,
+				selectedList.description
+			);
+
+			const updatedListWithTasks = {
+				...updatedList,
+				tasks: selectedList.tasks,
+			};
+
+			setSelectedList(updatedListWithTasks);
+			onListUpdate(updatedListWithTasks);
+		} catch (err) {
+			setError("Failed to update list name");
+			console.error(err);
+		}
+	};
+
 	return (
 		<main
 			className={`${
@@ -127,7 +153,7 @@ export default function MainContent({
 							}`,
 						}}
 					>
-						<ListActions
+						<ListHeader
 							selectedList={selectedList}
 							sortBy={sortBy}
 							groupBy={groupBy}
@@ -137,6 +163,7 @@ export default function MainContent({
 							newTaskName={newTaskName}
 							setNewTaskName={setNewTaskName}
 							handleAddTask={handleAddTask}
+							onUpdateList={handleListUpdate}
 						/>
 						<Tasks
 							selectedList={selectedList}

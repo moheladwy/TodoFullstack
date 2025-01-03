@@ -1,56 +1,41 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { useNavigate } from "react-router";
 import { UseAuth } from "./context/AuthContext";
-import { BASE_URL, LOGIN_PATH } from "../API/URLs";
-
-interface LoginForm {
-	email: string;
-	password: string;
-}
-
-interface LoginResponse {
-	userId: string;
-	accessToken: string;
-	accessTokenExpirationDate: string;
-	refreshToken: string;
-	refreshTokenExpirationDate: string;
-}
-
-const LoginCall = async (formData: LoginForm) => {
-	return fetch(`${BASE_URL}/${LOGIN_PATH}`, {
-		method: "POST",
-		headers: {
-			"Content-Type": "application/json",
-		},
-		body: JSON.stringify(formData),
-	});
-};
+import { LoginRequest } from "../API/interfaces";
+import { authApi } from "../API/Calls/AuthCalls";
 
 export default function Login() {
 	const navigate = useNavigate();
 	const { login } = UseAuth();
 	const [showPassword, setShowPassword] = useState(false);
-	const [formData, setFormData] = useState<LoginForm>({
+	const [formData, setFormData] = useState<LoginRequest>({
 		email: "",
 		password: "",
 	});
 	const [error, setError] = useState<string>("");
+	const [result, setResult] = useState<string>("");
+
+	useEffect(() => {
+		setShowPassword(false);
+		setFormData({
+			email: "",
+			password: "",
+		});
+		setError("");
+		setResult("");
+	}, []);
 
 	const handleSubmit = async (e: React.FormEvent) => {
 		e.preventDefault();
 		setError("");
 
 		try {
-			const response = await LoginCall(formData);
-			if (!response.ok) throw new Error("Login failed");
+			const response = await authApi.login(formData);
+			login(response);
 
-			const data: LoginResponse = await response.json();
+			setResult("Successfully logged in as " + formData.email);
+			await new Promise((resolve) => setTimeout(resolve, 2000));
 
-			login(data.accessToken);
-			localStorage.setItem("refreshToken", data.refreshToken);
-			localStorage.setItem("userId", data.userId);
-
-			console.log("Login successful: about to navigate to /dashboard");
 			navigate("/", { replace: true });
 		} catch (err: Error | unknown) {
 			setError("Invalid email or password");
@@ -68,6 +53,11 @@ export default function Login() {
 							{error && (
 								<div className="alert alert-danger">
 									{error}
+								</div>
+							)}
+							{result && (
+								<div className="alert alert-success">
+									{result}
 								</div>
 							)}
 							<form onSubmit={handleSubmit}>
@@ -143,6 +133,19 @@ export default function Login() {
 									Login
 								</button>
 							</form>
+							<div className="have-no-account">
+								Don't have an account?{" "}
+								<span
+									className="register-link text-primary"
+									onClick={() =>
+										navigate("/register", {
+											replace: true,
+										})
+									}
+								>
+									Register Now
+								</span>
+							</div>
 						</div>
 					</div>
 				</div>

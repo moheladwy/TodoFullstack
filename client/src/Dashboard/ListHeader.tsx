@@ -1,3 +1,4 @@
+import { useState } from "react";
 import { List } from "../API/interfaces";
 import { GroupBy, SortBy } from "./MainContentHelpers";
 
@@ -11,9 +12,10 @@ interface ListActionsProps {
 	newTaskName: string;
 	setNewTaskName: (newTaskName: string) => void;
 	handleAddTask: (e: React.FormEvent) => void;
+	onUpdateList: (name: string) => void;
 }
 
-export default function ListActions({
+export default function ListHeader({
 	selectedList,
 	sortBy,
 	groupBy,
@@ -23,13 +25,61 @@ export default function ListActions({
 	newTaskName,
 	setNewTaskName,
 	handleAddTask,
+	onUpdateList,
 }: ListActionsProps) {
+	const [isEditing, setIsEditing] = useState(false);
+	const [editedName, setEditedName] = useState(selectedList.name);
+
+	const handleUpdateListClick = () => {
+		setIsEditing(true);
+		setEditedName(selectedList.name);
+	};
+
+	const handleSubmit = (e: React.FormEvent) => {
+		e.preventDefault();
+		if (editedName.trim().length > 0) {
+			onUpdateList(editedName.trim());
+			setIsEditing(false);
+		}
+	};
 	return (
 		<div className="d-flex flex-column justify-content-center flex-wrap flex-md-nowrap align-items-center pt-3 pb-2 px-0 mx-0 mb-3">
 			{error && <div className="alert alert-danger">{error}</div>}
 			<div className="list-actions mb-2 d-flex justify-content-between align-items-center w-100">
-				<h1 className="h2 w-15 mx-3">{selectedList.name}</h1>
+				{isEditing ? (
+					<form
+						onSubmit={handleSubmit}
+						className="d-flex align-items-center mx-3"
+					>
+						<input
+							type="text"
+							className="form-control h2 mb-0"
+							value={editedName}
+							onChange={(e) => setEditedName(e.target.value)}
+							autoFocus
+							onBlur={() => {
+								setIsEditing(false);
+								setEditedName(selectedList.name);
+							}}
+						/>
+					</form>
+				) : (
+					<h1
+						className="h2 w-15 mx-3 mb-0"
+						onClick={handleUpdateListClick}
+					>
+						{selectedList.name}
+					</h1>
+				)}
 				<div className="d-flex gap-2">
+					<button
+						type="button"
+						className="btn btn-outline-secondary mx-1"
+						onClick={handleUpdateListClick}
+						title="Edit list name"
+					>
+						<i className="bi bi-pencil"></i>
+					</button>
 					<div className="btn-group">
 						<button
 							type="button"

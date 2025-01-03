@@ -1,11 +1,10 @@
 import { useState, useEffect } from "react";
 import { List } from "../API/interfaces";
-import { tasksApi } from "../API/TasksActions";
+import { tasksApi } from "../API/Calls/TasksCalls";
+import { listsApi } from "../API/Calls/ListsCalls";
 import { UseAuth } from "../Authentication/context/AuthContext";
 import MainContent from "./MainContent";
 import Sidebar from "./Sidebar";
-import { listsApi } from "../API/ListsActions";
-import { BASE_URL } from "../API/URLs";
 
 export default function Dashboard() {
 	const [lists, setLists] = useState<List[]>([]);
@@ -17,7 +16,6 @@ export default function Dashboard() {
 		const fetchLists = async () => {
 			try {
 				setIsLoading(true);
-				console.log("Fetching lists from API URL: ", BASE_URL);
 				const response = await listsApi.getAllLists();
 				const sortedLists = [...response].sort((a, b) => {
 					const nameA = a.name.toLowerCase();
@@ -33,7 +31,7 @@ export default function Dashboard() {
 				if (sortedLists.length > 0) {
 					setSelectedList(sortedLists[0]);
 				}
-			} catch (err) {
+			} catch (err: Error | unknown) {
 				console.error("Fetch error:", err);
 			} finally {
 				setIsLoading(false);
@@ -62,9 +60,17 @@ export default function Dashboard() {
 				}
 			}
 		};
-		setSelectedList(selectedList);
 		fetchTasks();
 	}, [selectedList?.id]);
+
+	const handleListUpdate = (updatedList: List) => {
+		setLists(
+			lists.map((list) =>
+				list.id === updatedList.id ? updatedList : list
+			)
+		);
+		setSelectedList(updatedList);
+	};
 
 	if (isLoading)
 		return (
@@ -102,6 +108,7 @@ export default function Dashboard() {
 				<MainContent
 					selectedList={selectedList}
 					setSelectedList={setSelectedList}
+					onListUpdate={handleListUpdate}
 				/>
 			</div>
 		</div>

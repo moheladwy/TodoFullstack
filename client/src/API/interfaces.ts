@@ -1,3 +1,24 @@
+export enum HttpMethods {
+	GET = "GET",
+	POST = "POST",
+	PUT = "PUT",
+	DELETE = "DELETE",
+	PATCH = "PATCH",
+}
+
+export interface RegisterRequest {
+	email: string;
+	username: string;
+	firstName: string;
+	lastName: string;
+	password: string;
+}
+
+export interface LoginRequest {
+	email: string;
+	password: string;
+}
+
 export interface AuthResponse {
 	userId: string;
 	accessToken: string;
@@ -6,12 +27,28 @@ export interface AuthResponse {
 	refreshTokenExpirationDate: string;
 }
 
-export enum HttpMethods {
-	GET = "GET",
-	POST = "POST",
-	PUT = "PUT",
-	DELETE = "DELETE",
-	PATCH = "PATCH",
+export interface User {
+	id: string;
+	email: string;
+	username: string;
+	firstName: string;
+	lastName: string;
+	phoneNumber: string | null;
+}
+
+export interface ChangePasswordRequest {
+	id: string;
+	currentPassword: string;
+	newPassword: string;
+}
+
+export interface UpdateUserInfoRequest {
+	id: string;
+	newFirstName: string | null;
+	newLastName: string | null;
+	newUsername: string | null;
+	newEmail: string | null;
+	newPhoneNumber: string | null;
 }
 
 export enum TaskPriority {
