@@ -25,16 +25,12 @@ export default function TaskDetails({
 	if (!task) return null;
 
 	const handleNameChange = (value: string) => {
-		if (value.trim().length === 0) {
-			setNameError("Task name cannot be empty");
-			return;
-		}
 		setNameError(null);
 		setName(value);
 	};
 
 	const handleNameSave = () => {
-		if (task.name.trim().length === 0) {
+		if (name.trim().length === 0) {
 			setNameError("Task name cannot be empty");
 			return;
 		}
@@ -76,7 +72,7 @@ export default function TaskDetails({
 				<input
 					type="text"
 					className="form-control"
-					value={task.name}
+					value={name}
 					onChange={(e) => handleNameChange(e.target.value)}
 				/>
 				{nameError && (
@@ -86,6 +82,9 @@ export default function TaskDetails({
 					className="btn btn-primary mt-2 w-100"
 					title="Save task name"
 					onClick={handleNameSave}
+					disabled={
+						!name || name.trim().length === 0 || name === task.name
+					}
 				>
 					Save
 				</button>
