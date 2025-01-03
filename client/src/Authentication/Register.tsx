@@ -1,31 +1,13 @@
 import { useState } from "react";
 import { useNavigate } from "react-router";
 import { UseAuth } from "./context/AuthContext";
-import { BASE_URL, REGISTER_PATH } from "../API/URLs";
-import { AuthResponse } from "../API/interfaces";
-
-interface RegisterForm {
-	email: string;
-	username: string;
-	firstName: string;
-	lastName: string;
-	password: string;
-}
-
-const RegisterCall = async (formData: RegisterForm) => {
-	return fetch(`${BASE_URL}/${REGISTER_PATH}`, {
-		method: "POST",
-		headers: {
-			"Content-Type": "application/json",
-		},
-		body: JSON.stringify(formData),
-	});
-};
+import { RegisterRequest } from "../API/interfaces";
+import { authApi } from "../API/Calls/AuthCalls";
 
 export default function Register() {
 	const navigate = useNavigate();
 	const { login } = UseAuth();
-	const [formData, setFormData] = useState<RegisterForm>({
+	const [formData, setFormData] = useState<RegisterRequest>({
 		email: "",
 		username: "",
 		firstName: "",
@@ -34,31 +16,23 @@ export default function Register() {
 	});
 	const [confirmPassword, setConfirmPassword] = useState<string>("");
 	const [error, setError] = useState<string>("");
+	const [result, setResult] = useState<string>("");
 	const [showPassword, setShowPassword] = useState(false);
 	const [showConfirmPassword, setShowConfirmPassword] = useState(false);
 
 	const handleSubmit = async (e: React.FormEvent) => {
-		e.preventDefault();
-		setError("");
-
-		if (formData.password !== confirmPassword) {
-			setError("Passwords do not match");
-			return;
-		}
-
 		try {
-			const response = await RegisterCall(formData);
-
-			if (!response.ok) {
-				const errorData = await response.json();
-				throw new Error(errorData.message || "Registration failed");
+			e.preventDefault();
+			setError("");
+			if (formData.password !== confirmPassword) {
+				setError("Passwords do not match");
+				return;
 			}
+			const response = await authApi.register(formData);
+			login(response);
 
-			const data: AuthResponse = await response.json();
-
-			login(data.accessToken);
-			localStorage.setItem("refreshToken", data.refreshToken);
-			localStorage.setItem("userId", data.userId);
+			setResult("Successfully registered as " + formData.email);
+			await new Promise((resolve) => setTimeout(resolve, 2000));
 
 			navigate("/", { replace: true });
 		} catch (err: Error | unknown) {
@@ -79,6 +53,11 @@ export default function Register() {
 							{error && (
 								<div className="alert alert-danger">
 									{error}
+								</div>
+							)}
+							{result && (
+								<div className="alert alert-success">
+									{result}
 								</div>
 							)}
 							<form onSubmit={handleSubmit}>
@@ -273,6 +252,19 @@ export default function Register() {
 									Register
 								</button>
 							</form>
+							<div className="have-account">
+								Do you have account?{" "}
+								<span
+									className="login-link text-primary"
+									onClick={() =>
+										navigate("/login", {
+											replace: true,
+										})
+									}
+								>
+									Login Now
+								</span>
+							</div>
 						</div>
 					</div>
 				</div>

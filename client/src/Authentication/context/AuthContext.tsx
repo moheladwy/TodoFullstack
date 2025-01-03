@@ -1,34 +1,27 @@
 import { createContext, useContext, useState, useEffect } from "react";
-import { BASE_URL, REFRESH_PATH } from "../../API/URLs";
-import { HttpMethods } from "../../API/interfaces";
+import { authApi } from "../../API/Calls/AuthCalls";
+import { AuthResponse, User } from "../../API/interfaces";
+import { userApi } from "../../API/Calls/UserCalls";
 
 interface AuthContextType {
 	isAuthenticated: boolean;
 	accessToken: string | null;
 	userId: string | null;
+	user: User | null;
 	isSidebarOpen: boolean;
 	toggleSidebar: () => void;
-	login: (token: string) => void;
+	login: (authResponse: AuthResponse) => void;
 	logout: () => void;
-	refreshAccessToken: () => Promise<void>;
+	refreshAccessToken: () => void;
 }
 
 const AuthContext = createContext<AuthContextType | null>(null);
-
-const RefreshAccessToken = async (refreshToken: string) => {
-	return await fetch(`${BASE_URL}/${REFRESH_PATH}`, {
-		method: HttpMethods.POST,
-		headers: {
-			"Content-Type": "application/json",
-		},
-		body: JSON.stringify(refreshToken),
-	});
-};
 
 function AuthProvider({ children }: { children: React.ReactNode }) {
 	const [isAuthenticated, setIsAuthenticated] = useState(false);
 	const [accessToken, setAccessToken] = useState<string | null>(null);
 	const [userId, setUserId] = useState<string | null>(null);
+	const [user, setUser] = useState<User | null>(null);
 	const [isLoading, setIsLoading] = useState(true);
 	const [isSidebarOpen, setIsSidebarOpen] = useState(() => {
 		const saved = localStorage.getItem("sidebarOpen");
@@ -39,19 +32,15 @@ function AuthProvider({ children }: { children: React.ReactNode }) {
 		const initializeAuth = async () => {
 			const token = localStorage.getItem("accessToken");
 			const refreshToken = localStorage.getItem("refreshToken");
+			const userId = localStorage.getItem("userId");
 			if (token) {
 				setAccessToken(token);
 				setIsAuthenticated(true);
-				setUserId(localStorage.getItem("userId"));
+				setUserId(userId);
 			} else if (refreshToken) {
 				try {
-					const response = await RefreshAccessToken(refreshToken);
-					if (!response.ok) throw new Error("Token refresh failed");
-
-					const data = await response.json();
-					login(data.accessToken);
-					localStorage.setItem("refreshToken", data.refreshToken);
-					setUserId(data.userId);
+					const authResponse = await authApi.refresh(refreshToken);
+					login(authResponse);
 				} catch (err: Error | unknown) {
 					console.error(err);
 					logout();
@@ -62,35 +51,39 @@ function AuthProvider({ children }: { children: React.ReactNode }) {
 		initializeAuth();
 	}, []);
 
-	const login = (token: string) => {
-		localStorage.setItem("accessToken", token);
-		setAccessToken(token);
+	const login = async (authResponse: AuthResponse) => {
+		localStorage.setItem("accessToken", authResponse.accessToken);
+		localStorage.setItem("refreshToken", authResponse.refreshToken);
+		localStorage.setItem("userId", authResponse.userId);
+		setAccessToken(authResponse.accessToken);
+		setUserId(authResponse.userId);
 		setIsAuthenticated(true);
+		setUser(await userApi.getUser(authResponse.userId));
 	};
 
-	const logout = () => {
+	const logout = async () => {
+		try {
+			await authApi.logout();
+		} catch (error: Error | unknown) {
+			console.error(error);
+		}
 		localStorage.removeItem("accessToken");
 		localStorage.removeItem("refreshToken");
 		localStorage.removeItem("userId");
 		setAccessToken(null);
+		setUserId(null);
 		setIsAuthenticated(false);
 	};
 
 	const refreshAccessToken = async () => {
-		const refreshToken = localStorage.getItem("refreshToken");
-		if (!refreshToken) {
-			logout();
-			return;
-		}
-
 		try {
-			const response = await RefreshAccessToken(refreshToken);
-			if (!response.ok) throw new Error("Token refresh failed");
-
-			const data = await response.json();
-			login(data.accessToken);
-			localStorage.setItem("refreshToken", data.refreshToken);
-			localStorage.setItem("userId", data.userId);
+			const refreshToken = localStorage.getItem("refreshToken");
+			if (!refreshToken) {
+				logout();
+				return;
+			}
+			const response = await authApi.refresh(refreshToken);
+			login(response);
 		} catch (err: Error | unknown) {
 			logout();
 			console.error(err);
@@ -112,6 +105,7 @@ function AuthProvider({ children }: { children: React.ReactNode }) {
 				isAuthenticated,
 				accessToken,
 				userId,
+				user,
 				isSidebarOpen,
 				login,
 				logout,

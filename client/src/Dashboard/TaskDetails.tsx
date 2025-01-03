@@ -13,17 +13,46 @@ export default function TaskDetails({
 	onUpdateTask,
 	onClose,
 }: TaskDetailsProps) {
+	const [name, setName] = useState<string>(task?.name || "");
 	const [nameError, setNameError] = useState<string | null>(null);
+	const [description, setDescription] = useState<string>(
+		task?.description || ""
+	);
+	const [descriptionError, setDescriptionError] = useState<string | null>(
+		null
+	);
 
 	if (!task) return null;
 
 	const handleNameChange = (value: string) => {
-		if (value.trim().length === 0) {
+		setNameError(null);
+		setName(value);
+	};
+
+	const handleNameSave = () => {
+		if (name.trim().length === 0) {
 			setNameError("Task name cannot be empty");
 			return;
 		}
 		setNameError(null);
-		onUpdateTask({ ...task, name: value });
+		onUpdateTask({ ...task, name: name });
+	};
+
+	const handleDescriptionChange = (value: string) => {
+		if (value.trim().length > 500) {
+			setDescriptionError(
+				"Task description cannot be more than 500 characters"
+			);
+			return;
+		}
+		setDescriptionError(null);
+		setDescription(value);
+	};
+
+	const handleDescriptionClear = () => {
+		setDescription("");
+		if (task.description?.trim().length !== 0)
+			onUpdateTask({ ...task, description: undefined });
 	};
 
 	return (
@@ -43,13 +72,22 @@ export default function TaskDetails({
 				<input
 					type="text"
 					className="form-control"
-					min={1}
-					value={task.name}
+					value={name}
 					onChange={(e) => handleNameChange(e.target.value)}
 				/>
 				{nameError && (
 					<div className="invalid-feedback">{nameError}</div>
 				)}
+				<button
+					className="btn btn-primary mt-2 w-100"
+					title="Save task name"
+					onClick={handleNameSave}
+					disabled={
+						!name || name.trim().length === 0 || name === task.name
+					}
+				>
+					Save
+				</button>
 			</div>
 
 			<div className="mb-3">
@@ -59,26 +97,41 @@ export default function TaskDetails({
 						className="form-control"
 						placeholder="Task description..."
 						rows={3}
-						value={task.description || ""}
+						value={description}
 						onChange={(e) =>
-							onUpdateTask({
-								...task,
-								description: e.target.value,
-							})
+							handleDescriptionChange(e.target.value)
 						}
 					/>
 				</div>
-				<button
-					className="btn btn-secondary w-100 mt-1"
-					type="button"
-					onClick={() =>
-						onUpdateTask({ ...task, description: undefined })
-					}
-					disabled={!task.description}
-					title="Clear description"
-				>
-					Clear
-				</button>
+				{descriptionError && (
+					<div className="invalid-feedback">{descriptionError}</div>
+				)}
+				<div className="description-actions d-flex justify-content-stretch mt-1">
+					<button
+						className="btn btn-danger flex-grow-1 me-1"
+						type="button"
+						onClick={handleDescriptionClear}
+						disabled={
+							!description || description.trim().length === 0
+						}
+						title="Clear description"
+					>
+						Clear
+					</button>
+					<button
+						className="btn btn-primary flex-grow-1 ms-1"
+						type="button"
+						onClick={() =>
+							onUpdateTask({ ...task, description: description })
+						}
+						disabled={
+							!description || description === task.description
+						}
+						title="Save description"
+					>
+						Save
+					</button>
+				</div>
 			</div>
 
 			<div className="mb-3">

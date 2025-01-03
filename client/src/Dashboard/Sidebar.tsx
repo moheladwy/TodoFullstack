@@ -1,7 +1,7 @@
 import { useState } from "react";
 import { List } from "../API/interfaces";
 import { UseAuth } from "../Authentication/context/AuthContext";
-import { listsApi } from "../API/ListsActions";
+import { listsApi } from "../API/Calls/ListsCalls";
 
 interface SidebarProps {
 	lists: List[];
@@ -79,9 +79,11 @@ export default function Sidebar({
 						{lists.map((list) => (
 							<a
 								key={list.id}
-								className={`list-group-item list-group-item-action d-flex justify-content-between align-items-center ${
-									selectedList?.id === list.id ? "active" : ""
-								} bg-dark text-light`}
+								className={`hover list-group-item list-group-item-action d-flex justify-content-between align-items-center ${
+									selectedList?.id === list.id
+										? "selected"
+										: "not-selected"
+								} text-light cursor-pointer`}
 								onClick={() => {
 									if (selectedList?.id !== list.id)
 										setSelectedList(list);
