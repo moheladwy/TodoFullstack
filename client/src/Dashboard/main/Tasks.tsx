@@ -1,4 +1,6 @@
-import { List, Task, TaskPriority } from "../API/interfaces";
+import { Task, TaskPriority } from "../../API/interfaces";
+import { UseLists } from "../context/ListsContext";
+import { UseTasks } from "../context/TaskContext";
 import {
 	GroupTasks,
 	GroupBy,
@@ -7,24 +9,22 @@ import {
 } from "./MainContentHelpers";
 
 interface TasksProps {
-	selectedList: List;
-	handleDeleteTask: (taskId: string) => void;
-	handleToggleTask: (task: Task) => void;
-	handleTaskSelect: (task: Task) => void;
-	selectedTask: Task | null;
 	groupBy: GroupBy;
 	sortBy: SortBy;
 }
 
-export default function Tasks({
-	selectedList,
-	handleDeleteTask,
-	handleToggleTask,
-	handleTaskSelect,
-	selectedTask,
-	groupBy,
-	sortBy,
-}: TasksProps) {
+export default function Tasks({ groupBy, sortBy }: TasksProps) {
+	const { selectedList } = UseLists();
+	const { selectedTask, setSelectedTask, toggleTask, deleteTask } =
+		UseTasks();
+
+	const handleTaskSelect = (task: Task) => {
+		if (task) {
+			if (selectedTask && selectedTask.id === task.id) return;
+			setSelectedTask(task);
+		}
+	};
+
 	return (
 		<div className="list-group mt-3">
 			{selectedList?.tasks &&
@@ -50,7 +50,7 @@ export default function Tasks({
 										className="form-check-input"
 										type="checkbox"
 										checked={task.isCompleted}
-										onChange={() => handleToggleTask(task)}
+										onChange={() => toggleTask(task)}
 									/>
 									<label
 										className={`form-check-label ${
@@ -75,7 +75,7 @@ export default function Tasks({
 									</label>
 								</div>
 								<button
-									onClick={() => handleDeleteTask(task.id)}
+									onClick={() => deleteTask(task.id)}
 									className="btn btn-outline-danger btn-sm"
 								>
 									<i className="bi bi-trash-fill"></i>

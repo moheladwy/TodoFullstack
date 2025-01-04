@@ -1,28 +1,28 @@
-import { useState } from "react";
-import { Task, TaskPriority } from "../API/interfaces";
+import { useEffect, useState } from "react";
+import { TaskPriority } from "../../API/interfaces";
 import { GetPriorityBadgeColor } from "./MainContentHelpers";
+import { UseTasks } from "../context/TaskContext";
 
-interface TaskDetailsProps {
-	task: Task | null;
-	onUpdateTask: (updatedTask: Task) => void;
-	onClose: () => void;
-}
-
-export default function TaskDetails({
-	task,
-	onUpdateTask,
-	onClose,
-}: TaskDetailsProps) {
-	const [name, setName] = useState<string>(task?.name || "");
+export default function TaskDetails() {
+	const { selectedTask, setSelectedTask, updateTask } = UseTasks();
+	const [name, setName] = useState<string>(selectedTask?.name || "");
 	const [nameError, setNameError] = useState<string | null>(null);
 	const [description, setDescription] = useState<string>(
-		task?.description || ""
+		selectedTask?.description || ""
 	);
 	const [descriptionError, setDescriptionError] = useState<string | null>(
 		null
 	);
 
-	if (!task) return null;
+	if (!selectedTask) return null;
+
+	// eslint-disable-next-line react-hooks/rules-of-hooks
+	useEffect(() => {
+		setName(selectedTask.name || "");
+		setDescription(selectedTask.description || "");
+		setNameError(null);
+		setDescriptionError(null);
+	}, [selectedTask]);
 
 	const handleNameChange = (value: string) => {
 		setNameError(null);
@@ -30,29 +30,41 @@ export default function TaskDetails({
 	};
 
 	const handleNameSave = () => {
-		if (name.trim().length === 0) {
-			setNameError("Task name cannot be empty");
-			return;
+		try {
+			if (name.trim().length === 0) {
+				setNameError("Task name cannot be empty");
+				return;
+			}
+			setNameError(null);
+			updateTask({ ...selectedTask, name: name });
+		} catch (error) {
+			console.error(error);
 		}
-		setNameError(null);
-		onUpdateTask({ ...task, name: name });
 	};
 
 	const handleDescriptionChange = (value: string) => {
-		if (value.trim().length > 500) {
-			setDescriptionError(
-				"Task description cannot be more than 500 characters"
-			);
-			return;
+		try {
+			if (value.trim().length > 500) {
+				setDescriptionError(
+					"Task description cannot be more than 500 characters"
+				);
+				return;
+			}
+			setDescriptionError(null);
+			setDescription(value);
+		} catch (error) {
+			console.error(error);
 		}
-		setDescriptionError(null);
-		setDescription(value);
 	};
 
 	const handleDescriptionClear = () => {
-		setDescription("");
-		if (task.description?.trim().length !== 0)
-			onUpdateTask({ ...task, description: undefined });
+		try {
+			setDescription("");
+			if (selectedTask.description?.trim().length !== 0)
+				updateTask({ ...selectedTask, description: "" });
+		} catch (error) {
+			console.error(error);
+		}
 	};
 
 	return (
@@ -61,7 +73,7 @@ export default function TaskDetails({
 				<h4>Task Details</h4>
 				<button
 					className="btn btn-sm btn-outline-secondary"
-					onClick={onClose}
+					onClick={() => setSelectedTask(null)}
 				>
 					<i className="bi bi-x-lg"></i>
 				</button>
@@ -83,7 +95,9 @@ export default function TaskDetails({
 					title="Save task name"
 					onClick={handleNameSave}
 					disabled={
-						!name || name.trim().length === 0 || name === task.name
+						!name ||
+						name.trim().length === 0 ||
+						name === selectedTask.name
 					}
 				>
 					Save
@@ -122,10 +136,14 @@ export default function TaskDetails({
 						className="btn btn-primary flex-grow-1 ms-1"
 						type="button"
 						onClick={() =>
-							onUpdateTask({ ...task, description: description })
+							updateTask({
+								...selectedTask,
+								description: description,
+							})
 						}
 						disabled={
-							!description || description === task.description
+							!description ||
+							description === selectedTask.description
 						}
 						title="Save description"
 					>
@@ -138,10 +156,11 @@ export default function TaskDetails({
 				<label className="form-label">Priority</label>
 				<select
 					className="form-select"
-					value={task.priority}
+					value={selectedTask.priority}
 					onChange={(e) =>
-						onUpdateTask({
-							...task,
+						selectedTask &&
+						updateTask({
+							...selectedTask,
 							priority: Number(e.target.value),
 						})
 					}
@@ -161,10 +180,10 @@ export default function TaskDetails({
 					<input
 						className="form-check-input"
 						type="checkbox"
-						checked={task.isCompleted}
+						checked={selectedTask.isCompleted}
 						onChange={(e) =>
-							onUpdateTask({
-								...task,
+							updateTask({
+								...selectedTask,
 								isCompleted: e.target.checked,
 							})
 						}
@@ -176,17 +195,17 @@ export default function TaskDetails({
 			<div className="task-status mt-4">
 				<span
 					className={`badge bg-${GetPriorityBadgeColor(
-						task.priority
+						selectedTask.priority
 					)} me-2`}
 				>
-					{TaskPriority[task.priority]}
+					{TaskPriority[selectedTask.priority]}
 				</span>
 				<span
 					className={`badge ${
-						task.isCompleted ? "bg-success" : "bg-secondary"
+						selectedTask.isCompleted ? "bg-success" : "bg-secondary"
 					}`}
 				>
-					{task.isCompleted ? "Completed" : "Active"}
+					{selectedTask.isCompleted ? "Completed" : "Active"}
 				</span>
 			</div>
 		</div>
