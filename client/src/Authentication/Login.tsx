@@ -133,10 +133,10 @@ export default function Login() {
 									Login
 								</button>
 							</form>
-							<div className="have-no-account">
+							<div className="have-no-account mt-2">
 								Don't have an account?{" "}
 								<span
-									className="register-link text-primary"
+									className="register-link text-primary cursor-pointer"
 									onClick={() =>
 										navigate("/register", {
 											replace: true,

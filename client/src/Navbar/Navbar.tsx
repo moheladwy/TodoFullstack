@@ -39,6 +39,14 @@ export default function Navbar() {
 										Dashboard
 									</Link>
 								</li>
+								<li className="nav-item me-2">
+									<Link
+										className="btn btn-secondary"
+										to="/account"
+									>
+										<i className="bi bi-gear"></i> Account
+									</Link>
+								</li>
 								<li className="nav-item">
 									<button
 										onClick={handleLogout}

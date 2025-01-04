@@ -252,10 +252,10 @@ export default function Register() {
 									Register
 								</button>
 							</form>
-							<div className="have-account">
+							<div className="have-account mt-2">
 								Do you have account?{" "}
 								<span
-									className="login-link text-primary"
+									className="login-link text-primary cursor-pointer"
 									onClick={() =>
 										navigate("/login", {
 											replace: true,

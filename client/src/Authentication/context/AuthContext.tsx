@@ -8,6 +8,7 @@ interface AuthContextType {
 	accessToken: string | null;
 	userId: string | null;
 	user: User | null;
+	updateUser: (updatedUser: User) => void;
 	login: (authResponse: AuthResponse) => void;
 	logout: () => void;
 	refreshAccessToken: () => void;
@@ -84,6 +85,14 @@ function AuthProvider({ children }: { children: React.ReactNode }) {
 		}
 	};
 
+	const updateUser = async (updatedUser: User) => {
+		if (!accessToken) {
+			setUser(null);
+			return;
+		}
+		setUser(updatedUser);
+	};
+
 	if (isLoading) {
 		return <div>Loading...</div>;
 	}
@@ -94,6 +103,7 @@ function AuthProvider({ children }: { children: React.ReactNode }) {
 				accessToken,
 				userId,
 				user,
+				updateUser,
 				login,
 				logout,
 				refreshAccessToken,
