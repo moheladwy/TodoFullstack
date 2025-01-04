@@ -1,22 +1,15 @@
 import { useState } from "react";
-import { List } from "../API/interfaces";
-import { UseAuth } from "../Authentication/context/AuthContext";
-import { listsApi } from "../API/Calls/ListsCalls";
+import { UseLists } from "../context/ListsContext";
 
-interface SidebarProps {
-	lists: List[];
-	selectedList: List | null;
-	setSelectedList: (list: List) => void;
-	setLists: (lists: List[]) => void;
-}
-
-export default function Sidebar({
-	lists,
-	selectedList,
-	setSelectedList,
-	setLists,
-}: SidebarProps) {
-	const { toggleSidebar } = UseAuth();
+export default function Sidebar() {
+	const {
+		toggleSidebar,
+		lists,
+		selectedList,
+		setSelectedList,
+		addList,
+		deleteList,
+	} = UseLists();
 	const [newListName, setNewListName] = useState<string>("");
 	const [error, setError] = useState<string | null>(null);
 
@@ -25,8 +18,7 @@ export default function Sidebar({
 		if (!newListName.trim()) return;
 
 		try {
-			const newList = await listsApi.createList(newListName);
-			setLists([...lists, newList]);
+			addList(newListName);
 			setNewListName("");
 		} catch (err) {
 			setError("Failed to create list");
@@ -36,11 +28,7 @@ export default function Sidebar({
 
 	const handleDeleteList = async (listId: string) => {
 		try {
-			await listsApi.deleteList(listId);
-			setLists(lists.filter((list) => list.id !== listId));
-			if (selectedList?.id === listId) {
-				setSelectedList(lists[0] || null);
-			}
+			deleteList(listId);
 		} catch (err) {
 			setError("Failed to delete list");
 			console.error(err);

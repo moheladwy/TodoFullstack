@@ -1,4 +1,4 @@
-import { Task, TaskPriority } from "../API/interfaces";
+import { Task, TaskPriority } from "../../API/interfaces";
 
 enum SortBy {
 	Name = "name",

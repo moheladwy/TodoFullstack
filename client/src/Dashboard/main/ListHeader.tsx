@@ -1,75 +1,110 @@
 import { useState } from "react";
-import { List } from "../API/interfaces";
 import { GroupBy, SortBy } from "./MainContentHelpers";
+import { UseLists } from "../context/ListsContext";
+import { UseTasks } from "../context/TaskContext";
 
 interface ListActionsProps {
-	selectedList: List;
 	sortBy: SortBy;
 	groupBy: GroupBy;
 	setSortBy: (sortBy: SortBy) => void;
 	setGroupBy: (groupBy: GroupBy) => void;
-	error: string | null;
-	newTaskName: string;
-	setNewTaskName: (newTaskName: string) => void;
-	handleAddTask: (e: React.FormEvent) => void;
-	onUpdateList: (name: string) => void;
 }
 
 export default function ListHeader({
-	selectedList,
 	sortBy,
 	groupBy,
 	setSortBy,
 	setGroupBy,
-	error,
-	newTaskName,
-	setNewTaskName,
-	handleAddTask,
-	onUpdateList,
 }: ListActionsProps) {
+	const { selectedList, updateList } = UseLists();
+	const { addTask } = UseTasks();
+
 	const [isEditing, setIsEditing] = useState(false);
-	const [editedName, setEditedName] = useState(selectedList.name);
+	const [editedName, setEditedName] = useState(selectedList?.name || "");
+	const [editedDescription, setEditedDescription] = useState(
+		selectedList?.description || ""
+	);
+	const [newTaskName, setNewTaskName] = useState("");
+	const [error, setError] = useState<string | null>(null);
+
+	if (!selectedList) return null;
 
 	const handleUpdateListClick = () => {
 		setIsEditing(true);
-		setEditedName(selectedList.name);
+		setEditedName(selectedList.name || "");
+		setEditedDescription(selectedList.description || "");
+		setError(null);
 	};
 
 	const handleSubmit = (e: React.FormEvent) => {
 		e.preventDefault();
-		if (editedName.trim().length > 0) {
-			onUpdateList(editedName.trim());
-			setIsEditing(false);
+		if (editedName.trim().length !== 0) {
+			setError("List name cannot be empty");
 		}
+		updateList({
+			name: editedName,
+			description: editedDescription,
+		});
+		setIsEditing(false);
+		setError(null);
 	};
+
 	return (
 		<div className="d-flex flex-column justify-content-center flex-wrap flex-md-nowrap align-items-center pt-3 pb-2 px-0 mx-0 mb-3">
-			{error && <div className="alert alert-danger">{error}</div>}
-			<div className="list-actions mb-2 d-flex justify-content-between align-items-center w-100">
+			<div className="list-actions mb-4 d-flex justify-content-between align-items-center w-100">
 				{isEditing ? (
 					<form
 						onSubmit={handleSubmit}
-						className="d-flex align-items-center mx-3"
+						className="d-flex flex-column mx-3 w-75"
 					>
 						<input
 							type="text"
-							className="form-control h2 mb-0"
+							className="form-control h2 mb-2"
 							value={editedName}
 							onChange={(e) => setEditedName(e.target.value)}
 							autoFocus
-							onBlur={() => {
-								setIsEditing(false);
-								setEditedName(selectedList.name);
-							}}
+							placeholder="List name..."
 						/>
+						<textarea
+							className="form-control"
+							value={editedDescription}
+							onChange={(e) =>
+								setEditedDescription(e.target.value)
+							}
+							placeholder="List description..."
+							rows={2}
+						/>
+						<div className="mt-2">
+							<button
+								type="submit"
+								className="btn btn-primary me-2"
+							>
+								Save
+							</button>
+							<button
+								type="button"
+								className="btn btn-secondary"
+								onClick={() => {
+									setIsEditing(false);
+									setEditedName(selectedList?.name || "");
+									setEditedDescription(
+										selectedList?.description || ""
+									);
+								}}
+							>
+								Cancel
+							</button>
+						</div>
 					</form>
 				) : (
-					<h1
-						className="h2 w-15 mx-3 mb-0"
-						onClick={handleUpdateListClick}
-					>
-						{selectedList.name}
-					</h1>
+					<div className="mx-3 w-75" onClick={handleUpdateListClick}>
+						<h1 className="h2 mb-1">{selectedList.name}</h1>
+						{selectedList.description && (
+							<p className="text-muted mb-0">
+								{selectedList.description}
+							</p>
+						)}
+					</div>
 				)}
 				<div className="d-flex gap-2">
 					<button
@@ -167,7 +202,14 @@ export default function ListHeader({
 					</div>
 				</div>
 			</div>
-			<form onSubmit={handleAddTask} className="row g-1 w-100">
+			{error && <div className="alert alert-danger">{error}</div>}{" "}
+			<form
+				onSubmit={(e) => {
+					e.preventDefault();
+					addTask(selectedList.id, newTaskName);
+				}}
+				className="row g-1 w-100"
+			>
 				<div className="col">
 					<input
 						type="text"

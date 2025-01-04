@@ -8,8 +8,6 @@ interface AuthContextType {
 	accessToken: string | null;
 	userId: string | null;
 	user: User | null;
-	isSidebarOpen: boolean;
-	toggleSidebar: () => void;
 	login: (authResponse: AuthResponse) => void;
 	logout: () => void;
 	refreshAccessToken: () => void;
@@ -23,10 +21,6 @@ function AuthProvider({ children }: { children: React.ReactNode }) {
 	const [userId, setUserId] = useState<string | null>(null);
 	const [user, setUser] = useState<User | null>(null);
 	const [isLoading, setIsLoading] = useState(true);
-	const [isSidebarOpen, setIsSidebarOpen] = useState(() => {
-		const saved = localStorage.getItem("sidebarOpen");
-		return saved !== null ? JSON.parse(saved) : true;
-	});
 
 	useEffect(() => {
 		const initializeAuth = async () => {
@@ -90,12 +84,6 @@ function AuthProvider({ children }: { children: React.ReactNode }) {
 		}
 	};
 
-	const toggleSidebar = () => {
-		const newState = !isSidebarOpen;
-		setIsSidebarOpen(newState);
-		localStorage.setItem("sidebarOpen", JSON.stringify(newState));
-	};
-
 	if (isLoading) {
 		return <div>Loading...</div>;
 	}
@@ -106,11 +94,9 @@ function AuthProvider({ children }: { children: React.ReactNode }) {
 				accessToken,
 				userId,
 				user,
-				isSidebarOpen,
 				login,
 				logout,
 				refreshAccessToken,
-				toggleSidebar,
 			}}
 		>
 			{children}
@@ -126,4 +112,4 @@ const UseAuth = () => {
 	return context;
 };
 
-export { AuthContext, AuthProvider, UseAuth };
+export { AuthProvider, UseAuth };

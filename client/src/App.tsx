@@ -6,30 +6,33 @@ import Register from "./Authentication/Register";
 import Dashboard from "./Dashboard/Dashboard";
 import Navbar from "./Navbar/Navbar";
 import ProtectedRoute from "./Authentication/ProtectedRoute";
+import { ListsProvider } from "./Dashboard/context/ListsContext";
 
 export default function App() {
 	return (
 		<BrowserRouter>
 			<AuthProvider>
-				<div className="app-container">
-					<Navbar />
-					<Routes>
-						<Route
-							index
-							element={<Navigate to="/dashboard" replace />}
-						/>
-						<Route path="/login" element={<Login />} />
-						<Route path="/register" element={<Register />} />
-						<Route
-							path="/dashboard"
-							element={
-								<ProtectedRoute>
-									<Dashboard />
-								</ProtectedRoute>
-							}
-						/>
-					</Routes>
-				</div>
+				<ListsProvider>
+					<div className="app-container">
+						<Navbar />
+						<Routes>
+							<Route
+								index
+								element={<Navigate to="/dashboard" replace />}
+							/>
+							<Route path="/login" element={<Login />} />
+							<Route path="/register" element={<Register />} />
+							<Route
+								path="/dashboard"
+								element={
+									<ProtectedRoute>
+										<Dashboard />
+									</ProtectedRoute>
+								}
+							/>
+						</Routes>
+					</div>
+				</ListsProvider>
 			</AuthProvider>
 		</BrowserRouter>
 	);
