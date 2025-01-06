@@ -1,5 +1,6 @@
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
+using Todo.Core.Enums;
 using Task = Todo.Core.Entities.Task;
 
 namespace Todo.Core.Configurations;
@@ -25,14 +26,13 @@ public class TaskEntityConfiguration : IEntityTypeConfiguration<Task>
         builder.Property(task => task.Description)
             .HasMaxLength(500);
 
-        // builder.Property(task => task.DueDate)
-        //     .HasColumnType("date");
-
         builder.Property(task => task.IsCompleted)
             .IsRequired();
 
         builder.Property(task => task.Priority)
-            .HasColumnType("int");
+            .HasColumnType("int")
+            .HasDefaultValue(TaskPriority.Low)
+            .IsRequired();
 
         builder.HasOne(task => task.TaskList)
             .WithMany(list => list.Tasks)

@@ -1,4 +1,5 @@
 using System.Text;
+using FluentValidation;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.HttpLogging;
 using Microsoft.AspNetCore.Identity;
@@ -22,6 +23,8 @@ public static class StartupBuilderConfigurations
     /// </param>
     public static void InitializeConfigurations(this WebApplicationBuilder builder)
     {
+        builder.Services.AddValidatorsFromAssemblyContaining(typeof(Program));
+
         builder.Services.AddEndpointsApiExplorer();
         builder.AddSwaggerService();
         builder.AddLoggingService();

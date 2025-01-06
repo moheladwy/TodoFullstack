@@ -21,15 +21,12 @@ public class TaskList
     ///     The name of the list of tasks, required, and not null.
     ///     The name must be between 1 and 100 characters.
     /// </summary>
-    [Required]
-    [StringLength(100, MinimumLength = 1)]
     public required string Name { get; set; }
 
     /// <summary>
     ///     The description of the list of tasks, not required, and can be null.
     ///     The description must not exceed 200 characters.
     /// </summary>
-    [StringLength(200)]
     public string? Description { get; set; }
 
     /// <summary>
@@ -39,7 +36,6 @@ public class TaskList
     ///     The list of tasks is not lazy-loaded, and the tasks are eagerly-loaded.
     ///     The list is not mapped to the database.
     /// </summary>
-    [Required]
     public virtual List<Task> Tasks { get; set; } = [];
 
     /// <summary>
@@ -55,6 +51,5 @@ public class TaskList
     ///     The user is not mapped to the database.
     ///     The user is not being serialized.
     /// </summary>
-    [JsonIgnore]
     public virtual User? User { get; set; }
 }

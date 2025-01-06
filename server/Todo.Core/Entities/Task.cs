@@ -21,15 +21,12 @@ public class Task
     ///     The name of the task, required, and a string with a maximum length of 100 characters.
     ///     The minimum length is 1 character.
     /// </summary>
-    [Required]
-    [StringLength(100, MinimumLength = 1, ErrorMessage = "The field Name must be between 1 and 100 characters.")]
     public required string Name { get; set; }
 
     /// <summary>
     ///     The description of the task, a string with a maximum length of 500 characters.
     ///     The description is optional and can be null.
     /// </summary>
-    [StringLength(500, ErrorMessage = "The field Description must not exceed 500 characters.")]
     public string? Description { get; set; } = string.Empty;
 
     /// <summary>
@@ -39,10 +36,6 @@ public class Task
     [Required]
     public bool IsCompleted { get; set; }
 
-    /// <summary>
-    ///    The due date of the task, optional, and can be null.
-    /// </summary>
-    // [DataType(DataType.Date)]
     // public DateTime? DueDate { get; set; }
 
     /// <summary>

@@ -12,6 +12,7 @@
     </PropertyGroup>
 
     <ItemGroup>
+        <PackageReference Include="FluentValidation.DependencyInjectionExtensions" Version="11.11.0" />
         <PackageReference Include="Microsoft.AspNetCore.Authentication.JwtBearer" Version="8.0.11" />
         <PackageReference Include="Microsoft.AspNetCore.Identity.EntityFrameworkCore" Version="8.0.11" />
         <PackageReference Include="Microsoft.AspNetCore.OpenApi" Version="8.0.11" />
@@ -34,8 +35,8 @@
     </ItemGroup>
     
     <ItemGroup>
-        <Folder Include="Database\" />
         <Folder Include="obj\" />
+        <Folder Include="Validators\List\" />
     </ItemGroup>
     
     <ItemGroup>

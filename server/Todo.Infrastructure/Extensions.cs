@@ -1,12 +1,9 @@
 using Microsoft.AspNetCore.Builder;
-using Microsoft.EntityFrameworkCore;
-using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Todo.Core.DTOs.ListDTOs;
 using Todo.Core.DTOs.TasksDtos;
 using Todo.Core.Entities;
 using Todo.Core.Interfaces;
-using Todo.Infrastructure.Configurations;
 using Todo.Infrastructure.Repositories.Cached;
 using Todo.Infrastructure.Repositories.DB;
 using Todo.Infrastructure.Services;

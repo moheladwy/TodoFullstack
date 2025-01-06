@@ -23,7 +23,7 @@ public class TaskListEntityConfiguration : IEntityTypeConfiguration<TaskList>
             .HasMaxLength(100);
 
         builder.Property(list => list.Description)
-            .HasMaxLength(200);
+            .HasMaxLength(500);
 
         builder.HasMany(list => list.Tasks)
             .WithOne(task => task.TaskList)
