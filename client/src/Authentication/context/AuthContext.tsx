@@ -1,6 +1,10 @@
 import { createContext, useContext, useState, useEffect } from "react";
 import { authApi } from "../../API/Calls/AuthCalls";
-import { AuthResponse, User } from "../../API/interfaces";
+import {
+	AuthResponse,
+	UpdateUserInfoRequest,
+	User,
+} from "../../API/interfaces";
 import { userApi } from "../../API/Calls/UserCalls";
 
 interface AuthContextType {
@@ -8,7 +12,7 @@ interface AuthContextType {
 	accessToken: string | null;
 	userId: string | null;
 	user: User | null;
-	updateUser: (updatedUser: User) => void;
+	updateUser: (updatedUser: UpdateUserInfoRequest) => Promise<void>;
 	login: (authResponse: AuthResponse) => void;
 	logout: () => void;
 	refreshAccessToken: () => void;
@@ -32,6 +36,7 @@ function AuthProvider({ children }: { children: React.ReactNode }) {
 				setAccessToken(token);
 				setIsAuthenticated(true);
 				setUserId(userId);
+				setUser(await userApi.getUser(userId || ""));
 			} else if (refreshToken) {
 				try {
 					const authResponse = await authApi.refresh(refreshToken);
@@ -85,12 +90,13 @@ function AuthProvider({ children }: { children: React.ReactNode }) {
 		}
 	};
 
-	const updateUser = async (updatedUser: User) => {
+	const updateUser = async (updatedUser: UpdateUserInfoRequest) => {
 		if (!accessToken) {
 			setUser(null);
 			return;
 		}
-		setUser(updatedUser);
+		await userApi.updateUserInfo(updatedUser);
+		setUser(await userApi.getUser(updatedUser.id));
 	};
 
 	if (isLoading) {
