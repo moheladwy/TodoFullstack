@@ -3,24 +3,27 @@ Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio Version 17
 VisualStudioVersion = 17.5.002.0
 MinimumVisualStudioVersion = 10.0.40219.1
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Todo.Api", "Todo.Api\Todo.Api.csproj", "{5A66F6FD-559C-49B7-A2F8-44D9AFEA78F6}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Todo.Api", "src/Todo.Api\Todo.Api.csproj", "{5A66F6FD-559C-49B7-A2F8-44D9AFEA78F6}"
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution Items", "{24FC08AC-E3BE-4FEC-9615-F92D133866B8}"
 	ProjectSection(SolutionItems) = preProject
-		docker-compose.yml = docker-compose.yml
+		..\docker-compose.yml = ..\docker-compose.yml
+		..\Jenkinsfile = ..\Jenkinsfile
+		..\nginx.conf = ..\nginx.conf
 		Dockerfile = Dockerfile
-		Jenkinsfile = Jenkinsfile
 	EndProjectSection
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Todo.UnitTests", "Todo.UnitTests\Todo.UnitTests.csproj", "{08946D7C-7CEB-4C46-81C1-85AE850F72A7}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Todo.UnitTests", "tests/Todo.UnitTests\Todo.UnitTests.csproj", "{08946D7C-7CEB-4C46-81C1-85AE850F72A7}"
 	ProjectSection(ProjectDependencies) = postProject
 		{4751BE56-078A-4CC0-B738-64DA2FB02908} = {4751BE56-078A-4CC0-B738-64DA2FB02908}
 		{5A66F6FD-559C-49B7-A2F8-44D9AFEA78F6} = {5A66F6FD-559C-49B7-A2F8-44D9AFEA78F6}
 	EndProjectSection
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Todo.Core", "Todo.Core\Todo.Core.csproj", "{4751BE56-078A-4CC0-B738-64DA2FB02908}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Todo.Core", "src/Todo.Core\Todo.Core.csproj", "{4751BE56-078A-4CC0-B738-64DA2FB02908}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Todo.Infrastructure", "Todo.Infrastructure\Todo.Infrastructure.csproj", "{50E63B8E-58AB-4AB8-8ADF-E628B32611B4}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Todo.Infrastructure", "src/Todo.Infrastructure\Todo.Infrastructure.csproj", "{50E63B8E-58AB-4AB8-8ADF-E628B32611B4}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Todo.IntegrationTests", "tests/Todo.IntegrationTests\Todo.IntegrationTests.csproj", "{0748DB0B-1E20-49DC-8F7C-9096FD23EC66}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -44,11 +47,18 @@ Global
 		{50E63B8E-58AB-4AB8-8ADF-E628B32611B4}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{50E63B8E-58AB-4AB8-8ADF-E628B32611B4}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{50E63B8E-58AB-4AB8-8ADF-E628B32611B4}.Release|Any CPU.Build.0 = Release|Any CPU
+		{0748DB0B-1E20-49DC-8F7C-9096FD23EC66}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{0748DB0B-1E20-49DC-8F7C-9096FD23EC66}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{0748DB0B-1E20-49DC-8F7C-9096FD23EC66}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{0748DB0B-1E20-49DC-8F7C-9096FD23EC66}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {BA20D71A-EE1C-4698-A992-8A91B140F27D}
+	EndGlobalSection
+	GlobalSection(NestedProjects) = preSolution
+		{0748DB0B-1E20-49DC-8F7C-9096FD23EC66} = {50148190-E52A-40E6-98AF-55B239FAED07}
 	EndGlobalSection
 EndGlobal

@@ -9,7 +9,8 @@ FROM mcr.microsoft.com/dotnet/sdk:8.0 AS build
 ARG BUILD_CONFIGURATION=Release
 WORKDIR /Todo/src
 
-COPY . .
+COPY Todo.sln .
+COPY src/ .
 RUN dotnet restore Todo.sln
 RUN dotnet build -c $BUILD_CONFIGURATION -o /Todo/build
 

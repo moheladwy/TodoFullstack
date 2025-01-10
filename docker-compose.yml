@@ -9,7 +9,7 @@ services:
 
     api:
         build:
-            context: server
+            context: src/server
             dockerfile: Dockerfile
         image: todo-api:latest
         container_name: todo-api
@@ -26,7 +26,7 @@ services:
             - "sh -c dotnet Todo.Api.dll ef database update && dotnet Todo.Api.dll"
 
     client:
-        build: client
+        build: src/client
         image: todo-client:latest
         container_name: todo-client
         command: ["npm", "run", "build"]
