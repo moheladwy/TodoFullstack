@@ -28,6 +28,9 @@ export default function Sidebar() {
 
 	const handleDeleteList = async (listId: string) => {
 		try {
+			if (!window.confirm("Are you sure you want to delete this list?")) {
+				return;
+			}
 			deleteList(listId);
 		} catch (err) {
 			setError("Failed to delete list");
@@ -46,6 +49,9 @@ export default function Sidebar() {
 							onClick={toggleSidebar}
 						></i>
 					</div>
+
+					{/* Divider */}
+					<div className="border-bottom mb-3"></div>
 					<form onSubmit={handleAddList} className="mb-3">
 						<div className="input-group">
 							<input

@@ -207,6 +207,7 @@ export default function ListHeader({
 				onSubmit={(e) => {
 					e.preventDefault();
 					addTask(selectedList.id, newTaskName);
+					setNewTaskName("");
 				}}
 				className="row g-1 w-100"
 			>

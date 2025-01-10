@@ -30,7 +30,7 @@ export interface AuthResponse {
 export interface User {
 	id: string;
 	email: string;
-	username: string;
+	userName: string;
 	firstName: string;
 	lastName: string;
 	phoneNumber: string | null;
@@ -72,4 +72,5 @@ export interface Task {
 	priority: TaskPriority;
 	isCompleted: boolean;
 	listId: string;
+	dueDate?: string;
 }

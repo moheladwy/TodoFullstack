@@ -7,6 +7,7 @@ import Dashboard from "./Dashboard/Dashboard";
 import Navbar from "./Navbar/Navbar";
 import ProtectedRoute from "./Authentication/ProtectedRoute";
 import { ListsProvider } from "./Dashboard/context/ListsContext";
+import AccountSettings from "./Authentication/Account/settings";
 
 export default function App() {
 	return (
@@ -27,6 +28,14 @@ export default function App() {
 								element={
 									<ProtectedRoute>
 										<Dashboard />
+									</ProtectedRoute>
+								}
+							/>
+							<Route
+								path="/account"
+								element={
+									<ProtectedRoute>
+										<AccountSettings />
 									</ProtectedRoute>
 								}
 							/>
