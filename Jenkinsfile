@@ -2,36 +2,47 @@ pipeline {
     agent any
 
     environment {
-        // Replace with your Docker Hub credentials stored in Jenkins
-        DOCKER_CREDENTIALS_ID = 'DOCKER_HUB_ID'                       // Jenkins credentials ID for Docker Hub.
-        DOCKER_IMAGE = 'only1adwy/todo-api'                           // Your Docker Hub repo.
-        BRANCH = 'main'                                               // Branch to build.
-        REPO_URL = 'https://github.com/moheladwy/TodoFullstack.git'   // GitHub repo URL.
-        BUILD_TAG = "V1.8.${env.BUILD_NUMBER}"                        // Build tag.
+        DOCKER_CREDENTIALS_ID = 'DOCKER_HUB_ID'
+        DOCKER_API_IMAGE = 'only1adwy/todo-api'
+        DOCKER_CLIENT_IMAGE = 'only1adwy/todo-client'
+        BRANCH = 'main'
+        REPO_URL = 'https://github.com/moheladwy/TodoFullstack.git'
+        BUILD_TAG = "V1.8.${env.BUILD_NUMBER}"
+        
+        // Client environment variables
+        VITE_SERVER_URL = credentials('VITE_SERVER_URL')
     }
 
     stages {
         stage('Checkout') {
             steps {
-                // Checkout the source code from GitHub
                 git branch: "${BRANCH}", url: "${REPO_URL}"
             }
         }
         
-        stage('Build Docker Image') {
+        stage('Build API Docker Image') {
             steps {
                 script {
-                    // Build Docker image using the Dockerfile in the repo
-                    sh 'docker build -t ${DOCKER_IMAGE}:${BUILD_TAG} .'
+                    // Build API Docker image
+                    sh """
+                        docker build -t ${DOCKER_API_IMAGE}:${BUILD_TAG} server/
+                        docker tag ${DOCKER_API_IMAGE}:${BUILD_TAG} ${DOCKER_API_IMAGE}:latest
+                    """
                 }
             }
         }
 
-        stage('Tag Docker Image as latest') {
+        stage('Build Client Docker Image') {
             steps {
                 script {
-                    // Tag the built image as latest
-                    sh 'docker tag ${DOCKER_IMAGE}:${BUILD_TAG} ${DOCKER_IMAGE}:latest'
+                    // Build Client Docker image with build arguments
+                    sh """
+                        docker build \
+                        --build-arg VITE_SERVER_URL=${VITE_SERVER_URL} \
+                        -t ${DOCKER_CLIENT_IMAGE}:${BUILD_TAG} client/
+                        
+                        docker tag ${DOCKER_CLIENT_IMAGE}:${BUILD_TAG} ${DOCKER_CLIENT_IMAGE}:latest
+                    """
                 }
             }
         }
@@ -39,7 +50,6 @@ pipeline {
         stage('Login to Docker Hub') {
             steps {
                 script {
-                    // Login to Docker Hub using Jenkins credentials
                     withCredentials([usernamePassword(credentialsId: DOCKER_CREDENTIALS_ID, passwordVariable: 'DOCKER_PASSWORD', usernameVariable: 'DOCKER_USERNAME')]) {
                         sh 'echo "$DOCKER_PASSWORD" | docker login -u "$DOCKER_USERNAME" --password-stdin'
                     }
@@ -47,12 +57,20 @@ pipeline {
             }
         }
         
-        stage('Push Docker Image to Docker Hub') {
+        stage('Push Docker Images to Docker Hub') {
             steps {
                 script {
-                    // Push the built image to Docker Hub
-                    sh 'docker push ${DOCKER_IMAGE}:${BUILD_TAG}'
-                    sh 'docker push ${DOCKER_IMAGE}:latest'
+                    // Push API images
+                    sh """
+                        docker push ${DOCKER_API_IMAGE}:${BUILD_TAG}
+                        docker push ${DOCKER_API_IMAGE}:latest
+                    """
+                    
+                    // Push Client images
+                    sh """
+                        docker push ${DOCKER_CLIENT_IMAGE}:${BUILD_TAG}
+                        docker push ${DOCKER_CLIENT_IMAGE}:latest
+                    """
                 }
             }
         }
@@ -64,6 +82,13 @@ pipeline {
         }
         failure {
             echo 'Build or Docker Push failed.'
+        }
+        always {
+            // Clean up Docker images to free up space
+            sh """
+                docker rmi ${DOCKER_API_IMAGE}:${BUILD_TAG} ${DOCKER_API_IMAGE}:latest || true
+                docker rmi ${DOCKER_CLIENT_IMAGE}:${BUILD_TAG} ${DOCKER_CLIENT_IMAGE}:latest || true
+            """
         }
     }
 }
