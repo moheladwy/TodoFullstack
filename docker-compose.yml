@@ -29,6 +29,12 @@ services:
             - cache
         command:
             - "sh -c dotnet Todo.Api.dll ef database update && dotnet Todo.Api.dll"
+        healthcheck:
+            test: ["CMD", "curl", "-f", "http://todo-api:8080/health"]
+            interval: 1m30s
+            timeout: 30s
+            retries: 5
+            start_period: 10s
 
     client:
         build: src/client
