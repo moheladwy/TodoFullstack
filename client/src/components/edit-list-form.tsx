@@ -1,6 +1,4 @@
 import { useForm } from "react-hook-form"
-import { zodResolver } from "@hookform/resolvers/zod"
-import * as z from "zod"
 import { useAppStore } from "@/store/useStore"
 import { Button } from "@/components/ui/button"
 import {
@@ -14,10 +12,17 @@ import {
 import { Input } from "@/components/ui/input"
 import { Textarea } from "@/components/ui/textarea"
 import { toast } from "@/hooks/use-toast"
+import { zodResolver } from "@hookform/resolvers/zod"
+import * as z from "zod"
+import { useState } from "react"
 
 const editListSchema = z.object({
-  name: z.string().min(1, "Name is required"),
-  description: z.string().optional(),
+  name: z.string()
+    .min(1, "Name must not be empty")
+    .max(100, "Name must not exceed 100 characters"),
+  description: z.string()
+    .max(500, "Description must not exceed 500 characters")
+    .default(""),
 })
 
 interface EditListFormProps {
@@ -34,7 +39,8 @@ export function EditListForm({
   onClose 
 }: EditListFormProps) {
   const updateList = useAppStore().updateList
-  
+  const [isSubmitting, setIsSubmitting] = useState(false)
+
   const form = useForm<z.infer<typeof editListSchema>>({
     resolver: zodResolver(editListSchema),
     defaultValues: {
@@ -45,7 +51,12 @@ export function EditListForm({
 
   const onSubmit = async (data: z.infer<typeof editListSchema>) => {
     try {
-      await updateList(listId, data.name, data.description)
+      setIsSubmitting(true)
+      await updateList({
+        id: listId,
+        name: data.name,
+        description: data.description,
+      })
       toast({
         title: "List updated",
         description: "Your list has been updated successfully.",
@@ -59,6 +70,8 @@ export function EditListForm({
         variant: "destructive",
       })
       console.error('Failed to update list:', error)
+    } finally {
+      setIsSubmitting(false)
     }
   }
 
@@ -72,7 +85,11 @@ export function EditListForm({
             <FormItem>
               <FormLabel>Name</FormLabel>
               <FormControl>
-                <Input {...field} />
+                <Input 
+                  {...field} 
+                  placeholder="Enter list name"
+                  disabled={isSubmitting}
+                />
               </FormControl>
               <FormMessage />
             </FormItem>
@@ -86,7 +103,11 @@ export function EditListForm({
             <FormItem>
               <FormLabel>Description</FormLabel>
               <FormControl>
-                <Textarea {...field} />
+                <Textarea 
+                  {...field} 
+                  placeholder="Enter list description (optional)"
+                  disabled={isSubmitting}
+                />
               </FormControl>
               <FormMessage />
             </FormItem>
@@ -97,8 +118,8 @@ export function EditListForm({
           <Button type="button" variant="outline" onClick={onClose}>
             Cancel
           </Button>
-          <Button type="submit">
-            Save changes
+          <Button type="submit" disabled={isSubmitting}>
+            {isSubmitting ? "Saving..." : "Save changes"}
           </Button>
         </div>
       </form>

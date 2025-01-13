@@ -40,39 +40,34 @@ export function UserProfile({ user }: UserProfileProps) {
 
   return (
     <Card className="flex flex-col">
-      <CardHeader>
+      <CardHeader className="pb-4">
         <CardTitle>Profile Information</CardTitle>
       </CardHeader>
-      <CardContent className="space-y-6 flex-1">
+      <CardContent className="space-y-4">
         <div className="flex items-center gap-4">
-          <Avatar className="h-20 w-20">
+          <Avatar className="h-16 w-16">
             <AvatarFallback className="text-lg">
               {getInitials(user.firstName, user.lastName)}
             </AvatarFallback>
           </Avatar>
           
           <div> 
-            <h2 className="text-2xl font-semibold">
+            <h2 className="text-xl font-semibold">
               {user.firstName} {user.lastName}
             </h2>
             <p className="text-sm text-muted-foreground">@{user.userName}</p>
           </div>
         </div>
 
-        <div className="space-y-4">
+        <div className="grid gap-3">
           <div>
             <label className="text-sm font-medium text-muted-foreground">Email</label>
-            <p>{user.email}</p>
+            <p className="mt-1">{user.email}</p>
           </div>
           
           <div>
             <label className="text-sm font-medium text-muted-foreground">Phone Number</label>
-            <p>{user.phoneNumber || 'Not provided'}</p>
-          </div>
-          
-          <div>
-            <label className="text-sm font-medium text-muted-foreground">Bio</label>
-            <p>Not provided</p>
+            <p className="mt-1">{user.phoneNumber || 'Not provided'}</p>
           </div>
         </div>
       </CardContent>

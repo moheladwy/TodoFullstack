@@ -21,13 +21,27 @@ import {
 } from "@/components/ui/form"
 import { Input } from "@/components/ui/input"
 import { toast } from "@/hooks/use-toast"
+import { useState } from "react"
 
 const updateProfileSchema = z.object({
-  firstName: z.string().min(2, "First name must be at least 2 characters"),
-  lastName: z.string().min(2, "Last name must be at least 2 characters"),
-  userName: z.string().min(3, "Username must be at least 3 characters"),
-  email: z.string().email("Invalid email address"),
-  phoneNumber: z.string().optional(),
+  firstName: z.string()
+    .min(3, "First name must be at least 3 characters")
+    .max(25, "First name must not exceed 25 characters"),
+  lastName: z.string()
+    .min(3, "Last name must be at least 3 characters")
+    .max(25, "Last name must not exceed 25 characters"),
+  userName: z.string()
+    .min(3, "Username must be at least 3 characters")
+    .max(25, "Username must not exceed 25 characters"),
+  email: z.string()
+    .email("Invalid email address"),
+  phoneNumber: z.string()
+    .refine((val) => {
+      if (val === "") return true;
+      return val.length >= 10 && val.length <= 15;
+    }, "Phone number must be between 10 and 15 characters")
+    .optional()
+    .nullable(),
 })
 
 interface UpdateProfileFormProps {
@@ -35,6 +49,7 @@ interface UpdateProfileFormProps {
 }
 
 export function UpdateProfileForm({ user }: UpdateProfileFormProps) {
+  const [isSubmitting, setIsSubmitting] = useState(false)
   const form = useForm<z.infer<typeof updateProfileSchema>>({
     resolver: zodResolver(updateProfileSchema),
     defaultValues: {
@@ -48,6 +63,7 @@ export function UpdateProfileForm({ user }: UpdateProfileFormProps) {
 
   const onSubmit = async (data: z.infer<typeof updateProfileSchema>) => {
     try {
+      setIsSubmitting(true)
       await appStore.getState().updateUserInfo({
         id: user.id,
         newFirstName: data.firstName,
@@ -68,6 +84,8 @@ export function UpdateProfileForm({ user }: UpdateProfileFormProps) {
         variant: "destructive",
       })
       console.error("Failed to update profile information:", error)
+    } finally {
+      setIsSubmitting(false)
     }
   }
 
@@ -90,7 +108,11 @@ export function UpdateProfileForm({ user }: UpdateProfileFormProps) {
                   <FormItem>
                     <FormLabel>First Name</FormLabel>
                     <FormControl>
-                      <Input {...field} />
+                      <Input 
+                        {...field} 
+                        placeholder="Enter first name"
+                        disabled={isSubmitting}
+                      />
                     </FormControl>
                     <FormMessage />
                   </FormItem>
@@ -104,7 +126,11 @@ export function UpdateProfileForm({ user }: UpdateProfileFormProps) {
                   <FormItem>
                     <FormLabel>Last Name</FormLabel>
                     <FormControl>
-                      <Input {...field} />
+                      <Input 
+                        {...field} 
+                        placeholder="Enter last name"
+                        disabled={isSubmitting}
+                      />
                     </FormControl>
                     <FormMessage />
                   </FormItem>
@@ -119,7 +145,11 @@ export function UpdateProfileForm({ user }: UpdateProfileFormProps) {
                 <FormItem>
                   <FormLabel>Username</FormLabel>
                   <FormControl>
-                    <Input {...field} />
+                    <Input 
+                      {...field} 
+                      placeholder="Enter username"
+                      disabled={isSubmitting}
+                    />
                   </FormControl>
                   <FormMessage />
                 </FormItem>
@@ -133,7 +163,12 @@ export function UpdateProfileForm({ user }: UpdateProfileFormProps) {
                 <FormItem>
                   <FormLabel>Email</FormLabel>
                   <FormControl>
-                    <Input {...field} type="email" />
+                    <Input 
+                      {...field} 
+                      type="email"
+                      placeholder="Enter email address"
+                      disabled={isSubmitting}
+                    />
                   </FormControl>
                   <FormMessage />
                 </FormItem>
@@ -147,14 +182,19 @@ export function UpdateProfileForm({ user }: UpdateProfileFormProps) {
                 <FormItem>
                   <FormLabel>Phone Number</FormLabel>
                   <FormControl>
-                    <Input {...field} type="tel" />
+                    <Input 
+                      {...field} 
+                      type="tel"
+                      placeholder="Enter phone number"
+                      disabled={isSubmitting}
+                    />
                   </FormControl>
                   <FormMessage />
                 </FormItem>
               )}
             />
 
-            <Button type="submit">Update Profile</Button>
+            <Button type="submit" disabled={isSubmitting}>{isSubmitting ? "Updating..." : "Update Profile"}</Button>
           </form>
         </Form>
       </CardContent>

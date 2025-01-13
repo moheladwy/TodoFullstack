@@ -26,18 +26,29 @@ import {
   SelectValue,
 } from "@/components/ui/select"
 import { toast } from "@/hooks/use-toast"
+import { zodResolver } from "@hookform/resolvers/zod"
+import * as z from "zod"
+import { useState } from "react"
+
+const taskSchema = z.object({
+  name: z.string()
+    .min(1, "Name must be at least 1 character")
+    .max(100, "Name must not exceed 100 characters"),
+  description: z.string()
+    .max(500, "Description must not exceed 500 characters")
+    .optional(),
+  priority: z.number()
+    .min(0, "Priority must be between 0 and 4")
+    .max(4, "Priority must be between 0 and 4"),
+  isCompleted: z.boolean(),
+});
+
+type TaskForm = z.infer<typeof taskSchema>;
 
 interface EditTaskDialogProps {
   task: Task
   open: boolean
   onOpenChange: (open: boolean) => void
-}
-
-interface TaskForm {
-  name: string
-  description?: string
-  priority: TaskPriority
-  isCompleted: boolean
 }
 
 const taskStatus = [
@@ -47,7 +58,9 @@ const taskStatus = [
 
 export function EditTaskDialog({ task, open, onOpenChange }: EditTaskDialogProps) {
   const updateTask = useAppStore().updateTask
+  const [isSubmitting, setIsSubmitting] = useState(false)
   const form = useForm({
+    resolver: zodResolver(taskSchema),
     defaultValues: {
       name: task.name,
       description: task.description || "",
@@ -58,6 +71,7 @@ export function EditTaskDialog({ task, open, onOpenChange }: EditTaskDialogProps
 
   const onSubmit = async (data: TaskForm) => {
     try {
+      setIsSubmitting(true)
       await updateTask({
         ...task,
         ...data,
@@ -75,6 +89,8 @@ export function EditTaskDialog({ task, open, onOpenChange }: EditTaskDialogProps
         duration: 6000,
         variant: "destructive",
       })
+    } finally {
+      setIsSubmitting(false)
     }
   }
 
@@ -93,7 +109,7 @@ export function EditTaskDialog({ task, open, onOpenChange }: EditTaskDialogProps
                 <FormItem>
                   <FormLabel>Task Name</FormLabel>
                   <FormControl>
-                    <Input {...field} />
+                    <Input {...field} disabled={isSubmitting} placeholder="Enter task name" />
                   </FormControl>
                   <FormMessage />
                 </FormItem>
@@ -107,7 +123,11 @@ export function EditTaskDialog({ task, open, onOpenChange }: EditTaskDialogProps
                 <FormItem>
                   <FormLabel>Description</FormLabel>
                   <FormControl>
-                    <Textarea {...field} />
+                    <Textarea 
+                      {...field} 
+                      placeholder="Enter task description (optional)"
+                      disabled={isSubmitting}
+                    />
                   </FormControl>
                   <FormMessage />
                 </FormItem>
@@ -179,7 +199,7 @@ export function EditTaskDialog({ task, open, onOpenChange }: EditTaskDialogProps
               <Button type="button" variant="outline" onClick={() => onOpenChange(false)}>
                 Cancel
               </Button>
-              <Button type="submit">Save changes</Button>
+              <Button type="submit" disabled={isSubmitting}>{isSubmitting ? "Saving..." : "Save changes"}</Button>
             </div>
           </form>
         </Form>

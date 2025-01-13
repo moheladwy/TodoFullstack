@@ -28,16 +28,28 @@ import {
 } from "@/components/ui/select"
 import { useAppStore } from "@/store/useStore"
 import { toast } from "@/hooks/use-toast"
+import * as z from "zod"
+import { zodResolver } from "@hookform/resolvers/zod" 
 
-interface CreateTaskForm {
-  name: string
-  description: string
-  priority: TaskPriority
-}
+const taskSchema = z.object({
+  name: z.string()
+    .min(1, "Name must be at least 1 character")
+    .max(100, "Name must not exceed 100 characters"),
+  description: z.string()
+    .max(500, "Description must not exceed 500 characters")
+    .optional(),
+  priority: z.number()
+    .min(0, "Priority must be between 0 and 4")
+    .max(4, "Priority must be between 0 and 4"),
+});
+
+type CreateTaskForm = z.infer<typeof taskSchema>;
 
 export function CreateTaskDialog() {
   const [open, setOpen] = useState(false)
+  const [isSubmitting, setIsSubmitting] = useState(false)
   const form = useForm<CreateTaskForm>({
+    resolver: zodResolver(taskSchema),
     defaultValues: {
       name: "",
       description: "",
@@ -48,13 +60,23 @@ export function CreateTaskDialog() {
 
   const onSubmit = async (data: CreateTaskForm) => {
     try {
+      if (!selectedListId) {
+        toast({
+          title: "Error",
+          description: "No list selected. Please select a list first.",
+          duration: 5000,
+          variant: "destructive",
+        })
+        return
+      }
+      setIsSubmitting(true)
       // Here you would call your API to create the task
       await createTask({
         name: data.name,
-        description: data.description,
+        description: data.description || "",
         priority: data.priority,
         isCompleted: false,
-        listId: selectedListId!,
+        listId: selectedListId,
       })
       toast({
         title: "Task created",
@@ -71,6 +93,8 @@ export function CreateTaskDialog() {
         duration: 5000,
       })
       console.error('Failed to create task:', error)
+    } finally {
+      setIsSubmitting(false)
     }
   }
 
@@ -92,7 +116,7 @@ export function CreateTaskDialog() {
                 <FormItem>
                   <FormLabel>Task Name</FormLabel>
                   <FormControl>
-                    <Input {...field} />
+                    <Input {...field} placeholder="Enter Task Name"/>
                   </FormControl>
                   <FormMessage />
                 </FormItem>
@@ -106,7 +130,7 @@ export function CreateTaskDialog() {
                 <FormItem>
                   <FormLabel>Description</FormLabel>
                   <FormControl>
-                    <Textarea {...field} />
+                    <Textarea {...field} placeholder="Enter task description (optional)"/>
                   </FormControl>
                   <FormMessage />
                 </FormItem>
@@ -147,7 +171,7 @@ export function CreateTaskDialog() {
               <Button type="button" variant="outline" onClick={() => setOpen(false)}>
                 Cancel
               </Button>
-              <Button type="submit">Create Task</Button>
+              <Button type="submit">{isSubmitting ? "Creating..." : "Create Task"}</Button>
             </div>
           </form>
         </Form>

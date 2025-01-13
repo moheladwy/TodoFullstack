@@ -11,7 +11,9 @@ import type {
   RegisterRequest, 
   ChangePasswordRequest, 
   UpdateUserInfoRequest, 
-  CreateTaskRequest
+  CreateTaskRequest,
+  CreateListRequest,
+  UpdateListRequest
 } from '@/lib/api/interfaces'
 
 interface State {
@@ -39,8 +41,8 @@ interface State {
   
   // List actions
   fetchLists: () => Promise<void>
-  createList: (name: string, description?: string) => Promise<void>
-  updateList: (id: string, name: string, description?: string) => Promise<void>
+  createList: (createListRequest: CreateListRequest) => Promise<void>
+  updateList: (updateList: UpdateListRequest) => Promise<void>
   deleteList: (listId: string) => Promise<void>
   setSelectedList: (listId: string) => void
   
@@ -109,6 +111,7 @@ export const appStore = createStore<State>((set, get) => ({
       localStorage.setItem('refreshToken', response.refreshToken)
       localStorage.setItem('userId', response.userId)
       await get().fetchUserInfo(response.userId)
+      await get().fetchLists()
     } catch (error) {
       set({ error: 'Login failed', isLoading: false })
       throw error
@@ -123,6 +126,7 @@ export const appStore = createStore<State>((set, get) => ({
       localStorage.setItem('refreshToken', response.refreshToken)
       localStorage.setItem('userId', response.userId)
       await get().fetchUserInfo(response.userId)
+      await get().fetchLists()
     } catch (error) {
       set({ error: 'Registration failed', isLoading: false })
       throw error
@@ -215,10 +219,10 @@ export const appStore = createStore<State>((set, get) => ({
       }
   },
 
-  createList: async (name: string, description?: string) => {
+  createList: async (createListRequest: CreateListRequest) => {
       set({ isLoading: true, error: null })
       try {
-        const newList = await listsApi.createList(name, description)
+        const newList = await listsApi.createList(createListRequest)
         set((state) => ({ 
           lists: [...state.lists, newList],
           selectedListId: newList.id, // Automatically select the new list
@@ -230,13 +234,13 @@ export const appStore = createStore<State>((set, get) => ({
       }
   },
   
-  updateList: async (id: string, name: string, description?: string) => {
+  updateList: async (updateListRequest: UpdateListRequest) => {
     set({ isLoading: true, error: null })
     try {
-      const updatedList = await listsApi.updateList(id, name, description)
+      const updatedList = await listsApi.updateList(updateListRequest)
       set((state) => ({
         lists: state.lists.map((list) => 
-          list.id === id ? updatedList : list
+          list.id === updateListRequest.id ? updatedList : list
         ),
         isLoading: false
       }))

@@ -1,5 +1,8 @@
 namespace Todo.Core.DTOs.AccountDTOs;
 
+/// <summary>
+///   The user data that is returned to the client.
+/// </summary>
 public class UserDto
 {
   /// <summary>
