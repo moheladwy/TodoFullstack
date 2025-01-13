@@ -9,6 +9,6 @@ public static class Constants
   public const string ClientCrossOriginPolicyProductionName = "AllowProductionReactApp";
   public const string ClientCrossOriginPolicyDevName = "AllowDevelopmentReactApp";
   public const string ClientCrossOriginPolicyDevURL = "http://localhost:5173";
-  public const string ClientCrossOriginPolicyProductionURL = "https://todo.aladawy.duckdns.org";
+  public const string ClientCrossOriginPolicyProductionURL = "https://tasker-aladawy.netlify.app";
   public const string AllowedUserNameCharacters = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789-._@";
 }
