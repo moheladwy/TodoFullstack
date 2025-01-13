@@ -5,19 +5,19 @@ import { User } from "@/lib/api/interfaces"
 import { appStore } from "@/store/useStore"
 import { Button } from "@/components/ui/button"
 import {
-  Card,
-  CardContent,
-  CardDescription,
-  CardHeader,
-  CardTitle,
+    Card,
+    CardContent,
+    CardDescription,
+    CardHeader,
+    CardTitle,
 } from "@/components/ui/card"
 import {
-  Form,
-  FormControl,
-  FormField,
-  FormItem,
-  FormLabel,
-  FormMessage,
+    Form,
+    FormControl,
+    FormField,
+    FormItem,
+    FormLabel,
+    FormMessage,
 } from "@/components/ui/form"
 import { Input } from "@/components/ui/input"
 import { toast } from "@/hooks/use-toast"
@@ -57,7 +57,7 @@ export function UpdateProfileForm({ user }: UpdateProfileFormProps) {
       lastName: user.lastName,
       userName: user.userName,
       email: user.email,
-      phoneNumber: user.phoneNumber || "",
+      phoneNumber: user.phoneNumber ?? "",
     },
   })
 
@@ -72,7 +72,7 @@ export function UpdateProfileForm({ user }: UpdateProfileFormProps) {
         newEmail: data.email,
         newPhoneNumber: data.phoneNumber || null,
       })
-      
+
       toast({
         title: "Profile updated",
         description: "Your profile information has been updated successfully.",
@@ -118,7 +118,7 @@ export function UpdateProfileForm({ user }: UpdateProfileFormProps) {
                   </FormItem>
                 )}
               />
-              
+
               <FormField
                 control={form.control}
                 name="lastName"
@@ -178,12 +178,13 @@ export function UpdateProfileForm({ user }: UpdateProfileFormProps) {
             <FormField
               control={form.control}
               name="phoneNumber"
-              render={({ field }) => (
+              render={({ field: { value, ...fieldProps } }) => (
                 <FormItem>
                   <FormLabel>Phone Number</FormLabel>
                   <FormControl>
                     <Input 
-                      {...field} 
+                      {...fieldProps}
+                      value={value ?? ""}
                       type="tel"
                       placeholder="Enter phone number"
                       disabled={isSubmitting}
