@@ -8,10 +8,11 @@ import { Toaster } from "./components/ui/toaster"
 import { useAppStore } from './store/useStore'
 import { useEffect, useState } from 'react'
 import { Loading } from './components/loading'
+import { ThemeProvider } from "@/components/theme-provider"
 
 export default function App() {
   const initializeStore = useAppStore().initializeStore
-    const [isInitializing, setIsInitializing] = useState(true)
+  const [isInitializing, setIsInitializing] = useState(true)
   
     useEffect(() => {
       const initialize = async () => {
@@ -33,11 +34,12 @@ export default function App() {
     }
   
   return (
-    <Router>
+    <ThemeProvider defaultTheme="light" storageKey="vite-ui-theme">
+      <Router>
         <Routes>
           <Route path="/login" element={<Login />} />
           <Route path="/register" element={<Register />} />
-          <Route path="/" element={<Navigate to="/tasks" replace />} />
+          <Route index element={<Navigate to="/tasks" replace />} />
           <Route
             path="/tasks"
             element={
@@ -46,7 +48,6 @@ export default function App() {
               </PrivateRoute>
             }
           >
-            <Route index element={<Navigate to="inbox" replace />} />
             <Route path=":listId" element={<Tasks />} />
           </Route>
           <Route
@@ -59,6 +60,7 @@ export default function App() {
           />
         </Routes>
         <Toaster />
-    </Router>
+      </Router>
+    </ThemeProvider>
   )
 }

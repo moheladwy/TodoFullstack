@@ -16,11 +16,14 @@ import {
   FormLabel,
   FormMessage,
 } from "@/components/ui/form"
+import { toast } from "@/hooks/use-toast"
 
 const loginSchema = z.object({
-  email: z.string().email("Invalid email address"),
+  email: z.string().min(1, "Email is required").email("Invalid email address"),
   password: z.string().min(1, "Password is required"),
 })
+
+type LoginFormData = z.infer<typeof loginSchema>
 
 export function LoginForm({
   className,
@@ -30,7 +33,7 @@ export function LoginForm({
   const login = useAppStore().login
   const [isLoading, setIsLoading] = useState(false)
 
-  const form = useForm<z.infer<typeof loginSchema>>({
+  const form = useForm<LoginFormData>({
     resolver: zodResolver(loginSchema),
     defaultValues: {
       email: "",
@@ -38,16 +41,26 @@ export function LoginForm({
     },
   })
 
-  const onSubmit = async (data: z.infer<typeof loginSchema>) => {
+  const onSubmit = async (data: LoginFormData) => {
     setIsLoading(true)
     try {
       await login({
         email: data.email,
         password: data.password,
       })
+      toast({
+        title: "Success",
+        description: "You have successfully logged in.",
+      })
       navigate("/tasks" , {replace: true})
     } catch (error) {
+      toast({
+        title: "Login failed",
+        description: "Invalid email or password. Please try again.",
+        variant: "destructive",
+      })
       console.error("Login failed:", error)
+      form.setValue("password", "")
     } finally {
       setIsLoading(false)
     }
@@ -75,7 +88,9 @@ export function LoginForm({
                     <FormControl>
                       <Input
                         type="email"
-                        placeholder="user@example.com"
+                        placeholder="Enter your email"
+                        disabled={isLoading}
+                        autoComplete="email"
                         {...field}
                       />
                     </FormControl>
@@ -100,15 +115,25 @@ export function LoginForm({
                       </Button> */}
                     </div>
                     <FormControl>
-                      <Input type="password" placeholder="your password" {...field} />
+                      <Input 
+                        type="password"
+                        placeholder="Enter your password"
+                        disabled={isLoading}
+                        autoComplete="current-password"
+                        {...field} 
+                      />
                     </FormControl>
                     <FormMessage />
                   </FormItem>
                 )}
               />
 
-              <Button type="submit" className="w-full" disabled={isLoading}>
-                {isLoading ? "Logging in..." : "Login"}
+              <Button 
+                type="submit" 
+                className="w-full" 
+                disabled={isLoading}
+              >
+                {isLoading ? "Signing in..." : "Sign in"}
               </Button>
 
               <div className="relative text-center text-sm after:absolute after:inset-0 after:top-1/2 after:z-0 after:flex after:items-center after:border-t after:border-border">

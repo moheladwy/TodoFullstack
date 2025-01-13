@@ -6,6 +6,12 @@ services:
             - todo-network
         ports:
             - "6379:6379"
+        healthcheck:
+          test: ["CMD", "redis-cli", "ping"]
+          interval: 1m30s
+          timeout: 30s
+          retries: 5
+          start_period: 3s
 
     api:
         build:
@@ -15,7 +21,6 @@ services:
         container_name: todo-api
         ports:
             - "8070:8080"
-            - "8443:8443"
         networks:
             - todo-network
         environment:
@@ -24,20 +29,21 @@ services:
             - cache
         command:
             - "sh -c dotnet Todo.Api.dll ef database update && dotnet Todo.Api.dll"
+        healthcheck:
+            test: ["CMD", "curl", "-f", "http://todo-api:8080/health"]
+            interval: 1m30s
+            timeout: 30s
+            retries: 5
+            start_period: 10s
 
     client:
         build: src/client
         image: todo-client:latest
         container_name: todo-client
-        command: ["npm", "run", "build"]
         networks:
             - todo-network
         environment:
-            - VITE_SERVER_URL=https://todo-api:8443/api
-            - VITE_SERVER_LOGIN_PATH=Auth/login
-            - VITE_SERVER_REGISTER_PATH=Auth/register
-            - VITE_SERVER_REFRESH_PATH=Auth/refresh
-            - VITE_SERVER_LOGOUT_PATH=Auth/logout
+            - VITE_SERVER_URL=http://todo-api:8070/api
         depends_on:
             - api
         volumes:

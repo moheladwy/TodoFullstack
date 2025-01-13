@@ -1,4 +1,4 @@
-import { Calendar, CheckCircle, ChevronUp, ListTodo, LogOut, User2 } from "lucide-react"
+import { Calendar, CheckCircle, ChevronUp, ListTodo, LogOut, User2, Plus, X } from "lucide-react"
 import {
   Sidebar,
   SidebarContent,
@@ -21,12 +21,18 @@ import {
 } from "@/components/ui/dropdown-menu"
 import { useAppStore } from "@/store/useStore"
 import { Navigate, useNavigate, useParams } from "react-router"
-import { useMemo } from "react"
+import { useMemo, useState } from "react"
+import { Input } from "@/components/ui/input"
+import { toast } from "@/hooks/use-toast"
+import { Button } from "./ui/button"
+import { ThemeToggle } from "@/components/theme-toggle"
 
 export function AppSidebar() {
   const navigate = useNavigate()
   const { listId } = useParams()
-  const { user, logout, lists, tasks } = useAppStore()
+  const { user, logout, lists, tasks, createList } = useAppStore()
+  const [isAddingList, setIsAddingList] = useState(false)
+  const [newListName, setNewListName] = useState("")
 
   // Calculate pending and completed tasks
   const { pendingTasksCount, totalCompletedTasks } = useMemo(() => {
@@ -55,6 +61,27 @@ export function AppSidebar() {
   
   const handleSelectList = (listId: string) => {
     navigate(`/tasks/${listId}`, { replace: true })
+  }
+  
+  const handleCreateList = async (e: React.KeyboardEvent<HTMLInputElement>) => {
+    if (e.key === 'Enter' && newListName.trim()) {
+      try {
+        await createList({
+          name: newListName.trim(),
+          description: "",
+          userId: user?.id || "",
+        })
+        setNewListName("")
+        setIsAddingList(false)
+      } catch (error) {
+        toast({
+          title: "Error",
+          description: "Failed to create list. Please try again.",
+          variant: "destructive",
+        })
+        console.error(error);
+      }
+    }
   }
   
   const handleLogout = async () => {
@@ -147,8 +174,33 @@ export function AppSidebar() {
 
         <SidebarSeparator />
         
-        {/* User Lists */}
         <SidebarGroup>
+          <div className="flex items-center justify-between px-0">
+            <SidebarGroupLabel>Add new list</SidebarGroupLabel>
+            <Button
+              variant="ghost"
+              size="icon"
+              onClick={() => setIsAddingList(!isAddingList)}
+            >
+              {isAddingList ? (
+                <X className="h-4 w-4" />
+              ) : (
+                <Plus className="h-4 w-4" />
+              )}
+            </Button>
+          </div>
+          {isAddingList && (
+            <div className="px-2 py-2">
+              <Input
+                placeholder="New list name..."
+                value={newListName}
+                onChange={(e) => setNewListName(e.target.value)}
+                onKeyDown={handleCreateList}
+                autoFocus
+              />
+            </div>
+          )}
+          {/* User Lists */}
           <SidebarGroupContent>
             <SidebarMenu>
               {lists.map((list) => {
@@ -182,28 +234,31 @@ export function AppSidebar() {
       <SidebarFooter>
         <SidebarMenu>
           <SidebarMenuItem>
-            <DropdownMenu>
-              <DropdownMenuTrigger asChild>
-                <SidebarMenuButton>
-                  <User2 />
-                  <span>{user.userName}</span>
-                  <ChevronUp className="ml-auto" />
-                </SidebarMenuButton>
-              </DropdownMenuTrigger>
-              <DropdownMenuContent
-                side="top"
-                className="w-[--radix-popper-anchor-width]"
-              >
-                <DropdownMenuItem onClick={() => navigate("/account")}>
-                  <User2 className="mr-2 h-4 w-4" />
-                  <span>Account</span>
-                </DropdownMenuItem>
-                <DropdownMenuItem className="text-destructive" onClick={handleLogout}>
-                  <LogOut className="mr-2 h-4 w-4 text-destructive" />
-                  <span className="text-destructive">Sign out</span>
-                </DropdownMenuItem>
-              </DropdownMenuContent>
-            </DropdownMenu>
+            <div className="flex items-center justify-between px-2 py-2">
+              <ThemeToggle /> {/* Add the ThemeToggle component here */}
+              <DropdownMenu>
+                <DropdownMenuTrigger asChild>
+                  <SidebarMenuButton>
+                    <User2 />
+                    <span>{user.userName}</span>
+                    <ChevronUp className="ml-auto" />
+                  </SidebarMenuButton>
+                </DropdownMenuTrigger>
+                <DropdownMenuContent
+                  side="top"
+                  className="w-[--radix-popper-anchor-width]"
+                >
+                  <DropdownMenuItem onClick={() => navigate("/account")}>
+                    <User2 className="mr-2 h-4 w-4" />
+                    <span>Account</span>
+                  </DropdownMenuItem>
+                  <DropdownMenuItem className="text-destructive" onClick={handleLogout}>
+                    <LogOut className="mr-2 h-4 w-4 text-destructive" />
+                    <span className="text-destructive">Sign out</span>
+                  </DropdownMenuItem>
+                </DropdownMenuContent>
+              </DropdownMenu>
+            </div>
           </SidebarMenuItem>
         </SidebarMenu>
       </SidebarFooter>

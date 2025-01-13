@@ -75,6 +75,18 @@ export interface Task {
 	dueDate?: string;
 }
 
+export interface CreateListRequest {
+  name: string;
+  description?: string;
+  userId: string;
+}
+
+export interface UpdateListRequest {
+  id: string;
+  name: string;
+  description?: string;
+}
+
 export interface CreateTaskRequest {
   name: string;
   description?: string;

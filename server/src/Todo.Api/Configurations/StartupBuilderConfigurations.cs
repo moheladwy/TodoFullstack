@@ -68,6 +68,18 @@ public static class StartupBuilderConfigurations
         });
     }
 
+    public static void AddHealthChecks(this WebApplicationBuilder builder)
+    {
+        var sqlServerConnectionString = builder.Configuration.GetConnectionString(Constants.SqlServerConnectionStringName)
+            ?? throw new InvalidOperationException("The SQL Server connection string is not found.");
+        var redisConnectionString = builder.Configuration.GetConnectionString(Constants.RedisConnectionStringName)
+            ?? throw new InvalidOperationException("The Redis connection string is not found.");
+
+        builder.Services.AddHealthChecks()
+            .AddSqlServer(sqlServerConnectionString)
+            .AddRedis(redisConnectionString);
+    }
+
     /// <summary>
     ///     Initializes the JWT configurations for the application builder.
     /// </summary>

@@ -26,6 +26,7 @@ export function Tasks() {
     lists, 
     tasks, 
     setSelectedList, 
+    selectedListId,
     selectedListTasks, 
     deleteList, 
     isLoading, 
@@ -77,7 +78,7 @@ export function Tasks() {
           setList(undefined)
           break
         default:
-          { 
+          {
             const list = lists.find(l => l.id === listId);
             if (list) {
               setList(list)
@@ -87,8 +88,15 @@ export function Tasks() {
             }
           }
       }
-    }
-  }, [listId, lists, tasks, navigate, setSelectedList])
+    } else if (selectedListId) {
+        const list = lists.find(l => l.id === selectedListId);
+        if (list) {
+          setList(list)
+        } else {
+          navigate('/tasks/all', { replace: true })
+        }
+      }
+    }, [listId, lists, tasks, navigate, setSelectedList, selectedListId])
   
   const filteredAndSortedTasks = useMemo(() => {
     let filtered = [...selectedListTasks]

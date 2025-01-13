@@ -1,4 +1,6 @@
 using FluentValidation;
+using HealthChecks.UI.Client;
+using Microsoft.AspNetCore.Diagnostics.HealthChecks;
 using Todo.Api.Configurations;
 using Todo.Api.Validators.Account;
 using Todo.Infrastructure;
@@ -30,6 +32,7 @@ public class Program
 
         builder.AddSqlServerDb();
         builder.AddRedisConnectionString();
+        builder.AddHealthChecks();
         builder.InitializeJwtConfigurations();
         builder.AddAuthenticationService();
         builder.Services.AddAuthorizationBuilder();
@@ -56,6 +59,10 @@ public class Program
         app.UseHttpsRedirection();
         app.UseHttpLogging();
         app.UseRouting();
+        app.MapHealthChecks("/health", new HealthCheckOptions
+        {
+            ResponseWriter = UIResponseWriter.WriteHealthCheckUIResponse
+        });
         app.UseSwagger();
         app.UseSwaggerUI();
         app.UseAuthentication();

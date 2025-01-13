@@ -13,15 +13,14 @@ export function Account() {
 
   return (
     <Layout>
-      <div className="mx-auto p-4 space-y-6">
-        <div className="flex flex-row flex-wrap gap-4 justify-items-center direction-normal">
+      <div className="mx-auto p-3 space-y-8">
+        <div className="flex items-center gap-4">
           <SidebarTrigger />
-          <h1 className="text-3xl font-bold mb-6">Profile Settings</h1>
+          <h1 className="text-3xl font-bold">Profile Settings</h1>
         </div>
-        <div className="grid gap-6 md:grid-cols-2">
+        <div className="space-y-4 mx-10">
           <UserProfile user={user} />
-          
-          <div className="space-y-6">
+          <div className="grid grid-cols-2 gap-x-5">
             <UpdateProfileForm user={user} />
             <ChangePasswordForm userId={user.id} />
           </div>

@@ -1,5 +1,5 @@
 import api from "../axios";
-import { List } from "../interfaces";
+import { CreateListRequest, List, UpdateListRequest } from "../interfaces";
 import { LISTS_URLs } from "../URLs";
 
 const SUCCESSFUL_STATUS = 200;
@@ -23,10 +23,11 @@ export const listsApi = {
 		return response.data;
 	},
 
-	createList: async (name: string, description?: string): Promise<List> => {
+	createList: async (createListRequest: CreateListRequest): Promise<List> => {
 		const response = await api.post<List>(LISTS_URLs.CREATE_LIST, {
-			name,
-			description,
+			name: createListRequest.name,
+			description: createListRequest.description,
+			userId: createListRequest.userId,
 		});
 		if (response.status !== SUCCESSFUL_STATUS) {
 			throw new Error("Failed to create list: " + name);
@@ -35,17 +36,15 @@ export const listsApi = {
 	},
 
 	updateList: async (
-		id: string,
-		name: string,
-		description?: string
+		updateListRequest: UpdateListRequest
 	): Promise<List> => {
 		const response = await api.put<List>(LISTS_URLs.UPDATE_LIST, {
-			id,
-			name,
-			description,
+			id: updateListRequest.id,
+			name: updateListRequest.name,
+			description: updateListRequest.description,
 		});
 		if (response.status !== SUCCESSFUL_STATUS) {
-			throw new Error("Failed to update list by id: " + id);
+			throw new Error("Failed to update list by id: " + updateListRequest.id);
 		}
 		return response.data;
 	},

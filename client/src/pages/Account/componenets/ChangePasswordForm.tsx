@@ -20,21 +20,43 @@ import {
 } from "@/components/ui/form"
 import { Input } from "@/components/ui/input"
 import { toast } from "@/hooks/use-toast"
+import { useState } from "react"
 
 const passwordSchema = z.object({
-  currentPassword: z.string().min(6, "Password must be at least 6 characters"),
-  newPassword: z.string().min(6, "Password must be at least 6 characters"),
-  confirmPassword: z.string(),
-}).refine((data) => data.newPassword === data.confirmPassword, {
-  message: "Passwords don't match",
-  path: ["confirmPassword"],
-})
+  currentPassword: z.string()
+    .min(1, "Current password is required"),
+  newPassword: z.string()
+    .min(12, "Password must be at least 12 characters long")
+    .max(100, "Password must not exceed 100 characters")
+    .regex(
+      /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[^a-zA-Z0-9]).{12,100}$/,
+      "Password must contain at least one uppercase letter, one lowercase letter, one number, and one special character"
+    ),
+  confirmPassword: z.string()
+}).superRefine((data, ctx) => {
+  if (data.newPassword === data.currentPassword) {
+    ctx.addIssue({
+      code: z.ZodIssueCode.custom,
+      message: "New password must be different from the current password",
+      path: ["newPassword"],
+    });
+  }
+  if (data.newPassword !== data.confirmPassword) {
+    ctx.addIssue({
+      code: z.ZodIssueCode.custom,
+      message: "Passwords don't match",
+      path: ["confirmPassword"],
+    });
+  }
+});
 
 interface ChangePasswordFormProps {
   userId: string
 }
 
 export function ChangePasswordForm({ userId }: ChangePasswordFormProps) {
+  const [isSubmitting, setIsSubmitting] = useState(false)
+  
   const form = useForm<z.infer<typeof passwordSchema>>({
     resolver: zodResolver(passwordSchema),
     defaultValues: {
@@ -46,6 +68,7 @@ export function ChangePasswordForm({ userId }: ChangePasswordFormProps) {
 
   const onSubmit = async (data: z.infer<typeof passwordSchema>) => {
     try {
+      setIsSubmitting(true)
       await appStore.getState().changePassword({
         id: userId,
         currentPassword: data.currentPassword,
@@ -56,6 +79,7 @@ export function ChangePasswordForm({ userId }: ChangePasswordFormProps) {
       toast({
         title: "Password updated",
         description: "Your password has been changed successfully.",
+        duration: 5000,
       })
     } catch (error) {
       toast({
@@ -64,6 +88,8 @@ export function ChangePasswordForm({ userId }: ChangePasswordFormProps) {
         variant: "destructive",
       })
       console.error('Failed to change password:', error)
+    } finally {
+      setIsSubmitting(false)
     }
   }
 
@@ -85,7 +111,12 @@ export function ChangePasswordForm({ userId }: ChangePasswordFormProps) {
                 <FormItem>
                   <FormLabel>Current Password</FormLabel>
                   <FormControl>
-                    <Input {...field} type="password" />
+                    <Input 
+                      {...field} 
+                      type="password"
+                      placeholder="Enter current password"
+                      disabled={isSubmitting}
+                    />
                   </FormControl>
                   <FormMessage />
                 </FormItem>
@@ -99,7 +130,12 @@ export function ChangePasswordForm({ userId }: ChangePasswordFormProps) {
                 <FormItem>
                   <FormLabel>New Password</FormLabel>
                   <FormControl>
-                    <Input {...field} type="password" />
+                    <Input 
+                      {...field} 
+                      type="password"
+                      placeholder="Enter new password"
+                      disabled={isSubmitting}
+                    />
                   </FormControl>
                   <FormMessage />
                 </FormItem>
@@ -113,14 +149,19 @@ export function ChangePasswordForm({ userId }: ChangePasswordFormProps) {
                 <FormItem>
                   <FormLabel>Confirm New Password</FormLabel>
                   <FormControl>
-                    <Input {...field} type="password" />
+                    <Input 
+                      {...field} 
+                      type="password"
+                      placeholder="Confirm new password"
+                      disabled={isSubmitting}
+                    />
                   </FormControl>
                   <FormMessage />
                 </FormItem>
               )}
             />
 
-            <Button type="submit">Change Password</Button>
+            <Button type="submit" disabled={isSubmitting}>{isSubmitting ? "Changing Password..." : "Change Password"}</Button>
           </form>
         </Form>
       </CardContent>

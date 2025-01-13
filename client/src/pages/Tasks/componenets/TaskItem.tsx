@@ -49,23 +49,29 @@ export function TaskItem({ task }: TaskItemProps) {
 
   return (
     <>
-      <div className="flex items-center gap-4 p-4 bg-white rounded-lg shadow">
+      <div className="flex items-center gap-4 p-4 bg-card text-card-foreground rounded-lg shadow dark:shadow-slate-900/10">
         <Checkbox
           checked={task.isCompleted}
           onCheckedChange={handleToggleComplete}
         />
         
         <div className="flex-1">
-          <h3 className={`font-medium ${task.isCompleted ? 'line-through text-gray-500' : ''}`}>
+          <h3 className={`font-medium ${
+            task.isCompleted 
+              ? 'line-through text-muted-foreground' 
+              : 'text-foreground'
+          }`}>
             {task.name}
           </h3>
           {task.description && (
-            <p className="text-sm text-gray-600">{task.description}</p>
+            <p className="text-sm text-muted-foreground">
+              {task.description}
+            </p>
           )}
         </div>
 
         <div className="flex items-center gap-2">
-          <Badge className={priorityColors[task.priority]}>
+          <Badge className={`${priorityColors[task.priority]} text-white`}>
             {TaskPriority[task.priority]}
           </Badge>
           

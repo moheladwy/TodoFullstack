@@ -17,19 +17,32 @@ import {
 import { Input } from "@/components/ui/input"
 import { toast } from "@/hooks/use-toast"
 import { useState } from "react"
-import { LoadingButton } from "./loading"
 
 const registerSchema = z.object({
-  email: z.string().email("Invalid email address"),
-  username: z.string().min(3, "Username must be at least 3 characters"),
-  firstName: z.string().min(2, "First name must be at least 2 characters"),
-  lastName: z.string().min(2, "Last name must be at least 2 characters"),
-  password: z.string().min(6, "Password must be at least 6 characters"),
-  confirmPassword: z.string(),
+  email: z.string()
+    .min(1, "Email is required")
+    .email("Invalid email address"),
+  username: z.string()
+    .min(3, "Username must be at least 3 characters")
+    .max(25, "Username must not exceed 25 characters"),
+  firstName: z.string()
+    .min(3, "First name must be at least 3 characters")
+    .max(25, "First name must not exceed 25 characters"),
+  lastName: z.string()
+    .min(3, "Last name must be at least 3 characters")
+    .max(25, "Last name must not exceed 25 characters"),
+  password: z.string()
+    .min(12, "Password must be at least 12 characters")
+    .max(100, "Password must not exceed 100 characters")
+    .regex(
+      /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[!@#$%^&*()_+\-=[\]{};':"\\|,.<>/?]).{12,100}$/,
+      "Password must contain at least one uppercase letter, one lowercase letter, one number, and one special character"
+    ),
+  confirmPassword: z.string()
 }).refine((data) => data.password === data.confirmPassword, {
   message: "Passwords don't match",
   path: ["confirmPassword"],
-})
+});
 
 type RegisterFormData = z.infer<typeof registerSchema>
 
@@ -55,6 +68,7 @@ export function RegisterForm({
 
   const onSubmit = async (data: RegisterFormData) => {
     try {
+      setIsLoading(true)
       await register({
         email: data.email,
         username: data.username,
@@ -89,7 +103,7 @@ export function RegisterForm({
                 <div className="flex flex-col items-center text-center">
                   <h1 className="text-2xl font-bold">Create an account</h1>
                   <p className="text-balance text-muted-foreground">
-                    Enter your information correctly.
+                    Enter your information to create an account.
                   </p>
                 </div>
 
@@ -102,7 +116,11 @@ export function RegisterForm({
                         <FormItem>
                           <FormLabel>First Name</FormLabel>
                           <FormControl>
-                            <Input placeholder="John" {...field} />
+                            <Input 
+                              placeholder="John"
+                              disabled={isLoading}
+                              {...field} 
+                            />
                           </FormControl>
                           <FormMessage />
                         </FormItem>
@@ -116,7 +134,11 @@ export function RegisterForm({
                         <FormItem>
                           <FormLabel>Last Name</FormLabel>
                           <FormControl>
-                            <Input placeholder="Doe" {...field} />
+                            <Input 
+                              placeholder="Doe"
+                              disabled={isLoading}
+                              {...field} 
+                            />
                           </FormControl>
                           <FormMessage />
                         </FormItem>
@@ -131,7 +153,11 @@ export function RegisterForm({
                       <FormItem>
                         <FormLabel>Username</FormLabel>
                         <FormControl>
-                          <Input placeholder="johndoe" {...field} />
+                          <Input 
+                            placeholder="johndoe"
+                            disabled={isLoading}
+                            {...field} 
+                          />
                         </FormControl>
                         <FormMessage />
                       </FormItem>
@@ -145,7 +171,12 @@ export function RegisterForm({
                       <FormItem>
                         <FormLabel>Email</FormLabel>
                         <FormControl>
-                          <Input type="email" placeholder="m@example.com" {...field} />
+                          <Input 
+                            type="email"
+                            placeholder="john@example.com"
+                            disabled={isLoading}
+                            {...field} 
+                          />
                         </FormControl>
                         <FormMessage />
                       </FormItem>
@@ -159,7 +190,12 @@ export function RegisterForm({
                       <FormItem>
                         <FormLabel>Password</FormLabel>
                         <FormControl>
-                          <Input type="password" {...field} />
+                          <Input 
+                            type="password"
+                            placeholder="Create a strong password"
+                            disabled={isLoading}
+                            {...field} 
+                          />
                         </FormControl>
                         <FormMessage />
                       </FormItem>
@@ -173,7 +209,12 @@ export function RegisterForm({
                       <FormItem>
                         <FormLabel>Confirm Password</FormLabel>
                         <FormControl>
-                          <Input type="password" {...field} />
+                          <Input 
+                            type="password"
+                            placeholder="Confirm your password"
+                            disabled={isLoading}
+                            {...field} 
+                          />
                         </FormControl>
                         <FormMessage />
                       </FormItem>
@@ -182,7 +223,7 @@ export function RegisterForm({
                 </div>
 
                 <Button type="submit" className="w-full" disabled={isLoading}>
-                  {isLoading ? <LoadingButton /> : "Create account"}
+                  {isLoading ? "Creating account..." : "Create account"}
                 </Button>
                 
                 <div className="relative text-center text-sm after:absolute after:inset-0 after:top-1/2 after:z-0 after:flex after:items-center after:border-t after:border-border">
@@ -208,6 +249,7 @@ export function RegisterForm({
                     variant="link"
                     className="p-0"
                     onClick={() => navigate("/login", {replace: true})}
+                    disabled={isLoading}
                   >
                     Login
                   </Button>
