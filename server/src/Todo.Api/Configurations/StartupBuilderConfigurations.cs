@@ -181,9 +181,9 @@ public static class StartupBuilderConfigurations
             options.AddPolicy(Constants.ClientCrossOriginPolicyProductionName, builder =>
             {
                 builder
-                    .AllowAnyOrigin()
+                    .WithOrigins(Constants.ClientCrossOriginPolicyProductionURL)
                     .AllowAnyMethod()
-                    .AllowAnyHeader();
+                    .AllowCredentials();
             });
         });
     }
