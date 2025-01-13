@@ -17,7 +17,6 @@ import {
 import { Input } from "@/components/ui/input"
 import { toast } from "@/hooks/use-toast"
 import { useState } from "react"
-import { LoadingButton } from "./loading"
 
 const registerSchema = z.object({
   email: z.string()
@@ -36,7 +35,7 @@ const registerSchema = z.object({
     .min(12, "Password must be at least 12 characters")
     .max(100, "Password must not exceed 100 characters")
     .regex(
-      /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[!@#$%^&*()_+\-=[\]{};':\"\\|,.<>\/?]).{12,100}$/,
+      /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[!@#$%^&*()_+\-=[\]{};':"\\|,.<>/?]).{12,100}$/,
       "Password must contain at least one uppercase letter, one lowercase letter, one number, and one special character"
     ),
   confirmPassword: z.string()
