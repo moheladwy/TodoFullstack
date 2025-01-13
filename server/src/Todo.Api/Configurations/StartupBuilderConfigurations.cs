@@ -183,6 +183,7 @@ public static class StartupBuilderConfigurations
                 builder
                     .WithOrigins(Constants.ClientCrossOriginPolicyProductionURL)
                     .AllowAnyMethod()
+                    .AllowAnyHeader()
                     .AllowCredentials();
             });
         });
