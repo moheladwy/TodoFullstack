@@ -1,0 +1,69 @@
+services:
+    cache:
+        image: redis:alpine
+        container_name: todo-redis-cache
+        networks:
+            - todo-network
+        ports:
+            - "6379:6379"
+        volumes:
+            - redis-data:/data
+        healthcheck:
+            test: ["CMD", "redis-cli", "ping"]
+            interval: 10s
+            timeout: 10s
+            retries: 3
+        labels:
+            - "com.centurylinklabs.watchtower.enable=true"
+
+    api:
+        image: only1adwy/todo-api:latest
+        environment:
+            - ASPNETCORE_ENVIRONMENT=Production
+        deploy:
+            mode: replicated
+            replicas: 2
+            update_config:
+                parallelism: 1
+            restart_policy:
+                condition: on-failure
+            resources:
+                limits:
+                    cpus: "1"
+                    memory: 1G
+                reservations:
+                    cpus: "0.25"
+                    memory: 125M
+        depends_on:
+            - cache
+        networks:
+            - todo-network
+        command:
+            - "sh -c dotnet Todo.Api.dll ef database update && dotnet Todo.Api.dll"
+        labels:
+            - "com.centurylinklabs.watchtower.enable=true"
+
+    nginx:
+        image: nginx:alpine
+        container_name: todo-reverse-proxy
+        ports:
+            - "8070:8070"
+        volumes:
+            - ./conf.d:/etc/nginx/conf.d
+            - /var/run/docker.sock:/tmp/docker.sock:ro
+        depends_on:
+            - cache
+            - api
+        networks:
+            - todo-network
+        labels:
+            - "com.centurylinklabs.watchtower.enable=true"
+
+volumes:
+    redis-data:
+        name: redis-data
+
+networks:
+    todo-network:
+        driver: bridge
+        name: todo-network
