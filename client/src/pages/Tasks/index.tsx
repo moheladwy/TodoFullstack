@@ -230,6 +230,7 @@ export function Tasks() {
             tasks={filteredAndSortedTasks}
             isCompletedView={listId === 'completed'}
             isAllPendingView={listId === 'all'}
+            sortOption={sort}
           />
         </div>
 

@@ -19,6 +19,7 @@ import { useAppStore } from '@/store/useStore';
 import { Task, TaskOrder } from '@/lib/api/interfaces';
 import { TaskItem } from '@/pages/Tasks/componenets/TaskItem';
 import { useMemo } from 'react';
+import { SortOption } from '@/pages/Tasks/componenets/TaskFilters';
 
 interface DraggableTaskItemProps {
   task: Task;
@@ -57,9 +58,10 @@ function DraggableTaskItem({ task }: DraggableTaskItemProps) {
 
 interface DraggableTasksProps {
   tasks: Task[];
+  sortOption?: SortOption;
 }
 
-export function DraggableTasks({ tasks }: DraggableTasksProps) {
+export function DraggableTasks({ tasks, sortOption = SortOption.CustomOrder }: DraggableTasksProps) {
   const { selectedListId, taskOrders, reorderTasks } = useAppStore();
   
   const sensors = useSensors(
@@ -76,16 +78,39 @@ export function DraggableTasks({ tasks }: DraggableTasksProps) {
   const sortedTasks = useMemo(() => {
     if (!selectedListId) return tasks;
 
+    let orderedTasks = [...tasks];
     const currentOrders = taskOrders[selectedListId] || [];
-    const tasksWithOrder = tasks.map((task, index) => {
-      const orderItem = currentOrders.find(order => order.taskId === task.id);
-      return {
-        ...task,
-        order: orderItem?.order ?? index
-      };
-    });
-    return tasksWithOrder.sort((a, b) => a.order - b.order);
-  }, [tasks, selectedListId, taskOrders]);
+
+    // First apply custom order from drag-and-drop if no sort option is active
+    if (sortOption === SortOption.CustomOrder) {
+      const tasksWithOrder = orderedTasks.map((task, index) => {
+        const orderItem = currentOrders.find(order => order.taskId === task.id);
+        return {
+          ...task,
+          order: orderItem?.order ?? index
+        };
+      });
+      orderedTasks = tasksWithOrder.sort((a, b) => (a.order ?? 0) - (b.order ?? 0));
+    } else {
+      // Apply sorting based on the selected option
+      switch (sortOption) {
+        case SortOption.NameAsc:
+          orderedTasks.sort((a, b) => a.name.localeCompare(b.name));
+          break;
+        case SortOption.NameDesc:
+          orderedTasks.sort((a, b) => b.name.localeCompare(a.name));
+          break;
+        case SortOption.PriorityHighToLow:
+          orderedTasks.sort((a, b) => a.priority - b.priority);
+          break;
+        case SortOption.PriorityLowToHigh:
+          orderedTasks.sort((a, b) => b.priority - a.priority);
+          break;
+      }
+    }
+
+    return orderedTasks;
+  }, [tasks, selectedListId, taskOrders, sortOption]);
 
   const handleDragEnd = (event: DragEndEvent) => {
     const { active, over } = event;

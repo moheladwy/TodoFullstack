@@ -9,6 +9,7 @@ import {
 } from "@/components/ui/select"
 
 export enum SortOption {
+  CustomOrder = "custom_order",
   NameAsc = "name_asc",
   NameDesc = "name_desc",
   PriorityLowToHigh = "priority_low_to_high",
@@ -68,13 +69,14 @@ export function TaskFilters({
       </Select>
       
       <Select 
-        defaultValue={SortOption.NameAsc}
+        defaultValue={SortOption.CustomOrder}
         onValueChange={(value) => onSortChange(value as SortOption)}
       >
         <SelectTrigger className="w-[180px]">
           <SelectValue placeholder="Sort by" />
         </SelectTrigger>
         <SelectContent>
+          <SelectItem value={SortOption.CustomOrder}>Custom Order</SelectItem>
           <SelectItem value={SortOption.NameAsc}>Name (A-Z)</SelectItem>
           <SelectItem value={SortOption.NameDesc}>Name (Z-A)</SelectItem>
           <SelectItem value={SortOption.PriorityLowToHigh}>
