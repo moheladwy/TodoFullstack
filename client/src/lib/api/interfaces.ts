@@ -94,3 +94,13 @@ export interface CreateTaskRequest {
   listId: string;
   isCompleted: boolean;
 }
+
+export interface ListOrder {
+  listId: string;
+  order: number;
+}
+
+export interface TaskOrder {
+  taskId: string;
+  order: number;
+}

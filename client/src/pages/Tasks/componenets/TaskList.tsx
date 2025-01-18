@@ -5,6 +5,7 @@ import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/
 import TaskCompletedViewList from "./TaskCompletedViewList"
 import AllPendingTasksList from "./AllPendingTasksList"
 import NoPendingTasks from "@/components/no-pending-tasks"
+import { DraggableTasks } from "@/components/draggable-tasks"
 
 interface TaskListProps {
   tasks: Task[]
@@ -27,9 +28,7 @@ export function TaskList({ tasks, isCompletedView, isAllPendingView }: TaskListP
   return (
     <div className="container space-y-4">
         <div className="container space-y-2">
-          {pendingTasks.map((task) => (
-            <TaskItem key={task.id} task={task} />
-          ))}
+          <DraggableTasks tasks={pendingTasks} />
         </div>
       <Accordion type="multiple" className="space-y-1 border-0">
         {completedTasks.length > 0 && (

@@ -13,7 +13,9 @@ import type {
   UpdateUserInfoRequest, 
   CreateTaskRequest,
   CreateListRequest,
-  UpdateListRequest
+  UpdateListRequest,
+  ListOrder,
+  TaskOrder
 } from '@/lib/api/interfaces'
 
 interface State {
@@ -24,6 +26,8 @@ interface State {
   selectedListTasks: Task[]
   isLoading: boolean
   error: string | null
+  listOrder: ListOrder[];
+  taskOrders: Record<string, TaskOrder[]>; // Key is listId
   
   // Initialization
   initializeStore: () => Promise<void>
@@ -52,6 +56,9 @@ interface State {
   updateTask: (task: Task) => Promise<void>
   createTask: (task: CreateTaskRequest) => Promise<void>
   deleteTask: (taskId: string) => Promise<void>
+
+  reorderLists: (newOrder: ListOrder[]) => void;
+  reorderTasks: (listId: string, newOrder: TaskOrder[]) => void;
 }
 
 export const appStore = createStore<State>((set, get) => ({
@@ -62,6 +69,8 @@ export const appStore = createStore<State>((set, get) => ({
   selectedListTasks: [],
   isLoading: false,
   error: null,
+  listOrder: [],
+  taskOrders: {},
   
   initializeStore: async () => {
     try {
@@ -84,7 +93,13 @@ export const appStore = createStore<State>((set, get) => ({
       // Fetch lists and tasks
       await get().fetchLists()
       
-      set({ isLoading: false })
+      // Load orders from localStorage
+      const savedListOrder = localStorage.getItem('listOrder');
+      const savedTaskOrders = localStorage.getItem('taskOrders');
+      
+      set({ listOrder: savedListOrder ? JSON.parse(savedListOrder) : [],
+            taskOrders: savedTaskOrders ? JSON.parse(savedTaskOrders) : {},
+            isLoading: false })
     } catch (error) {
       // If there's an error (like expired token), clear everything
       console.error('Failed to initialize store:', error)
@@ -374,6 +389,22 @@ export const appStore = createStore<State>((set, get) => ({
       set({ error: 'Failed to delete task', isLoading: false })
       throw error
     }
+  },
+  
+  reorderLists: (newOrder) => {
+    set({ listOrder: newOrder });
+    localStorage.setItem('listOrder', JSON.stringify(newOrder));
+  },
+  
+  reorderTasks: (listId, newOrder) => {
+    set(state => {
+      const newTaskOrders = {
+        ...state.taskOrders,
+        [listId]: newOrder
+      };
+      localStorage.setItem('taskOrders', JSON.stringify(newTaskOrders));
+      return { taskOrders: newTaskOrders };
+    });
   },
 }))
 

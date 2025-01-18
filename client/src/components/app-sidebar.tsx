@@ -26,11 +26,12 @@ import { Input } from "@/components/ui/input"
 import { toast } from "@/hooks/use-toast"
 import { Button } from "./ui/button"
 import { ThemeToggle } from "@/components/theme-toggle"
+import { DraggableLists } from "./draggable-lists"
 
 export function AppSidebar() {
   const navigate = useNavigate()
   const { listId } = useParams()
-  const { user, logout, lists, tasks, createList } = useAppStore()
+  const { user, logout, tasks, createList } = useAppStore()
   const [isAddingList, setIsAddingList] = useState(false)
   const [newListName, setNewListName] = useState("")
 
@@ -203,7 +204,7 @@ export function AppSidebar() {
           {/* User Lists */}
           <SidebarGroupContent>
             <SidebarMenu>
-              {lists.map((list) => {
+              {/* {lists.map((list) => {
                 const pendingCount = pendingTasksCount.get(list.id) || 0
                 
                 return (
@@ -224,7 +225,8 @@ export function AppSidebar() {
                     </SidebarMenuButton>
                   </SidebarMenuItem>
                 )
-              })}
+              })} */}
+              <DraggableLists />
             </SidebarMenu>
           </SidebarGroupContent>
         </SidebarGroup>
