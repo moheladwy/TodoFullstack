@@ -6,14 +6,17 @@ import TaskCompletedViewList from "./TaskCompletedViewList"
 import AllPendingTasksList from "./AllPendingTasksList"
 import NoPendingTasks from "@/components/no-pending-tasks"
 import { DraggableTasks } from "@/components/draggable-tasks"
+import { SortOption } from "./TaskFilters"
 
 interface TaskListProps {
   tasks: Task[]
   isCompletedView?: boolean
   isAllPendingView?: boolean
+  sortOption?: SortOption
 }
 
-export function TaskList({ tasks, isCompletedView, isAllPendingView }: TaskListProps) {
+export function TaskList({ tasks, isCompletedView, 
+  isAllPendingView, sortOption }: TaskListProps) {
   const pendingTasks = tasks.filter(task => !task.isCompleted)
   const completedTasks = tasks.filter(task => task.isCompleted)
   
@@ -28,7 +31,7 @@ export function TaskList({ tasks, isCompletedView, isAllPendingView }: TaskListP
   return (
     <div className="container space-y-4">
         <div className="container space-y-2">
-          <DraggableTasks tasks={pendingTasks} />
+          <DraggableTasks tasks={pendingTasks} sortOption={sortOption} />
         </div>
       <Accordion type="multiple" className="space-y-1 border-0">
         {completedTasks.length > 0 && (
