@@ -10,7 +10,8 @@ import { toast } from "@/hooks/use-toast"
 
 
 interface TaskItemProps {
-  task: Task
+  task: Task;
+  dragDisabled?: boolean;
 }
 
 const priorityColors = {
@@ -20,7 +21,7 @@ const priorityColors = {
   [TaskPriority.Low]: "bg-green-500",
 }
 
-export function TaskItem({ task }: TaskItemProps) {
+export function TaskItem({ task, dragDisabled }: TaskItemProps) {
   const {updateTask, deleteTask} = useAppStore()
   const [isEditDialogOpen, setIsEditDialogOpen] = useState(false)
 
@@ -49,7 +50,11 @@ export function TaskItem({ task }: TaskItemProps) {
 
   return (
     <>
-      <div className="flex items-center gap-4 p-4 bg-card text-card-foreground rounded-lg shadow dark:shadow-slate-900/10">
+      <div className="flex items-center gap-4 p-4 bg-card text-card-foreground rounded-lg shadow dark:shadow-slate-900/10"
+        onClick={(e) => {
+          if (dragDisabled) e.stopPropagation();
+        }}
+      >
         <Checkbox
           checked={task.isCompleted}
           onCheckedChange={handleToggleComplete}
