@@ -8,6 +8,7 @@ import {
   SelectValue,
 } from "@/components/ui/select"
 
+// eslint-disable-next-line react-refresh/only-export-components
 export enum SortOption {
   CustomOrder = "custom_order",
   NameAsc = "name_asc",
@@ -69,7 +70,7 @@ export function TaskFilters({
       </Select>
       
       <Select 
-        defaultValue={SortOption.CustomOrder}
+        defaultValue={SortOption.NameAsc}
         onValueChange={(value) => onSortChange(value as SortOption)}
       >
         <SelectTrigger className="w-[180px]">
