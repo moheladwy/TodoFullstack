@@ -1,4 +1,4 @@
-import { useAppStore } from "@/store/useStore"
+import { useAppStore } from "@/lib/store/useStore"
 import { UserProfile } from "./componenets/UserProfile"
 import { ChangePasswordForm } from "./componenets/ChangePasswordForm"
 import { UpdateProfileForm } from "./componenets/UpdateUserProfileForm"

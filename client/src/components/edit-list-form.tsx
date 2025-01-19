@@ -1,5 +1,5 @@
 import { useForm } from "react-hook-form"
-import { useAppStore } from "@/store/useStore"
+import { useAppStore } from "@/lib/store/useStore"
 import { Button } from "@/components/ui/button"
 import {
   Form,

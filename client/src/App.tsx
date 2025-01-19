@@ -5,7 +5,7 @@ import Register from "./pages/Register"
 import { Account } from "./pages/Account"
 import { PrivateRoute } from "./components/private-route"
 import { Toaster } from "./components/ui/toaster"
-import { useAppStore } from './store/useStore'
+import { useAppStore } from './lib/store/useStore'
 import { useEffect, useState } from 'react'
 import { Loading } from './components/loading'
 import { ThemeProvider } from "@/components/theme-provider"
