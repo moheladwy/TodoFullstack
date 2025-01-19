@@ -1,6 +1,6 @@
-import api from "../axios";
-import { CreateListRequest, List, UpdateListRequest } from "../interfaces";
-import { LISTS_URLs } from "../URLs";
+import api from "./axios";
+import { CreateListRequest, List, UpdateListRequest } from "./interfaces";
+import { LISTS_URLs } from "./URLs";
 
 const SUCCESSFUL_STATUS = 200;
 

@@ -1,5 +1,5 @@
 import { List, Task } from "@/lib/api/interfaces";
-import { useAppStore } from "@/store/useStore";
+import { useAppStore } from "@/lib/store/useStore";
 import { useEffect } from "react";
 import { TaskItem } from "./TaskItem";
 import NoPendingTasks from "@/components/no-pending-tasks";

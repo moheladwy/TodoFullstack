@@ -3,7 +3,7 @@ import { zodResolver } from "@hookform/resolvers/zod"
 import * as z from "zod"
 import { useNavigate } from "react-router"
 import { cn } from "@/lib/utils"
-import { useAppStore } from "@/store/useStore"
+import { useAppStore } from "@/lib/store/useStore"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent } from "@/components/ui/card"
 import {

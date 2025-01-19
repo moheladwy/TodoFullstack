@@ -13,7 +13,7 @@ import {
   useSortable,
 } from '@dnd-kit/sortable';
 import { CSS } from '@dnd-kit/utilities';
-import { useAppStore } from '@/store/useStore';
+import { useAppStore } from "@/lib/store/useStore";
 import { Task, TaskOrder } from '@/lib/api/interfaces';
 import { TaskItem } from '@/pages/Tasks/componenets/TaskItem';
 import { useMemo } from 'react';

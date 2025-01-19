@@ -1,10 +1,10 @@
-import api from "../axios";
+import api from "./axios";
 import {
 	User,
 	ChangePasswordRequest,
 	UpdateUserInfoRequest,
-} from "../interfaces";
-import { USER_URLs } from "../URLs";
+} from "./interfaces";
+import { USER_URLs } from "./URLs";
 
 const SUCCESS_STATUS = 200;
 

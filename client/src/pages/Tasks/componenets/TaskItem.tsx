@@ -1,5 +1,5 @@
 import { Task, TaskPriority } from "@/lib/api/interfaces"
-import { useAppStore } from "@/store/useStore"
+import { useAppStore } from "@/lib/store/useStore"
 import { Checkbox } from "@/components/ui/checkbox"
 import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"

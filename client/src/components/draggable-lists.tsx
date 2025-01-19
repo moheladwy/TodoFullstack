@@ -14,7 +14,7 @@ import {
   useSortable,
 } from '@dnd-kit/sortable';
 import { CSS } from '@dnd-kit/utilities';
-import { useAppStore } from '@/store/useStore';
+import { useAppStore } from "@/lib/store/useStore";
 import { List, ListOrder } from '@/lib/api/interfaces';
 import { SidebarMenuItem, SidebarMenuButton, SidebarMenuBadge } from './ui/sidebar';
 import { useNavigate } from 'react-router';

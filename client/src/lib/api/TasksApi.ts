@@ -1,6 +1,6 @@
-import api from "../axios";
-import { Task } from "../interfaces";
-import { TASKS_URLs } from "../URLs";
+import api from "./axios";
+import { Task } from "./interfaces";
+import { TASKS_URLs } from "./URLs";
 
 const SUSSCESSFUL_STATUS = 200;
 

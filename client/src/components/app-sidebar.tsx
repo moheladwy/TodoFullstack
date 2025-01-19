@@ -19,7 +19,7 @@ import {
   DropdownMenuItem, 
   DropdownMenuTrigger 
 } from "@/components/ui/dropdown-menu"
-import { useAppStore } from "@/store/useStore"
+import { useAppStore } from "@/lib/store/useStore"
 import { Navigate, useNavigate, useParams } from "react-router"
 import { useMemo, useState } from "react"
 import { Input } from "@/components/ui/input"

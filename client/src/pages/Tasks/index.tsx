@@ -1,4 +1,4 @@
-import { useAppStore } from "@/store/useStore";
+import { useAppStore } from "@/lib/store/useStore";
 import { TaskList } from "./componenets/TaskList";
 import { TaskFilters, SortOption } from "./componenets/TaskFilters";
 import { CreateTaskDialog } from "./componenets/CreateTaskDialog";

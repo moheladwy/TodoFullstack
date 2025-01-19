@@ -1,6 +1,6 @@
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/components/ui/accordion"
 import { List, Task } from "@/lib/api/interfaces"
-import { useAppStore } from "@/store/useStore"
+import { useAppStore } from "@/lib/store/useStore"
 import { TaskItem } from "./TaskItem"
 
 export default function TaskCompletedViewList() {

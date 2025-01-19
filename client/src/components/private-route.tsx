@@ -1,5 +1,5 @@
 import { Navigate } from 'react-router'
-import { useAppStore } from '@/store/useStore'
+import { useAppStore } from "@/lib/store/useStore"
 
 export function PrivateRoute({ children }: { children: React.ReactNode }) {
   const user = useAppStore().user

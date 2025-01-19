@@ -1,8 +1,8 @@
 import { createStore, useStore } from 'zustand'
-import { authApi } from '@/lib/api/calls/AuthCalls'
-import { userApi } from '@/lib/api/calls/UserCalls'
-import { tasksApi } from '@/lib/api/calls/TasksCalls'
-import { listsApi } from '@/lib/api/calls/ListsCalls'
+import { authApi } from '@/lib/api/AuthApi'
+import { userApi } from '@/lib/api/UserApi'
+import { tasksApi } from '@/lib/api/TasksApi'
+import { listsApi } from '@/lib/api/ListsApi'
 import type { 
   User, 
   Task, 
@@ -240,7 +240,6 @@ export const appStore = createStore<State>((set, get) => ({
         const newList = await listsApi.createList(createListRequest)
         set((state) => ({ 
           lists: [...state.lists, newList],
-          selectedListId: newList.id, // Automatically select the new list
           isLoading: false 
         }))
       } catch (error) {
@@ -266,30 +265,37 @@ export const appStore = createStore<State>((set, get) => ({
   },
   
   deleteList: async (id: string) => {
-    set({ isLoading: true, error: null })
-    try {
-      await listsApi.deleteList(id)
-      set((state) => {
-        const newLists = state.lists.filter((list) => list.id !== id)
-        return {
-          lists: newLists,
-          // If the deleted list was selected, select the first available list
-          selectedListId: state.selectedListId === id 
-            ? (newLists.length > 0 ? newLists[0].id : null)
-            : state.selectedListId,
-          // Clear tasks if the deleted list was selected
-          tasks: state.selectedListId === id ? [] : state.tasks,
-          isLoading: false
-        }
-      })
-      
-      // If we selected a new list, fetch its tasks
-      const newSelectedId = get().selectedListId
-      if (newSelectedId) await get().setSelectedListTasks(newSelectedId)
-    } catch (error) {
-      set({ error: 'Failed to delete list', isLoading: false })
-      throw error
-    }
+      set({ isLoading: true, error: null })
+      try {
+        await listsApi.deleteList(id)
+        set((state) => {
+          // Filter out the lists that is not the deleted list.
+          const updatedLists = state.lists.filter((list) => list.id !== id)
+          // Filter out only the tasks that belonged to the deleted list.
+          const updatedTasks = state.tasks.filter(task => task.listId !== id)
+          return {
+            lists: updatedLists,
+            // If the deleted list was selected, select the first available list
+            selectedListId: state.selectedListId === id 
+              ? (updatedLists.length > 0 ? updatedLists[0].id : null)
+              : state.selectedListId,
+            // Update tasks by removing only the tasks from the deleted list
+            tasks: updatedTasks,
+            // Update selectedListTasks based on the new selectedListId
+            selectedListTasks: state.selectedListId === id
+              ? (updatedLists.length > 0 ? updatedTasks.filter(task => task.listId === updatedLists[0].id) : [])
+              : state.selectedListTasks,
+            isLoading: false
+          }
+        })
+        
+        // If we selected a new list, fetch its tasks
+        const newSelectedId = get().selectedListId
+        if (newSelectedId) await get().setSelectedListTasks(newSelectedId)
+      } catch (error) {
+        set({ error: 'Failed to delete list', isLoading: false })
+        throw error
+      }
   },
   
   setSelectedList: async (listId: string) => {
